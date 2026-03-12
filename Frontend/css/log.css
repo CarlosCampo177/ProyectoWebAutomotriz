@@ -1,0 +1,97 @@
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #0d3b66;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-login {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.card-login h2 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  color: #0d3b66;
+  margin-bottom: 0.3rem;
+}
+
+.card-login p {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 1.8rem;
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: #343a40;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1.5px solid #dee2e6;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: #0d3b66;
+  box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.12);
+}
+
+.btn-entrar {
+  background-color: #d90429;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.btn-entrar:hover {
+  background-color: #b00320;
+  color: white;
+}
+
+.link-volver {
+  color: #0d3b66;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.link-volver:hover {
+  text-decoration: underline;
+}
+
+.divider {
+  border-top: 1px solid #e9ecef;
+  margin: 1.5rem 0;
+}
+
+.texto-registro {
+  font-size: 0.88rem;
+  color: #888;
+  text-align: center;
+}
+
+.texto-registro a {
+  color: #d90429;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.texto-registro a:hover {
+  text-decoration: underline;
+}

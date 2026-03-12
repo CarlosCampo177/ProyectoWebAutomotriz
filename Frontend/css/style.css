@@ -1,0 +1,94 @@
+body {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* NAVBAR */
+.navbar {
+  background-color: #0d1d2c;
+  box-shadow: 0 0 10px  rgb(1, 1, 1);
+}
+
+/* HERO: fondo azul que ocupa todo */
+.hero {
+  background-color: #0d3b66;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: stretch;
+}
+
+/* Columna izquierda: texto */
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 48px 300px 48px;
+  color: white;
+}
+
+.titulo {
+  font-family: "Montserrat", sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.texto {
+  font-size: 14px;
+  color: #c0c0c0;
+  margin-top: 16px;
+  max-width: 380px;
+}
+
+.btn-leer {
+  margin-top: 2rem;
+  background-color: white;
+  color: #0d3b66;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 2.5rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  width: fit-content;
+}
+
+.btn-leer:hover {
+  background-color: #0d1d2c;
+  color: white;
+}
+
+/* Columna derecha: imagen pegada arriba, sin padding */
+.hero-img-col {
+  padding: 0;
+  overflow: hidden;
+}
+
+.hero-img-col img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* Botón outline blanco navbar */
+.btn-reservar {
+  border: 2px solid white;
+  color: white;
+  border-radius: 30px;
+  padding: 0.35rem 1.3rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: transparent;
+}
+
+.btn-reservar:hover {
+  background: white;
+  color: #0d3b66;
+}
+.nav-item:hover{
+  color: black;
+}
