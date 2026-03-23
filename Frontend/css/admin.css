@@ -1,0 +1,86 @@
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  background-color: #0d1d2c;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.sidebar-logo {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: white;
+  letter-spacing: 2px;
+  padding: 1.5rem 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo span {
+  color: #d90429;
+}
+
+.sidebar-nav a {
+  display: block;
+  padding: 0.7rem 1.2rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.sidebar-nav a:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-nav a.active {
+  color: white;
+  background: rgba(217, 4, 41, 0.12);
+  border-left-color: #d90429;
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left: 220px;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  background: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.topbar h5 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+  color: #0d1d2c;
+}
+
+/* ── CONTENIDO ── */
+.content {
+  padding: 1.5rem;
+}
+
+/* Secciones: solo la activa se muestra */
+.seccion {
+  display: none;
+}
+.seccion.active {
+  display: block;
+}

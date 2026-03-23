@@ -7,45 +7,10 @@ body {
 /* NAVBAR */
 .navbar {
   background-color: #0d1d2c;
-  box-shadow: 0 0 10px rgb(1, 1, 1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  box-shadow: 0 0 10px  rgb(1, 1, 1);
 }
 
-.nav-link {
-  color: rgba(255, 255, 255, 0.5) !important;
-  transition: color 0.2s;
-}
-
-.nav-link:hover {
-  color: white !important;
-}
-
-/* Resalta la sección activa */
-.nav-link.active {
-  color: white !important;
-  border-bottom: 2px solid #d90429;
-  padding-bottom: 2px;
-}
-
-.btn-reservar {
-  border: 2px solid white;
-  color: white;
-  border-radius: 30px;
-  padding: 0.35rem 1.3rem;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 600;
-  font-size: 0.85rem;
-  background: transparent;
-}
-
-.btn-reservar:hover {
-  background: white;
-  color: #0d3b66;
-}
-
-/* HERO */
+/* HERO: fondo azul que ocupa todo */
 .hero {
   background-color: #0d3b66;
   min-height: calc(100vh - 60px);
@@ -53,11 +18,12 @@ body {
   align-items: stretch;
 }
 
+/* Columna izquierda: texto */
 .hero-text {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 48px 100px 48px;
+  padding: 0 48px 300px 48px;
   color: white;
 }
 
@@ -86,8 +52,6 @@ body {
   font-weight: 600;
   font-size: 15px;
   width: fit-content;
-  text-decoration: none;
-  display: inline-block;
 }
 
 .btn-leer:hover {
@@ -95,6 +59,7 @@ body {
   color: white;
 }
 
+/* Columna derecha: imagen pegada arriba, sin padding */
 .hero-img-col {
   padding: 0;
   overflow: hidden;
@@ -108,78 +73,22 @@ body {
   display: block;
 }
 
-/* SECCIONES — offset para el navbar sticky */
-section {
-  scroll-margin-top: 62px;
-}
-
-/* SERVICIOS */
-#servicios {
-  background-color: #f8f9fa;
-  padding: 80px 0;
-}
-
-.card-servicio {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s;
-  height: 100%;
-}
-
-.card-servicio:hover {
-  transform: translateY(-6px);
-}
-
-.icono-servicio {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-/* ACERCA DE */
-#acerca {
-  background-color: #0d3b66;
-  padding: 80px 0;
+/* Botón outline blanco navbar */
+.btn-reservar {
+  border: 2px solid white;
   color: white;
-}
-
-/* CONTACTO */
-#contacto {
-  background-color: #f8f9fa;
-  padding: 80px 0;
-}
-
-.form-control:focus {
-  border-color: #0d3b66;
-  box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.12);
-}
-
-.btn-enviar {
-  background-color: #d90429;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.75rem 2rem;
+  border-radius: 30px;
+  padding: 0.35rem 1.3rem;
   font-family: "Montserrat", sans-serif;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: transparent;
 }
 
-.btn-enviar:hover {
-  background-color: #b00320;
-  color: white;
+.btn-reservar:hover {
+  background: white;
+  color: #0d3b66;
 }
-
-.section-title {
-  font-family: "Montserrat", sans-serif;
-  font-weight: 900;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.section-line {
-  width: 50px;
-  height: 4px;
-  background-color: #d90429;
-  margin: 0 auto 2.5rem auto;
-  border-radius: 2px;
+.nav-item:hover{
+  color: black;
 }
