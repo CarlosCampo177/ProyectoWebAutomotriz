@@ -7,13 +7,13 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
     const password = document.getElementById('password').value;
 
     // Simulación de datos correctos
-    if (email == "admin@autotech.com" && password == "123456") {
+    if (email === "admin@autotech.com" && password === "123456") {
         window.location.href = "../page/admin.html"; // Redirige a la siguiente página del admin
-    } else if (email == "carlos@email.com" && password == "abcde") {
-        window.location.href = "../page/admin.html"; // Redirige a la siguiente página del cliente
-    } else if (email == "oscar@gmail.com" && password == "oscar123") {
+    } else if (email === "carlos@email.com" && password === "abcde") {
+        window.location.href = "../page/usuario.html"; // Redirige a la siguiente página del cliente
+    } else if (email === "oscar@gmail.com" && password === "oscar123") {
         window.location.href = "../page/usuario.html"; // Redirige al panel del cliente Oscar
     } else {
-        alert("Correo o contraseña incorrectos. Intenta con admin@autotech.com / 123456");
+        alert("Correo o contraseña incorrectos. Intentelo de nuevo");
     }
 });

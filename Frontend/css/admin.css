@@ -1,9 +1,4 @@
-/* ================================================
-   admin.css — Dashboard Admin AutoTech
-   Paleta: #0d3b66 | #d90429 | #f8f9fa | #343a40
-================================================ */
 
-/* ── BASE ── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,9 +11,6 @@ body {
   color: #343a40;
 }
 
-/* ================================================
-   SIDEBAR
-================================================ */
 .sidebar {
   width: 220px;
   background-color: #0d1d2c;
@@ -113,7 +105,7 @@ body {
 
 .sidebar-nav a.active {
   color: white;
-  background: rgba(217,4,41,0.12);
+  background: rgba(0, 0, 0, 0.12);
   border-left-color: #d90429;
 }
 
@@ -137,9 +129,7 @@ body {
   color: #d90429;
 }
 
-/* ================================================
-   MAIN (área de contenido)
-================================================ */
+
 .main {
   margin-left: 220px;
   min-height: 100vh;
@@ -200,11 +190,8 @@ body {
   display: block;
 }
 
-/* ================================================
-   COMPONENTES REUTILIZABLES
-================================================ */
+/*COMPONENTES REUTILIZABLES*/
 
-/* Panel (tarjeta blanca con sombra) */
 .panel {
   background: white;
   border-radius: 12px;
@@ -225,7 +212,7 @@ body {
 .panel-titulo {
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #0d1d2c;
   margin: 0;
 }
@@ -259,7 +246,7 @@ body {
 
 /* Botón principal rojo */
 .btn-admin-primary {
-  background-color: #d90429;
+  background-color: #0d3b66;
   color: white;
   border: none;
   border-radius: 8px;
@@ -275,7 +262,7 @@ body {
 }
 
 .btn-admin-primary:hover {
-  background-color: #b00320;
+  background-color: #041540;
 }
 
 /* Buscador */
@@ -364,7 +351,7 @@ body {
 
 .badge-completado {
   background-color: #d4edda;
-  color: #155724;
+  color: #219a3d;
 }
 
 .badge-en-progreso,
