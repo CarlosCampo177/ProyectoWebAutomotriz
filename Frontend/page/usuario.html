@@ -1,84 +1,244 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoTech – Panel de Usuario</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../css/usuario.css" />
-  </head>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoTech – Panel de Usuario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="../css/usuario.css"/>
+</head>
+<body>
 
-  <body>
+  <!-- ══════════════════════════════
+       SIDEBAR
+  ══════════════════════════════ -->
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-text">AUTO<span>TECH</span></div>
+    </div>
 
-    <!-- ── SIDEBAR ── -->
-    <aside id="sidebar">
-
-      <div class="sidebar-brand">
-        <div class="brand-text">AUTO<span>TECH</span></div>
+    <div class="user-info">
+      <div class="avatar">OA</div>
+      <div>
+        <div class="name">Oscar Avila</div>
+        <div class="role">Cliente</div>
       </div>
+    </div>
 
-      <div class="user-info">
-        <div class="avatar">OA</div>
-        <div>
-          <div class="name">Oscar Avila</div>
-          <div class="role">Cliente</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="mostrar('inicio', this)">
+        <i class="bi bi-grid-1x2"></i> Inicio
+      </a>
+      <a class="nav-item" onclick="mostrar('vehiculos', this)">
+        <i class="bi bi-car-front"></i> Mis vehículos
+      </a>
+      <a class="nav-item" onclick="mostrar('citas', this)">
+        <i class="bi bi-calendar-check"></i> Mis citas
+      </a>
+      <a class="nav-item" onclick="mostrar('historial', this)">
+        <i class="bi bi-clock-history"></i> Historial
+      </a>
+      <a class="nav-item" onclick="mostrar('facturas', this)">
+        <i class="bi bi-receipt"></i> Facturas
+      </a>
+      <a class="nav-item" onclick="mostrar('perfil', this)">
+        <i class="bi bi-person"></i> Perfil
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="login.html"><i class="bi bi-box-arrow-left"></i> Cerrar sesión</a>
+    </div>
+  </aside>
+
+  <!-- ══════════════════════════════
+       MAIN
+  ══════════════════════════════ -->
+  <div id="main">
+
+    <div class="topbar">
+      <span class="page-title" id="topbarTitle">Inicio</span>
+      <span class="user-badge">Cliente</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════════════════════════
+           INICIO — JS llena: summary-cards,
+           acciones-rapidas, proximas-citas
+           y lista-vehiculos-inicio
+      ══════════════════════════════ -->
+      <div id="sec-inicio" class="seccion active">
+
+        <div class="greeting-wrap">
+          <p class="greeting-sub" id="timeGreeting"></p>
+          <h5 class="greeting-name">Bienvenido, <span>Oscar</span> 👋</h5>
+          <p class="greeting-date" id="dateLabel"></p>
         </div>
-      </div>
 
-      <nav class="sidebar-nav">
-        <a class="nav-item active" href="#">
-          <i class="bi bi-grid-1x2"></i> Inicio
-        </a>
-        <a class="nav-item" href="#">
-          <i class="bi bi-car-front"></i> Mis vehículos
-        </a>
-        <a class="nav-item" href="#">
-          <i class="bi bi-calendar-check"></i> Mis citas
-        </a>
-        <a class="nav-item" href="#">
-          <i class="bi bi-clock-history"></i> Historial
-        </a>
-        <a class="nav-item" href="#">
-          <i class="bi bi-receipt"></i> Facturas
-        </a>
-        <a class="nav-item" href="#">
-          <i class="bi bi-person"></i> Perfil
-        </a>
-      </nav>
+        <div class="row g-3 mb-3" id="summary-cards"></div>
 
-      <div class="sidebar-footer">
-        <a href="#">
-          <i class="bi bi-box-arrow-left"></i> Cerrar sesión
-        </a>
-      </div>
+        <p class="section-title">Acciones rápidas</p>
+        <div class="row g-2 mb-3" id="acciones-rapidas"></div>
 
-    </aside><!-- /sidebar -->
+        <div class="row g-3">
+          <div class="col-lg-7">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <p class="section-title mb-0">Próximas citas</p>
+              <a class="link-ver" onclick="mostrar('citas', document.querySelector('.nav-item[onclick*=citas]'))" style="cursor:pointer">Ver todas →</a>
+            </div>
+            <div class="d-flex flex-column gap-2" id="proximas-citas"></div>
+          </div>
 
-    <!-- ── MAIN ── -->
-    <div id="main">
+          <div class="col-lg-5">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <p class="section-title mb-0">Mis vehículos</p>
+              <a class="link-ver" onclick="mostrar('vehiculos', document.querySelector('.nav-item[onclick*=vehiculos]'))" style="cursor:pointer">Ver todos →</a>
+            </div>
+            <div class="d-flex flex-column gap-2" id="lista-vehiculos-inicio"></div>
+          </div>
+        </div>
 
-      <!-- TOPBAR -->
-      <div class="topbar">
-        <span class="page-title">Inicio</span>
-        <span class="user-badge">Cliente</span>
-      </div>
+      </div><!-- /sec-inicio -->
 
-      <!-- CONTENIDO -->
-      <div class="content">
 
-      </div><!-- /content -->
+      <!-- ══════════════════════════════
+           MIS VEHÍCULOS — JS llena grid-vehiculos
+      ══════════════════════════════ -->
+      <div id="sec-vehiculos" class="seccion">
 
-    </div><!-- /main -->
+        <div class="citas-header-row mb-3">
+          <div>
+            <h6 class="block-title">Mis Vehículos</h6>
+            <p class="block-sub">Vehículos registrados en tu cuenta</p>
+          </div>
+          <button class="btn-nueva"><i class="bi bi-plus-lg"></i> Agregar vehículo</button>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/usuario.js"></script>
+        <div class="row g-3" id="grid-vehiculos"></div>
 
-  </body>
+      </div><!-- /sec-vehiculos -->
+
+
+      <!-- ══════════════════════════════
+           MIS CITAS — filtros en HTML,
+           JS llena lista-citas
+      ══════════════════════════════ -->
+      <div id="sec-citas" class="seccion">
+
+        <div class="citas-header-row mb-3">
+          <div>
+            <h6 class="block-title">Mis Citas</h6>
+            <p class="block-sub">Consulta y gestiona todas tus citas agendadas</p>
+          </div>
+          <button class="btn-nueva"><i class="bi bi-calendar-plus"></i> Agendar cita</button>
+        </div>
+
+        <div class="filtros-row mb-3">
+          <button class="filtro-btn active" onclick="filtrarCitasUsuario('todas', this)">Todas</button>
+          <button class="filtro-btn" onclick="filtrarCitasUsuario('pendiente', this)">Pendientes</button>
+          <button class="filtro-btn" onclick="filtrarCitasUsuario('confirmada', this)">Confirmadas</button>
+          <button class="filtro-btn" onclick="filtrarCitasUsuario('completada', this)">Completadas</button>
+          <button class="filtro-btn" onclick="filtrarCitasUsuario('cancelada', this)">Canceladas</button>
+        </div>
+
+        <div class="citas-tabla" id="lista-citas"></div>
+
+      </div><!-- /sec-citas -->
+
+
+      <!-- ══════════════════════════════
+           HISTORIAL — JS llena lista-historial
+      ══════════════════════════════ -->
+      <div id="sec-historial" class="seccion">
+
+        <div class="citas-header-row mb-3">
+          <div>
+            <h6 class="block-title">Historial de Mantenimiento</h6>
+            <p class="block-sub">Todos los servicios realizados a tus vehículos</p>
+          </div>
+        </div>
+
+        <div class="citas-tabla" id="lista-historial"></div>
+
+      </div><!-- /sec-historial -->
+
+
+      <!-- ══════════════════════════════
+           FACTURAS — cabecera en HTML,
+           JS llena resumen-facturas y tabla-facturas
+      ══════════════════════════════ -->
+      <div id="sec-facturas" class="seccion">
+
+        <div class="citas-header-row mb-3">
+          <div>
+            <h6 class="block-title">Mis Facturas</h6>
+            <p class="block-sub">Registro de pagos y servicios facturados</p>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3" id="resumen-facturas"></div>
+
+        <div class="panel">
+          <table class="tabla-usr">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Servicio</th>
+                <th>Vehículo</th>
+                <th>Fecha</th>
+                <th>Total</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-facturas"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /sec-facturas -->
+
+
+      <!-- ══════════════════════════════
+           PERFIL — avatar/nombre estáticos,
+           JS llena perfil-campos
+      ══════════════════════════════ -->
+      <div id="sec-perfil" class="seccion">
+
+        <div class="citas-header-row mb-3">
+          <div>
+            <h6 class="block-title">Mi Perfil</h6>
+            <p class="block-sub">Información de tu cuenta</p>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-4">
+            <div class="perfil-card">
+              <div class="perfil-avatar">OA</div>
+              <div class="perfil-nombre">Oscar Avila</div>
+              <div class="perfil-rol">Cliente</div>
+              <span class="veh-badge ok mt-2">
+                <i class="bi bi-check-circle-fill"></i> Cuenta activa
+              </span>
+            </div>
+          </div>
+          <div class="col-lg-8">
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="bi bi-person-vcard"></i> Datos Personales
+              </div>
+              <div class="row g-3" id="perfil-campos"></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /sec-perfil -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/usuario.js"></script>
+</body>
 </html>
