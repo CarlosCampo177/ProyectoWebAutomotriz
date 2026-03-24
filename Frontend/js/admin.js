@@ -1,5 +1,4 @@
 /* 1. DATOS SIMULADOS*/
-
 const citas = [
   { id: 1, cliente: "Carlos Rodríguez", vehiculo: "Toyota Corolla", placa: "ABC-123", servicio: "Cambio de aceite",    fecha: "2025-06-23 10:30", mecanico: "Juan Pérez",    estado: "pendiente",    monto: 85000  },
   { id: 2, cliente: "Ana González",     vehiculo: "Mazda CX-5",     placa: "DEF-456", servicio: "Alineación y balanceo", fecha: "2025-06-23 11:00", mecanico: "Luis Torres",   estado: "pendiente",    monto: 120000 },
