@@ -1,13 +1,3 @@
-/* ================================================
-   usuario.js — Panel Cliente AutoTech
-   1. Datos simulados
-   2. Helpers reutilizables
-   3. Funciones render por sección
-   4. Utilidades (mostrar, filtrar, fecha)
-   5. Inicialización
-================================================ */
-
-
 /* ==============================================
    1. DATOS SIMULADOS
 =============================================== */
