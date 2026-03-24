@@ -212,7 +212,7 @@ body {
 .panel-titulo {
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #0d1d2c;
   margin: 0;
 }
@@ -246,7 +246,7 @@ body {
 
 /* Botón principal rojo */
 .btn-admin-primary {
-  background-color: #d90429;
+  background-color: #0d3b66;
   color: white;
   border: none;
   border-radius: 8px;
@@ -262,7 +262,7 @@ body {
 }
 
 .btn-admin-primary:hover {
-  background-color: #b00320;
+  background-color: #041540;
 }
 
 /* Buscador */

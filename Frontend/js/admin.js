@@ -91,7 +91,7 @@ function renderDashboard() {
   let completados = citas.filter(function(c) { return c.estado === "completado"; });
   let ultimoServicio = completados[completados.length - 1];
 
-  // Encontrar citas pendientes de hoy (alertas)
+  // Encontrar citas pendientes de hoy
   let citasPendientesHoy = citasHoy.filter(function(c) {
     return c.estado === "pendiente";
   });
@@ -103,8 +103,7 @@ function renderDashboard() {
   let pendHoy     = citasHoy.filter(function(c){ return c.estado === "pendiente"; }).length;
   let porcentaje  = totalHoy > 0 ? Math.round((compHoy / totalHoy) * 100) : 0;
 
-  // Construir el HTML de la sección dashboard
-  // Usamos template literals: texto con ${variable} adentro
+  // Construir el HTML de la sección inicio
   let html = `
     <p class="bienvenida-texto">Buen día, Admin. Aquí está el resumen de hoy.</p>
 
