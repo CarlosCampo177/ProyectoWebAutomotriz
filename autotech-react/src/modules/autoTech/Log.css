@@ -1,4 +1,6 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Roboto:wght@400;500&display=swap');
+
+.at-body {
   font-family: "Roboto", sans-serif;
   background-color: #0d3b66;
   min-height: 100vh;
@@ -7,59 +9,109 @@ body {
   justify-content: center;
 }
 
-.logo-text {
-  font-family: "Montserrat", sans-serif;
-  font-weight: 900;
-  font-size: 1.3rem;
-  color: #0d3b66;
-  letter-spacing: 2px;
-}
-
-.logo-tech {
-  color: #d90429;
-}
-
-.card-login {
+.tarjeta-login {
   background: white;
   border-radius: 16px;
   padding: 2.5rem;
   width: 100%;
   max-width: 420px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: left; /* ← agregar esto */
 }
 
-.card-login h2 {
+.logo-texto {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: #0d3b66;
+  letter-spacing: 2px;
+  display: inline-block;
+  margin-bottom: 1.2rem;
+}
+
+.logo-acento {
+  color: #d90429;
+}
+
+.titulo {
   font-family: "Montserrat", sans-serif;
   font-weight: 900;
   color: #0d3b66;
-  margin-bottom: 0.3rem;
+  font-size: 1.8rem;
+  margin: 0 0 0.3rem 0;
 }
 
-.card-login p {
+.subtitulo {
   color: #888;
   font-size: 0.9rem;
-  margin-bottom: 1.8rem;
+  margin: 0 0 1.8rem 0;
 }
 
-.form-label {
+.etiqueta {
+  display: block;
   font-weight: 500;
   font-size: 0.88rem;
-  color: #000000;
+  color: #000;
+  margin-bottom: 0.4rem;
 }
 
-.form-control { 
-  border-radius: 8px; 
-  border: 1.5px solid #dee2e6; 
-  padding: 0.65rem 1rem; 
-  font-size: 0.95rem; 
+.campo {
+  margin-bottom: 1rem;
 }
 
-.form-control:focus {
+.entrada {
+  background-color: white;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1.5px solid #dee2e6;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  font-family: "Roboto", sans-serif;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.entrada:focus {
   border-color: #0d3b66;
   box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.12);
 }
 
-.btn-entrar {
+.fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.recordar-usuario {
+  background-color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.recordar-usuario input {
+  accent-color: #0d3b66;
+}
+
+.recordatorio {
+  color: #0d3b66;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.recordatorio:hover {
+  text-decoration: underline;
+}
+
+.btnEntrar {
   background-color: #d90429;
   color: white;
   border: none;
@@ -70,25 +122,17 @@ body {
   font-size: 0.95rem;
   width: 100%;
   margin-top: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.btn-entrar:hover {
+.btnEntrar:hover {
   background-color: #b00320;
-  color: white;
 }
 
-.link-volver {
-  color: #0d3b66;
-  font-size: 0.85rem;
-  text-decoration: none;
-}
-
-.link-volver:hover {
-  text-decoration: underline;
-}
-
-.divider {
-  border-top: 1px solid #e9ecef;
+.separador {
+  border: none;
+  border-top: 1px solid #7a7a7a;
   margin: 1.5rem 0;
 }
 
@@ -96,6 +140,7 @@ body {
   font-size: 0.88rem;
   color: #888;
   text-align: center;
+  margin: 0;
 }
 
 .texto-registro a {
@@ -105,5 +150,18 @@ body {
 }
 
 .texto-registro a:hover {
+  text-decoration: underline;
+}
+
+.boton-volver {
+  display: block;
+  text-align: center;
+  margin-top: 0.9rem;
+  color: #0d3b66;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.boton-volver:hover {
   text-decoration: underline;
 }
