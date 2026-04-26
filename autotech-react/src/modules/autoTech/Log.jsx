@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";  
 import "./Log.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -11,9 +13,9 @@ export default function Login() {
     if (email === "admin@autotech.com" && password === "123456") {
       window.location.href = "/admin";
     } else if (email === "carlos@email.com" && password === "abcde") {
-      window.location.href = "/usuario";
+      window.location.href = "/admin";
     } else if (email === "oscar@gmail.com" && password === "oscar123") {
-      window.location.href = "/usuario";
+      window.location.href = "/admin";
     } else {
       alert("Correo o contraseña incorrectos. Inténtalo de nuevo");
     }
@@ -21,7 +23,7 @@ export default function Login() {
 
   return (
     <>
-      <div className="at-body">
+      <div className="body">
         <div className="tarjeta-login">
           <span className="logo-texto">
             AUTO<span className="logo-acento">TECH</span>
@@ -75,7 +77,7 @@ export default function Login() {
           </p>
 
           <a href="/" className="boton-volver">
-            ← Volver al inicio
+             Volver al inicio
           </a>
         </div>
       </div>

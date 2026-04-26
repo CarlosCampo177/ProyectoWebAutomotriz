@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Roboto:wght@400;500&display=swap');
 
-.at-body {
+.body {
   font-family: "Roboto", sans-serif;
   background-color: #0d3b66;
   min-height: 100vh;
@@ -15,7 +15,7 @@
   padding: 2.5rem;
   width: 100%;
   max-width: 420px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(75, 9, 9, 0.478);
   text-align: left; /* ← agregar esto */
 }
 
