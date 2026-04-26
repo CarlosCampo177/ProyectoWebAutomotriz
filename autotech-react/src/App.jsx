@@ -1,15 +1,17 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
-import Login from './modules/autoTech/Log.jsx'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Inicio from './modules/autoTech/Inicio.jsx'
+import Register from './modules/autoTech/Register.jsx'
+import Login from './modules/autoTech/Log.jsx'  
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <Login />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Inicio />} />
+        <Route path="/page/register" element={<Register />} />
+        <Route path="/page/login" element={<Login />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

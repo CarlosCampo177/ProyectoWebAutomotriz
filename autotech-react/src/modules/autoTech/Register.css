@@ -1,0 +1,192 @@
+/* ===== FONDO ===== */
+.rg-bg {
+  font-family: "Roboto", sans-serif;
+  background-color: #0d3b66;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+/* ===== CARD ===== */
+.rg-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== LOGO ===== */
+.rg-logo {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: #0d3b66;
+  letter-spacing: 2px;
+  margin-bottom: 1.2rem;
+}
+
+.rg-logo span {
+  color: #d90429;
+}
+
+/* ===== TÍTULOS ===== */
+.rg-title {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 900;
+  color: #0d3b66;
+  margin-bottom: 0.3rem;
+  font-size: 1.6rem;
+}
+
+.rg-sub {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 1.8rem;
+}
+
+/* ===== ERROR ===== */
+.rg-error {
+  background: #fff0f2;
+  border: 1px solid #f5c2c7;
+  color: #b00320;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== FILA DOS COLUMNAS ===== */
+.rg-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+
+/* ===== CAMPO ===== */
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.rg-field label {
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: #343a40;
+  margin-bottom: 0.35rem;
+}
+
+.rg-field input {
+  border-radius: 8px;
+  border: 1.5px solid #dee2e6;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: "Roboto", sans-serif;
+}
+
+.rg-field input:focus {
+  border-color: #0d3b66;
+  box-shadow: 0 0 0 3px rgba(13, 59, 102, 0.12);
+}
+
+/* ===== CHECKBOX ===== */
+.rg-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.rg-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #0d3b66;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.rg-check label {
+  font-size: 0.85rem;
+  color: #343a40;
+  cursor: pointer;
+}
+
+/* ===== BOTÓN ===== */
+.rg-btn {
+  background-color: #d90429;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  width: 100%;
+  margin-top: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.rg-btn:hover {
+  background-color: #b00320;
+}
+
+/* ===== DIVIDER ===== */
+.rg-divider {
+  border-top: 1px solid #e9ecef;
+  margin: 1.5rem 0;
+}
+
+/* ===== TEXTO LOGIN ===== */
+.rg-login-text {
+  font-size: 0.88rem;
+  color: #888;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.rg-link-red {
+  color: #d90429;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.rg-link-red:hover {
+  text-decoration: underline;
+}
+
+/* ===== LINK AZUL ===== */
+.rg-link {
+  color: #0d3b66;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.rg-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== VOLVER ===== */
+.rg-back {
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .rg-card {
+    padding: 1.8rem 1.2rem;
+  }
+
+  .rg-row {
+    grid-template-columns: 1fr;
+  }
+}
