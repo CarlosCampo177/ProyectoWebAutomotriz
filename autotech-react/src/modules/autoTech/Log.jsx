@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";  
 import "./Log.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -11,74 +13,74 @@ export default function Login() {
     if (email === "admin@autotech.com" && password === "123456") {
       window.location.href = "/admin";
     } else if (email === "carlos@email.com" && password === "abcde") {
-      window.location.href = "/usuario";
+      window.location.href = "/admin";
     } else if (email === "oscar@gmail.com" && password === "oscar123") {
-      window.location.href = "/usuario";
+      window.location.href = "/admin";
     } else {
       alert("Correo o contraseña incorrectos. Inténtalo de nuevo");
     }
   };
 
   return (
-    <div className="card-login">
-      <span className="logo-text">
-        AUTO<span className="logo-tech">TECH</span>
-      </span>
+    <>
+      <div className="body">
+        <div className="tarjeta-login">
+          <span className="logo-texto">
+            AUTO<span className="logo-acento">TECH</span>
+          </span>
 
-      <h2>Bienvenido</h2>
-      <p>Inicia sesión para continuar</p>
+          <h2 className="titulo">Bienvenido</h2>
+          <p className="subtitulo">Inicia sesión para continuar</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Correo electrónico</label>
-          <input
-            type="email"
-            className="form-control"
-            placeholder="tu@correo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+          <form onSubmit={handleSubmit}>
+            <div className="campo">
+              <label className="etiqueta">Correo electrónico</label>
+              <input
+                type="email"
+                className="entrada"
+                placeholder="tu@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
 
-        <div className="mb-3">
-          <label className="form-label">Contraseña</label>
-          <input
-            type="password"
-            className="form-control"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+            <div className="campo">
+              <label className="etiqueta">Contraseña</label>
+              <input
+                type="password"
+                className="entrada"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="form-check">
-            <input className="form-check-input" type="checkbox" />
-            <label className="form-check-label" style={{ fontSize: "0.85rem" }}>
-              Recordarme
-            </label>
-          </div>
-          <a href="#" className="link-volver">
-            ¿Olvidaste tu contraseña?
+            <div className="fila">
+              <label className="recordar-usuario">
+                <input type="checkbox" />
+                Recordarme
+              </label>
+              <a href="#" className="recordatorio">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+
+            <button type="submit" className="btnEntrar">
+              Entrar
+            </button>
+          </form>
+
+          <hr className="separador" />
+
+          <p className="texto-registro">
+            ¿No tienes cuenta? <a href="#">Regístrate gratis</a>
+          </p>
+
+          <a href="/" className="boton-volver">
+             Volver al inicio
           </a>
         </div>
-
-        <button type="submit" className="btn btn-entrar">
-          Entrar
-        </button>
-      </form>
-
-      <div className="divider"></div>
-
-      <p className="texto-registro">
-        ¿No tienes cuenta? <a href="#">Regístrate gratis</a>
-      </p>
-
-      <div className="text-center mt-3">
-        <a href="/" className="link-volver">
-          ← Volver al inicio
-        </a>
       </div>
-    </div>
+    </>
   );
 }
