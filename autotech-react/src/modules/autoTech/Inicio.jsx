@@ -54,7 +54,7 @@ export default function Inicio() {
 
       {/* QUÉ ES */}
       <section className="at-what">
-        <p className="at-label">Plataforma SaaS</p>
+        <p className="at-label">Sistema SaaS</p>
         <h2 className="fade-in">
           El Sistema de Gestión que tu Taller <span>Merece</span>
         </h2>
