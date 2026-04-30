@@ -11,11 +11,11 @@ export default function Login() {
     e.preventDefault();
 
     if (email === "admin@autotech.com" && password === "123456") {
-      window.location.href = "/admin";
+      navigate("/Admin/Inicio");
     } else if (email === "carlos@email.com" && password === "abcde") {
-      window.location.href = "/admin";
+      navigate("/usuario");
     } else if (email === "oscar@gmail.com" && password === "oscar123") {
-      window.location.href = "/admin";
+      navigate("/mecanico");
     } else {
       alert("Correo o contraseña incorrectos. Inténtalo de nuevo");
     }
@@ -73,7 +73,7 @@ export default function Login() {
           <hr className="separador" />
 
           <p className="texto-registro">
-            ¿No tienes cuenta? <a href="#">Regístrate gratis</a>
+            ¿No tienes cuenta? <a href="/page/register">Regístrate gratis</a>
           </p>
 
           <a href="/" className="boton-volver">
