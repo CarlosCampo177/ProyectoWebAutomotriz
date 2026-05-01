@@ -1,23 +1,38 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";  
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { loginRequest } from "../../services/authService";
 import "./Log.css";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();  
+  const [error, setError]       = useState("");
+  const [loading, setLoading]   = useState(false);
 
-  const handleSubmit = (e) => {
+  const { login } = useAuth();
+  const navigate  = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (email === "admin@autotech.com" && password === "123456") {
-      navigate("/Admin/Inicio");
-    } else if (email === "carlos@email.com" && password === "abcde") {
-      navigate("/usuario");
-    } else if (email === "oscar@gmail.com" && password === "oscar123") {
-      navigate("/mecanico");
-    } else {
-      alert("Correo o contraseña incorrectos. Inténtalo de nuevo");
+    try {
+      const userData = await loginRequest(email, password);
+
+      // Guarda el usuario en el contexto global
+      login(userData);
+
+      // Redirige según el rol que devuelve la API
+      if (userData.rol === "admin")    navigate("/admin/inicio");
+      if (userData.rol === "mecanico") navigate("/mecanico");
+      if (userData.rol === "cliente")  navigate("/usuario");
+
+    } catch {
+      setError("Correo o contraseña incorrectos");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,6 +70,12 @@ export default function Login() {
               />
             </div>
 
+            {error && (
+              <p style={{ color: '#d90429', fontSize: '0.82rem', marginBottom: '0.5rem' }}>
+                {error}
+              </p>
+            )}
+
             <div className="fila">
               <label className="recordar-usuario">
                 <input type="checkbox" />
@@ -65,8 +86,8 @@ export default function Login() {
               </a>
             </div>
 
-            <button type="submit" className="btnEntrar">
-              Entrar
+            <button type="submit" className="btnEntrar" disabled={loading}>
+              {loading ? "Verificando..." : "Entrar"}
             </button>
           </form>
 
@@ -77,7 +98,7 @@ export default function Login() {
           </p>
 
           <a href="/" className="boton-volver">
-             Volver al inicio
+            Volver al inicio
           </a>
         </div>
       </div>

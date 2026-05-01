@@ -4,6 +4,7 @@ import ComoFunciona from "./ComoFunciona";
 
 export default function Inicio() {
   useEffect(() => {
+  const timer = setTimeout(() => {
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -13,11 +14,14 @@ export default function Inicio() {
           }
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.05 }
     );
     document.querySelectorAll(".fade-in").forEach((el) => obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, 100);
+
+  return () => clearTimeout(timer);
+}, []);
 
   return (
     <>
@@ -140,90 +144,85 @@ export default function Inicio() {
         </div>
       </section>
 
-      {/* ROLES */}
-      <section className="at-roles-new">
-        <div className="at-roles-header">
-          <p className="at-label">Accesos</p>
-          <h2 className="fade-in">Un sistema, Tres Perfiles</h2>
-          <p className="fade-in">
-            Cada usuario ve y hace exactamente lo que necesita.
-          </p>
+            {/* MEMBRESÍAS */}
+      <section className="at-planes">
+        <div className="at-planes-header">
+          <p className="at-label">Planes</p>
+          <h2 className="fade-in">Elige el plan para tu taller</h2>
+          <p className="fade-in">Sin contratos. Cambia o cancela cuando quieras.</p>
         </div>
-        <div className="at-roles-grid">
-          <div className="at-role fade-in">
-            <div className="at-role-head">
-              <div className="at-role-avatar admin">
-                <i className="bi bi-shield-check"></i>
+        <div className="at-planes-grid">
+          <div className="at-plan fade-in">
+            <div className="at-plan-top">
+              <span className="at-plan-nombre">Básico</span>
+              <div className="at-plan-precio">
+                <span className="at-plan-monto">$29</span>
+                <span className="at-plan-periodo">/ mes</span>
               </div>
-              <h3>
-                Administrador<small>Control total del taller</small>
-              </h3>
+              <p className="at-plan-desc">
+                Ideal para talleres pequeños que quieren dar el primer paso digital.
+              </p>
             </div>
-            <ul>
-              <li>
-                <i className="bi bi-check2"></i> Dashboard con indicadores clave
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Gestión de clientes, vehículos
-                y mecánicos
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Catálogo de servicios
-                configurable
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Facturación y estadísticas
-              </li>
+            <ul className="at-plan-lista">
+              <li><i className="bi bi-check2-circle"></i> Hasta 2 mecánicos</li>
+              <li><i className="bi bi-check2-circle"></i> 50 órdenes / mes</li>
+              <li><i className="bi bi-check2-circle"></i> Gestión de clientes y vehículos</li>
+              <li><i className="bi bi-check2-circle"></i> Citas y agenda básica</li>
+              <li className="at-plan-no"><i className="bi bi-x-circle"></i> Facturación avanzada</li>
+              <li className="at-plan-no"><i className="bi bi-x-circle"></i> Agente IA</li>
             </ul>
+            <a href="/page/register" className="at-plan-btn at-plan-btn--outline">
+              Empezar gratis
+            </a>
           </div>
-          <div className="at-role fade-in">
-            <div className="at-role-head">
-              <div className="at-role-avatar mec">
-                <i className="bi bi-tools"></i>
+ 
+          <div className="at-plan at-plan--pro fade-in">
+            <div className="at-plan-badge">Más popular</div>
+            <div className="at-plan-top">
+              <span className="at-plan-nombre">Pro</span>
+              <div className="at-plan-precio">
+                <span className="at-plan-monto">$79</span>
+                <span className="at-plan-periodo">/ mes</span>
               </div>
-              <h3>
-                Mecánico<small>Vista operativa</small>
-              </h3>
+              <p className="at-plan-desc">
+                Para talleres en crecimiento que necesitan control total de su operación.
+              </p>
             </div>
-            <ul>
-              <li>
-                <i className="bi bi-check2"></i> Mis órdenes asignadas
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Vehículos a atender hoy
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Registro de servicios
-                realizados
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Observaciones por orden
-              </li>
+            <ul className="at-plan-lista">
+              <li><i className="bi bi-check2-circle"></i> Hasta 8 mecánicos</li>
+              <li><i className="bi bi-check2-circle"></i> Órdenes ilimitadas</li>
+              <li><i className="bi bi-check2-circle"></i> Facturación y reportes</li>
+              <li><i className="bi bi-check2-circle"></i> Venta de productos (SOAT, seguros)</li>
+              <li><i className="bi bi-check2-circle"></i> Portal del cliente</li>
+              <li className="at-plan-no"><i className="bi bi-x-circle"></i> Agente IA</li>
             </ul>
+            <a href="/page/register" className="at-plan-btn at-plan-btn--solid">
+              Elegir Pro
+            </a>
           </div>
-          <div className="at-role fade-in">
-            <div className="at-role-head">
-              <div className="at-role-avatar cli">
-                <i className="bi bi-person-circle"></i>
+ 
+          <div className="at-plan fade-in">
+            <div className="at-plan-top">
+              <span className="at-plan-nombre">Empresarial</span>
+              <div className="at-plan-precio">
+                <span className="at-plan-monto">$149</span>
+                <span className="at-plan-periodo">/ mes</span>
               </div>
-              <h3>
-                Cliente<small>Portal propio</small>
-              </h3>
+              <p className="at-plan-desc">
+                Para redes de talleres o franquicias que requieren potencia máxima.
+              </p>
             </div>
-            <ul>
-              <li>
-                <i className="bi bi-check2"></i> Historial de servicios
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Mis vehículos registrados
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Programar citas
-              </li>
-              <li>
-                <i className="bi bi-check2"></i> Recordatorios automáticos
-              </li>
+            <ul className="at-plan-lista">
+              <li><i className="bi bi-check2-circle"></i> Mecánicos ilimitados</li>
+              <li><i className="bi bi-check2-circle"></i> Multi-sede</li>
+              <li><i className="bi bi-check2-circle"></i> Todo lo del plan Pro</li>
+              <li><i className="bi bi-check2-circle"></i> Agente IA + Alertas</li>
+              <li><i className="bi bi-check2-circle"></i> Soporte prioritario 24/7</li>
+              <li><i className="bi bi-check2-circle"></i> Personalización de marca</li>
             </ul>
+            <a href="/page/register" className="at-plan-btn at-plan-btn--outline">
+              Contactar ventas
+            </a>
           </div>
         </div>
       </section>
@@ -245,6 +244,42 @@ export default function Inicio() {
       </section>
 
       <ComoFunciona />
+
+      {/* FOOTER */}
+      <footer className="at-footer">
+        <div className="at-footer-inner">
+          <div className="at-footer-brand">
+            <span className="at-footer-logo">AUTOTECH</span>
+            <p>El sistema de gestión para talleres mecánicos modernos.</p>
+            <div className="at-footer-social">
+              <a href="#"><i className="bi bi-instagram"></i></a>
+              <a href="#"><i className="bi bi-facebook"></i></a>
+              <a href="#"><i className="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+          <div className="at-footer-col">
+            <h4>Producto</h4>
+            <a href="#">Funcionalidades</a>
+            <a href="#">Planes y precios</a>
+            <a href="#">Novedades</a>
+          </div>
+          <div className="at-footer-col">
+            <h4>Empresa</h4>
+            <a href="#">Acerca de</a>
+            <a href="#">Blog</a>
+            <a href="#">Contacto</a>
+          </div>
+          <div className="at-footer-col">
+            <h4>Legal</h4>
+            <a href="#">Términos de uso</a>
+            <a href="#">Privacidad</a>
+            <a href="#">Cookies</a>
+          </div>
+        </div>
+        <div className="at-footer-bottom">
+          <span>© 2025 AutoTech. Todos los derechos reservados.</span>
+        </div>
+      </footer>
     </>
   );
 }
