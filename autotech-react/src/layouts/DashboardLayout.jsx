@@ -7,8 +7,8 @@ import './DashboardLayout.css'
 export default function DashboardLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const menuItems = menuConfig[user?.rol] ?? []
-
+  const menuItems = menuConfig[user?.rol] ?? [] // ?.El Optional Chaining, El Nullish Coalescing (??)
+                                                
   const handleLogout = () => {
     logout()
     navigate('/page/login')
@@ -57,7 +57,7 @@ export default function DashboardLayout() {
       {/* ── MAIN ── */}
       <div className="main">
         <div className="topbar">
-          <h5 id="titulo-pagina">Panel Admin</h5>
+          <h5 id="titulo-pagina">Panel {user?.rol}</h5>
           <div className="topbar-right">
             <span className="topbar-fecha">{getFechaHoy()}</span>
             <span className="topbar-badge">{user?.rol}</span>
