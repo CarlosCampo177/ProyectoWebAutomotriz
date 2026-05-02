@@ -1,0 +1,32 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — HEADER / TOPBAR
+   components/Header.css
+══════════════════════════════════════════ */
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #e2e6ef;
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1c2a45;
+}
+
+.topbar-badge {
+  background: #e8f0fe;
+  color: #1a6bdc;
+  font-size: .78rem;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 20px;
+  border: 1px solid #c5d8fb;
+  user-select: none;
+}

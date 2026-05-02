@@ -1,0 +1,231 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — MODAL AGENDAR CITA
+   modals/ModalAgendarCita.css
+══════════════════════════════════════════ */
+
+/* ─── Barra de progreso por pasos ─── */
+.mac-progress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.mac-progress-line {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: #e2e6ef;
+  z-index: 0;
+  transition: background .3s;
+}
+
+.mac-progress-line.active {
+  background: #1a6bdc;
+}
+
+.mac-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  z-index: 1;
+  font-size: .72rem;
+  color: #8a9bbf;
+  font-weight: 600;
+}
+
+.mac-step.active {
+  color: #1a6bdc;
+}
+
+.mac-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e6ef;
+  color: #8a9bbf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .78rem;
+  font-weight: 700;
+  transition: all .2s;
+}
+
+.mac-step-dot svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mac-step.active .mac-step-dot {
+  background: #1a6bdc;
+  color: #fff;
+}
+
+/* ─── Campos del formulario ─── */
+.mac-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mac-row {
+  display: flex;
+  gap: 12px;
+}
+
+.mac-select,
+.mac-textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 8px;
+  font-size: .88rem;
+  color: #1c2a45;
+  background: #f8f9fb;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+}
+
+.mac-select:focus,
+.mac-textarea:focus {
+  border-color: #1a6bdc;
+  background: #fff;
+}
+
+.mac-textarea {
+  resize: vertical;
+}
+
+/* ─── Grid de horas ─── */
+.mac-hora-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.mac-hora-btn {
+  padding: 10px 4px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e6ef;
+  background: #fff;
+  color: #1c2a45;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+  line-height: 1.2;
+}
+
+.mac-hora-btn:hover:not(:disabled) {
+  border-color: #1a6bdc;
+  background: #e8f0fe;
+  color: #1a6bdc;
+}
+
+.mac-hora-btn.selected {
+  border-color: #1a6bdc;
+  background: #1a6bdc;
+  color: #fff;
+}
+
+.mac-hora-btn.ocupada,
+.mac-hora-btn:disabled {
+  border-color: #f0f2f7;
+  background: #f8f9fb;
+  color: #c5ccd9;
+  cursor: not-allowed;
+}
+
+.mac-hora-ocupada {
+  display: block;
+  font-size: .58rem;
+  color: #c62828;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.mac-hora-btn.ocupada .mac-hora-ocupada {
+  color: #c5ccd9;
+}
+
+/* ─── Info mecánico ─── */
+.mac-mecanico-info {
+  background: #f0f2f7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: .8rem;
+  color: #5a6a8a;
+  line-height: 1.5;
+}
+
+.mac-mecanico-info strong {
+  color: #1c2a45;
+}
+
+/* ─── Acciones ─── */
+.mac-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mac-actions.end     { justify-content: flex-end; }
+.mac-actions.between { justify-content: space-between; }
+
+/* ─── FieldGroup ─── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-group label {
+  font-size: .76rem;
+  font-weight: 600;
+  color: #5a6a8a;
+}
+
+.field-error {
+  font-size: .72rem;
+  color: #c62828;
+}
+
+/* ─── Botones compartidos (si no vienen del layout global) ─── */
+.btn-primary {
+  background: #1a6bdc;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.btn-primary:hover { background: #155bb8; }
+
+.btn-secondary {
+  background: #f0f2f7;
+  color: #5a6a8a;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.btn-secondary:hover { background: #e2e6ef; }

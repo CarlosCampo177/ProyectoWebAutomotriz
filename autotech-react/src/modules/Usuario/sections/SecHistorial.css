@@ -1,0 +1,76 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — SECCIÓN HISTORIAL
+   sections/SecHistorial.css
+══════════════════════════════════════════ */
+
+.sh-header-sec { margin-bottom: 20px; }
+.sh-title    { font-size: 1rem; font-weight: 700; color: #1c2a45; margin-bottom: 2px; }
+.sh-subtitle { font-size: .78rem; color: #8a9bbf; }
+
+.sh-empty {
+  color: #8a9bbf;
+  font-size: .88rem;
+  padding: 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 12px;
+}
+
+.sh-list { display: flex; flex-direction: column; gap: 10px; }
+
+.sh-item {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow .18s, transform .18s;
+}
+
+.sh-item:hover {
+  box-shadow: 0 4px 16px rgba(26,107,220,.1);
+  transform: translateX(3px);
+}
+
+.sh-fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+  background: #f0f2f7;
+  border-radius: 8px;
+  padding: 8px 6px;
+  flex-shrink: 0;
+}
+
+.sh-fecha-dia {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1c2a45;
+  line-height: 1;
+}
+
+.sh-fecha-mes {
+  font-size: .62rem;
+  color: #8a9bbf;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.sh-item-body  { flex: 1; }
+.sh-item-title { font-size: .9rem; font-weight: 600; color: #1c2a45; margin-bottom: 4px; }
+.sh-item-meta  { display: flex; gap: 14px; font-size: .76rem; color: #8a9bbf; flex-wrap: wrap; }
+
+.sh-badge {
+  font-size: .73rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: #e3f2fd;
+  color: #1565c0;
+}
