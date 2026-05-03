@@ -1,0 +1,137 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — SECCIÓN FACTURAS
+   sections/SecFacturas.css
+══════════════════════════════════════════ */
+
+.sf-header-sec {
+  margin-bottom: 22px;
+}
+
+.sf-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1c2a45;
+  margin-bottom: 4px;
+}
+
+.sf-subtitle {
+  font-size: .82rem;
+  color: #8a9bbf;
+}
+
+/* ── Cards resumen ── */
+.sf-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sf-card {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.sf-card:hover {
+  box-shadow: 0 6px 20px rgba(26,107,220,.10);
+  transform: translateY(-2px);
+}
+
+/* ⚠️ CRÍTICO: sin esto los SVG heredan 100% y se ven enormes */
+.sf-card-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sf-card-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.sf-card-label {
+  font-size: .74rem;
+  color: #8a9bbf;
+  margin-bottom: 3px;
+}
+
+.sf-card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1c2a45;
+  line-height: 1;
+}
+
+/* ── Tabla ── */
+.sf-table-wrap {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sf-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sf-table thead tr {
+  background: #f8f9fb;
+  border-bottom: 1px solid #e2e6ef;
+}
+
+.sf-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #8a9bbf;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.sf-table td {
+  padding: 13px 16px;
+  color: #1c2a45;
+  border-bottom: 1px solid #f0f2f7;
+  font-size: .85rem;
+}
+
+.sf-table tbody tr:last-child td { border-bottom: none; }
+.sf-table tbody tr:hover td      { background: #fafbfd; }
+
+.sf-numero {
+  font-weight: 700;
+  color: #1a6bdc;
+}
+
+.sf-badge {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.sf-badge-pagada    { background: #e8f5e9; color: #2e7d32; }
+.sf-badge-pendiente { background: #fff3e0; color: #e65100; }
+
+.sf-empty {
+  color: #8a9bbf;
+  font-size: .85rem;
+  padding: 32px 20px;
+  text-align: center;
+}

@@ -1,0 +1,131 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — SECCIÓN CITAS
+   sections/SecCitas.css
+══════════════════════════════════════════ */
+
+.sc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.sc-title    { font-size: 1rem; font-weight: 700; color: #1c2a45; margin-bottom: 2px; }
+.sc-subtitle { font-size: .78rem; color: #8a9bbf; }
+
+.sc-btn-add {
+  background: #1a6bdc;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.sc-btn-add:hover { background: #155bb8; }
+
+.sc-btn-icon { width: 16px; height: 16px; display: flex; }
+.sc-btn-icon svg { width: 16px; height: 16px; }
+
+/* Filtros */
+.sc-filtros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sc-filtro {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #e2e6ef;
+  background: #fff;
+  color: #8a9bbf;
+  font-family: inherit;
+  transition: all .15s;
+}
+
+.sc-filtro.active {
+  background: #1a6bdc;
+  color: #fff;
+  border-color: #1a6bdc;
+}
+
+/* Lista */
+.sc-list { display: flex; flex-direction: column; gap: 10px; }
+
+.sc-item {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: box-shadow .18s, transform .18s;
+}
+
+.sc-item:hover {
+  box-shadow: 0 4px 16px rgba(26,107,220,.1);
+  transform: translateX(3px);
+}
+
+/* Fecha */
+.sc-fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+  background: #f0f2f7;
+  border-radius: 8px;
+  padding: 8px 6px;
+  flex-shrink: 0;
+}
+
+.sc-fecha-dia {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1c2a45;
+  line-height: 1;
+}
+
+.sc-fecha-mes {
+  font-size: .62rem;
+  color: #8a9bbf;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+/* Body */
+.sc-item-body  { flex: 1; }
+.sc-item-title { font-size: .9rem; font-weight: 600; color: #1c2a45; margin-bottom: 4px; }
+.sc-item-meta  { display: flex; gap: 14px; font-size: .76rem; color: #8a9bbf; flex-wrap: wrap; }
+.sc-item-obs   { font-size: .75rem; color: #8a9bbf; margin-top: 4px; font-style: italic; }
+
+/* Badge */
+.sc-badge {
+  font-size: .73rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sc-badge-pendiente  { background: #fff3e0; color: #e65100; }
+.sc-badge-confirmada { background: #e8f5e9; color: #2e7d32; }
+.sc-badge-completada { background: #e3f2fd; color: #1565c0; }
+.sc-badge-cancelada  { background: #fce4ec; color: #c62828; }
+
+/* Empty */
+.sc-empty { color: #8a9bbf; font-size: .85rem; padding: 20px; }

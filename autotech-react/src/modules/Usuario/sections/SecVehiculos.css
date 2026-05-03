@@ -1,0 +1,134 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — SECCIÓN VEHÍCULOS
+   sections/SecVehiculos.css
+══════════════════════════════════════════ */
+
+.sv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.sv-title    { font-size: 1rem;  font-weight: 700; color: #1c2a45; margin-bottom: 2px; }
+.sv-subtitle { font-size: .78rem; color: #8a9bbf; }
+
+.sv-btn-add {
+  background: #1a6bdc;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 9px 18px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.sv-btn-add:hover { background: #155bb8; }
+
+.sv-btn-icon { width: 16px; height: 16px; display: flex; }
+.sv-btn-icon svg { width: 16px; height: 16px; }
+
+.sv-empty {
+  color: #8a9bbf;
+  font-size: .88rem;
+  padding: 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 12px;
+}
+
+/* Grid */
+.sv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Tarjeta */
+.sv-card {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.sv-card:hover {
+  box-shadow: 0 8px 24px rgba(26,107,220,.12);
+  transform: translateY(-3px);
+}
+
+.sv-card-header {
+  padding: 18px 18px 0;
+  display: flex;
+  align-items: center;
+}
+
+.sv-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sv-icon-wrap svg { width: 26px; height: 26px; }
+
+.sv-card-body { padding: 14px 18px; flex: 1; }
+
+.sv-nombre { font-size: 1rem; font-weight: 700; color: #1c2a45; margin-bottom: 2px; }
+.sv-sub    { font-size: .78rem; color: #8a9bbf; margin-bottom: 14px; }
+
+.sv-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sv-stat-label { font-size: .68rem; color: #8a9bbf; text-transform: uppercase; letter-spacing: .05em; }
+.sv-stat-value { font-size: .82rem; font-weight: 600; color: #1c2a45; }
+.sv-stat-value.warn { color: #e65100; }
+
+.sv-alerta-km {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: .75rem;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.sv-alerta-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.sv-alerta-icon svg { width: 14px; height: 14px; }
+
+.sv-card-footer {
+  padding: 12px 18px;
+  border-top: 1px solid #f0f2f7;
+  background: #fafbfd;
+}
+
+.sv-status {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sv-status.ok   { background: #e8f5e9; color: #2e7d32; }
+.sv-status.warn { background: #fff3e0; color: #e65100; }

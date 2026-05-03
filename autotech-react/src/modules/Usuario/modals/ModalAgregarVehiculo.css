@@ -1,0 +1,118 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — MODAL AGREGAR VEHÍCULO
+   modals/ModalAgregarVehiculo.css
+══════════════════════════════════════════ */
+
+.mav-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mav-row {
+  display: flex;
+  gap: 12px;
+}
+
+.mav-input,
+.mav-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 8px;
+  font-size: .88rem;
+  color: #1c2a45;
+  background: #f8f9fb;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .15s, background .15s;
+}
+
+.mav-input:focus,
+.mav-select:focus {
+  border-color: #1a6bdc;
+  background: #fff;
+}
+
+/* ─── Toggle buttons ─── */
+.mav-toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.mav-toggle-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e6ef;
+  background: #fff;
+  color: #5a6a8a;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+
+.mav-toggle-btn.active-blue {
+  border-color: #1a6bdc;
+  background: #e8f0fe;
+  color: #1a6bdc;
+}
+
+/* ─── Acciones ─── */
+.mav-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ─── FieldGroup ─── */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-group label {
+  font-size: .76rem;
+  font-weight: 600;
+  color: #5a6a8a;
+}
+
+.field-error {
+  font-size: .72rem;
+  color: #c62828;
+}
+
+/* ─── Botones (si no vienen del layout global) ─── */
+.btn-primary {
+  background: #1a6bdc;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.btn-primary:hover { background: #155bb8; }
+
+.btn-secondary {
+  background: #f0f2f7;
+  color: #5a6a8a;
+  border: none;
+  border-radius: 9px;
+  padding: 10px 22px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+
+.btn-secondary:hover { background: #e2e6ef; }
