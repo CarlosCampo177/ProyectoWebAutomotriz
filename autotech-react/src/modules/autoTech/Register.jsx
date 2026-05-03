@@ -1,21 +1,28 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerRequest } from "../../services/authService";
 import "./Register.css";
 
 export default function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    nombre: "",
-    apellido: "",
+    primerNombre: "",
+    segundoNombre: "",
+    primerApellido: "",
+    segundoApellido: "",
+    username: "",
+    documento: "",
     correo: "",
     telefono: "",
+    direccion: "",
     password: "",
     confirmPassword: "",
     terminos: false,
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -25,10 +32,11 @@ export default function Register() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    // Validaciones locales
     if (form.password !== form.confirmPassword) {
       setError("¡Las contraseñas no coinciden!");
       return;
@@ -42,14 +50,32 @@ export default function Register() {
       return;
     }
 
-    // Todo OK → ir al login
-    navigate("/page/login");
+    setLoading(true);
+    try {
+      await registerRequest({
+        primerNombre: form.primerNombre,
+        segundoNombre: form.segundoNombre,
+        primerApellido: form.primerApellido,
+        segundoApellido: form.segundoApellido,
+        username: form.username,
+        documento: form.documento,
+        email: form.correo,
+        telefono: form.telefono,
+        direccion: form.direccion,
+        password: form.password,
+      });
+
+      navigate("/page/login");
+    } catch {
+      setError("El correo o usuario ya está registrado.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="rg-bg">
       <div className="rg-card">
-        {/* Logo */}
         <div className="rg-logo">
           AUTO<span>TECH</span>
         </div>
@@ -57,37 +83,103 @@ export default function Register() {
         <h2 className="rg-title">Crear cuenta</h2>
         <p className="rg-sub">Regístrate gratis y comienza hoy</p>
 
-        {/* Error */}
         {error && <div className="rg-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* Nombres */}
+
           <div className="rg-row">
             <div className="rg-field">
-              <label>Nombre</label>
+              <label>
+                Primer nombre <span className="rg-req">*</span>
+              </label>
               <input
                 type="text"
-                name="nombre"
-                value={form.nombre}
+                name="primerNombre"
+                value={form.primerNombre}
                 onChange={handleChange}
                 placeholder="Juan"
                 required
               />
             </div>
             <div className="rg-field">
-              <label>Apellido</label>
+              <label>
+                Segundo Nombre <span className="rg-opt">(opcional)</span>
+              </label>
               <input
                 type="text"
-                name="apellido"
-                value={form.apellido}
+                name="segundoNombre"
+                value={form.segundoNombre}
+                onChange={handleChange}
+                placeholder="Carlos"
+              />
+            </div>
+          </div>
+
+          {/* Apellidos */}
+          <div className="rg-row">
+            <div className="rg-field">
+              <label>
+                Primer Apellido <span className="rg-req">*</span>
+              </label>
+              <input
+                type="text"
+                name="primerApellido"
+                value={form.primerApellido}
                 onChange={handleChange}
                 placeholder="Pérez"
                 required
               />
             </div>
+            <div className="rg-field">
+              <label>
+                Segundo Apellido <span className="rg-opt">(opcional)</span>
+              </label>
+              <input
+                type="text"
+                name="segundoApellido"
+                value={form.segundoApellido}
+                onChange={handleChange}
+                placeholder="García"
+              />
+            </div>
+          </div>
+
+          {/* Documento */}
+          <div className="rg-field">
+            <label>
+              Documento <span className="rg-req">*</span>
+            </label>
+            <input
+              type="text"
+              name="documento"
+              value={form.documento}
+              onChange={handleChange}
+              placeholder="123456789"
+              required
+            />
+          </div>
+          
+          {/* Cuenta */}
+
+          <div className="rg-field">
+            <label>
+              Nombre de usuario <span className="rg-req">*</span>
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={form.username}
+              onChange={handleChange}
+              placeholder="juan_perez"
+              required
+            />
           </div>
 
           <div className="rg-field">
-            <label>Correo electrónico</label>
+            <label>
+              Correo electrónico <span className="rg-req">*</span>
+            </label>
             <input
               type="email"
               name="correo"
@@ -98,41 +190,66 @@ export default function Register() {
             />
           </div>
 
-          <div className="rg-field">
-            <label>Teléfono</label>
-            <input
-              type="tel"
-              name="telefono"
-              value={form.telefono}
-              onChange={handleChange}
-              placeholder="+57 300 000 0000"
-            />
+          <div className="rg-row">
+            <div className="rg-field">
+              <label>
+                Teléfono <span className="rg-req">*</span>
+              </label>
+              <input
+                type="tel"
+                name="telefono"
+                value={form.telefono}
+                onChange={handleChange}
+                placeholder="+57 300 000 0000"
+                required
+              />
+            </div>
+            <div className="rg-field">
+              <label>
+                Dirección <span className="rg-req">*</span>
+              </label>
+              <input
+                type="text"
+                name="direccion"
+                value={form.direccion}
+                onChange={handleChange}
+                placeholder="Calle 10 # 5-23"
+                required
+              />
+            </div>
           </div>
 
-          <div className="rg-field">
-            <label>Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
+          {/* Contraseñas */}
+          <div className="rg-row">
+            <div className="rg-field">
+              <label>
+                Contraseña <span className="rg-req">*</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div className="rg-field">
+              <label>
+                Confirmar <span className="rg-req">*</span>
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+            </div>
           </div>
 
-          <div className="rg-field">
-            <label>Confirmar contraseña</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
+          {/* Términos */}
           <div className="rg-check">
             <input
               type="checkbox"

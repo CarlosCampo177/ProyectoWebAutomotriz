@@ -5,10 +5,10 @@ import { loginRequest } from "../../services/authService";
 import "./Log.css";
 
 export default function Login() {
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError]       = useState("");
-  const [loading, setLoading]   = useState(false);
+  const [identifier, setIdentifier] = useState("");   //  email o username
+  const [password, setPassword]     = useState("");
+  const [error, setError]           = useState("");
+  const [loading, setLoading]       = useState(false);
 
   const { login } = useAuth();
   const navigate  = useNavigate();
@@ -19,18 +19,15 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const userData = await loginRequest(email, password);
-
-      // Guarda el usuario en el contexto global
+      const userData = await loginRequest(identifier, password);
       login(userData);
 
-      // Redirige según el rol que devuelve la API
       if (userData.rol === "admin")    navigate("/admin/inicio");
       if (userData.rol === "mecanico") navigate("/mecanico");
       if (userData.rol === "cliente")  navigate("/usuario");
 
     } catch {
-      setError("Correo o contraseña incorrectos");
+      setError("Credenciales incorrectas");
     } finally {
       setLoading(false);
     }
@@ -49,13 +46,13 @@ export default function Login() {
 
           <form onSubmit={handleSubmit}>
             <div className="campo">
-              <label className="etiqueta">Correo electrónico</label>
+              <label className="etiqueta">Correo o nombre de usuario</label>
               <input
-                type="email"
+                type="text"                              
                 className="entrada"
-                placeholder="tu@correo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@correo.com o usuario123"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
 

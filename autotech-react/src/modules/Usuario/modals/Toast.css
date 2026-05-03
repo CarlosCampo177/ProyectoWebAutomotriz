@@ -1,0 +1,75 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — TOAST
+   modals/Toast.css
+══════════════════════════════════════════ */
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.15);
+  min-width: 280px;
+  max-width: 420px;
+  animation: toastIn .25s ease;
+  font-size: .88rem;
+  font-weight: 500;
+}
+
+.toast-success {
+  background: #1a6bdc;
+  color: #fff;
+}
+
+.toast-error {
+  background: #c62828;
+  color: #fff;
+}
+
+.toast-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toast-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.toast-msg {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: .7;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: opacity .15s;
+}
+
+.toast-close:hover { opacity: 1; }
+
+.toast-close svg {
+  width: 16px;
+  height: 16px;
+}

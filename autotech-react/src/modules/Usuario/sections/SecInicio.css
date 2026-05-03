@@ -1,0 +1,193 @@
+/* ══════════════════════════════════════════
+   AUTOTECH — SECCIÓN INICIO
+   sections/SecInicio.css
+══════════════════════════════════════════ */
+
+.si-wrapper { display: flex; flex-direction: column; gap: 0; }
+
+/* Bienvenida */
+.si-greeting      { margin-bottom: 24px; }
+.si-greeting-sub  { font-size: .8rem; color: #8a9bbf; margin-bottom: 4px; }
+.si-greeting-title{
+  font-size: 1.3rem; font-weight: 700; color: #1c2a45;
+  margin: 0 0 2px; line-height: 1.3;
+}
+.si-greeting-title span { color: #1a6bdc; }
+.si-greeting-date { font-size: .78rem; color: #8a9bbf; }
+
+/* Cards */
+.si-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.si-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #e2e6ef;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.si-card:hover {
+  box-shadow: 0 6px 20px rgba(26,107,220,.12);
+  transform: translateY(-2px);
+}
+
+.si-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.si-card-icon svg { width: 22px; height: 22px; }
+.si-card-label { font-size: .74rem; color: #8a9bbf; margin-bottom: 2px; }
+.si-card-value { font-size: 1.55rem; font-weight: 700; color: #1c2a45; line-height: 1; }
+
+/* Acciones */
+.si-sec-label {
+  font-size: .76rem;
+  font-weight: 700;
+  color: #8a9bbf;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 10px;
+}
+
+.si-acciones {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.si-accion-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid;
+  transition: all .18s;
+  font-family: inherit;
+}
+
+.si-accion-icon { width: 16px; height: 16px; display: flex; }
+.si-accion-icon svg { width: 16px; height: 16px; }
+
+/* Grid 2 col */
+.si-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Sub sección header */
+.si-subsec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.si-ver-link {
+  font-size: .78rem;
+  color: #1a6bdc;
+  cursor: pointer;
+  font-weight: 500;
+}
+.si-ver-link:hover { text-decoration: underline; }
+
+/* Lista items */
+.si-list { display: flex; flex-direction: column; gap: 8px; }
+
+.si-list-item {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow .18s, transform .18s;
+}
+
+.si-list-item:hover {
+  box-shadow: 0 4px 16px rgba(26,107,220,.1);
+  transform: translateX(3px);
+}
+
+.si-list-item--col {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.si-veh-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.si-veh-icon { color: #1a6bdc; width: 18px; height: 18px; flex-shrink: 0; }
+.si-veh-icon svg { width: 18px; height: 18px; }
+
+.si-veh-km { font-size: .8rem; color: #5a6a8a; flex-shrink: 0; }
+
+.si-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.si-list-body  { flex: 1; }
+.si-list-title { font-size: .88rem; font-weight: 600; color: #1c2a45; margin-bottom: 4px; }
+.si-list-meta  { display: flex; gap: 12px; font-size: .75rem; color: #8a9bbf; flex-wrap: wrap; }
+
+/* Badge */
+.si-badge {
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.si-badge-pendiente  { background: #fff3e0; color: #e65100; }
+.si-badge-confirmada { background: #e8f5e9; color: #2e7d32; }
+.si-badge-completada { background: #e3f2fd; color: #1565c0; }
+.si-badge-cancelada  { background: #fce4ec; color: #c62828; }
+
+/* Alerta km */
+.si-alerta-km {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: .74rem;
+  color: #e65100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.si-alerta-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.si-alerta-icon svg { width: 14px; height: 14px; }
+
+/* Empty state */
+.si-empty { color: #8a9bbf; font-size: .84rem; padding: 12px; }
