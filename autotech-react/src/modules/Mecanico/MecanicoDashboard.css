@@ -207,11 +207,6 @@
   overflow: hidden;
 }
 
-.alerta-pulse-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: #c62828; flex-shrink: 0;
-  animation: pulse-red 1.4s infinite;
-}
 
 @keyframes pulse-red {
   0%, 100% { box-shadow: 0 0 0 0 rgba(198,40,40,.5); }

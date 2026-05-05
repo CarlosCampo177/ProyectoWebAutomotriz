@@ -1,34 +1,56 @@
 import { useState, useEffect } from "react";
 import "./MecanicoDashboard.css";
 
-/* ══════════════════════════════════════
-   DATOS SIMULADOS
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   🔌 PRÓXIMAMENTE — INTEGRACIÓN CON API REST
+   ──────────────────────────────────────────────────────────────
+   Todos estos datos simulados serán reemplazados por llamadas
+   a la API propia del proyecto. Estructura esperada:
+
+   GET /api/mecanico/perfil          → datos del mecánico autenticado
+   GET /api/mecanico/ordenes         → lista de órdenes asignadas
+   GET /api/mecanico/vehiculos       → vehículos a cargo
+   GET /api/mecanico/observaciones   → observaciones registradas
+   POST /api/mecanico/observaciones  → crear nueva observación
+   PUT  /api/mecanico/ordenes/:id    → actualizar estado de una orden
+
+   Cuando la API esté lista, reemplaza cada const por un useState([])
+   y un useEffect que haga fetch() o axios.get() al endpoint.
+   Ejemplo:
+     const [ordenes, setOrdenes] = useState([]);
+     useEffect(() => {
+       fetch("http://localhost:8080/api/mecanico/ordenes")
+         .then(res => res.json())
+         .then(data => setOrdenes(data));
+     }, []);
+══════════════════════════════════════════════════════════════ */
+
+/* ── Datos simulados (solo para desarrollo visual) ── */
+
 const mecanico = {
-  nombre: "Carlos Mendoza",
-  iniciales: "CM",
+  nombre:       "Carlos Mendoza",
+  iniciales:    "CM",
   especialidad: "Motor & Transmisión",
+  // TODO: reemplazar con /api/mecanico/perfil
 };
 
 const ordenes = [
-  { id: "ORD-001", servicio: "Cambio de aceite y filtros",        vehiculo: "Toyota Corolla 2020",  placa: "ABC-123", cliente: "Oscar Avila",    fecha: { dia: "28", mes: "MAR" }, hora: "10:00 AM", prioridad: "normal",  estado: "en_proceso" },
-  { id: "ORD-002", servicio: "Revisión general de frenos",        vehiculo: "Chevrolet Spark 2018", placa: "XYZ-789", cliente: "María López",    fecha: { dia: "05", mes: "ABR" }, hora: "2:00 PM",  prioridad: "alta",    estado: "pendiente"  },
-  { id: "ORD-003", servicio: "Alineación y balanceo",             vehiculo: "Renault Duster 2021",  placa: "DEF-456", cliente: "Luis Hernández", fecha: { dia: "10", mes: "ABR" }, hora: "9:00 AM",  prioridad: "normal",  estado: "completada" },
-  { id: "ORD-004", servicio: "Diagnóstico eléctrico",             vehiculo: "Kia Picanto 2019",     placa: "GHI-321", cliente: "Ana Torres",     fecha: { dia: "12", mes: "ABR" }, hora: "11:00 AM", prioridad: "urgente", estado: "pendiente"  },
-  { id: "ORD-005", servicio: "Cambio de correa de distribución",  vehiculo: "Mazda 3 2017",         placa: "JKL-654", cliente: "Pedro Ruiz",     fecha: { dia: "14", mes: "ABR" }, hora: "8:00 AM",  prioridad: "alta",    estado: "completada" },
+  // TODO: reemplazar con GET /api/mecanico/ordenes
+  { id: "ORD-001", servicio: "Cambio de aceite y filtros",  vehiculo: "Toyota Corolla 2020",  placa: "ABC-123", cliente: "Oscar Avila", fecha: { dia: "28", mes: "MAR" }, hora: "10:00 AM", prioridad: "normal",  estado: "en_proceso" },
+  { id: "ORD-002", servicio: "Revisión general de frenos",  vehiculo: "Chevrolet Spark 2018", placa: "XYZ-789", cliente: "María López", fecha: { dia: "05", mes: "ABR" }, hora: "2:00 PM",  prioridad: "urgente", estado: "pendiente"  },
+  { id: "ORD-003", servicio: "Alineación y balanceo",       vehiculo: "Renault Duster 2021",  placa: "DEF-456", cliente: "Luis H.",     fecha: { dia: "10", mes: "ABR" }, hora: "9:00 AM",  prioridad: "normal",  estado: "completada" },
 ];
 
 const vehiculosAsignados = [
-  { id: 1, nombre: "Toyota Corolla",  placa: "ABC-123", anio: 2020, km: 45200, combustible: "Gasolina", color: "Blanco", cliente: "Oscar Avila",  servicio: "Cambio de aceite",      estado: "en_proceso", colorWrap: "blue"   },
-  { id: 2, nombre: "Chevrolet Spark", placa: "XYZ-789", anio: 2018, km: 82000, combustible: "Gasolina", color: "Rojo",   cliente: "María López",  servicio: "Revisión de frenos",    estado: "pendiente",  colorWrap: "orange" },
-  { id: 3, nombre: "Kia Picanto",     placa: "GHI-321", anio: 2019, km: 38500, combustible: "Gasolina", color: "Azul",   cliente: "Ana Torres",   servicio: "Diagnóstico eléctrico", estado: "pendiente",  colorWrap: "purple" },
+  // TODO: reemplazar con GET /api/mecanico/vehiculos
+  { id: 1, nombre: "Toyota Corolla",  placa: "ABC-123", anio: 2020, km: 45200, combustible: "Gasolina", color: "Blanco", cliente: "Oscar Avila", servicio: "Cambio de aceite",   estado: "en_proceso", colorWrap: "blue"   },
+  { id: 2, nombre: "Chevrolet Spark", placa: "XYZ-789", anio: 2018, km: 82000, combustible: "Gasolina", color: "Rojo",   cliente: "María López", servicio: "Revisión de frenos", estado: "pendiente",  colorWrap: "orange" },
 ];
 
 const observaciones = [
-  { id: 1, vehiculo: "Toyota Corolla — ABC-123",  cliente: "Oscar Avila",    fecha: "10 Mar 2026", texto: "Filtro de aire en mal estado, se recomienda cambio inmediato. Se detectaron pequeñas fugas de aceite en la junta del motor.",         tipo: "advertencia" },
-  { id: 2, vehiculo: "Renault Duster — DEF-456",  cliente: "Luis Hernández", fecha: "08 Mar 2026", texto: "Vehículo en buen estado general. Pastillas de freno con 30% de vida útil, se notifica para próximo servicio.",                        tipo: "info"        },
-  { id: 3, vehiculo: "Mazda 3 — JKL-654",         cliente: "Pedro Ruiz",     fecha: "05 Mar 2026", texto: "Correa de distribución cambiada exitosamente. Se recomienda revisión del sistema de refrigeración en el próximo mantenimiento.",         tipo: "ok"          },
-  { id: 4, vehiculo: "Chevrolet Spark — XYZ-789", cliente: "María López",    fecha: "03 Mar 2026", texto: "Frenos traseros con desgaste crítico. Requiere cambio urgente de pastillas y revisión del disco.",                                      tipo: "urgente"     },
+  // TODO: reemplazar con GET /api/mecanico/observaciones
+  { id: 1, vehiculo: "Toyota Corolla — ABC-123",  cliente: "Oscar Avila", fecha: "10 Mar 2026", texto: "Filtro de aire en mal estado, se recomienda cambio inmediato. Se detectaron pequeñas fugas de aceite en la junta del motor.", tipo: "advertencia" },
+  { id: 2, vehiculo: "Chevrolet Spark — XYZ-789", cliente: "María López", fecha: "03 Mar 2026", texto: "Frenos traseros con desgaste crítico. Requiere cambio urgente de pastillas y revisión del disco.",                            tipo: "urgente"     },
 ];
 
 /* ══════════════════════════════════════
@@ -166,10 +188,10 @@ function SecInicio({ setSeccion }) {
       {/* ── STAT CARDS ── */}
       <div className="stat-grid">
         {[
-          { icon: "bi-clipboard-list-fill", color: "#1a6bdc", bg: "#e8f0fe", label: "Total órdenes", val: cTotal, bar: total      },
-          { icon: "bi-hourglass-split",     color: "#e65100", bg: "#fff3e0", label: "Pendientes",    val: cPend,  bar: pendientes  },
-          { icon: "bi-gear-wide-connected", color: "#7c3aed", bg: "#f3e5f5", label: "En proceso",    val: cProc,  bar: enProceso   },
-          { icon: "bi-patch-check-fill",    color: "#2e7d32", bg: "#e8f5e9", label: "Completadas",   val: cComp,  bar: completadas },
+          { icon: "bi-card-checklist",     color: "#1a6bdc", bg: "#e8f0fe", label: "Total órdenes", val: cTotal, bar: total      },
+          { icon: "bi-hourglass-split",    color: "#e65100", bg: "#fff3e0", label: "Pendientes",    val: cPend,  bar: pendientes  },
+          { icon: "bi-gear-fill",          color: "#7c3aed", bg: "#f3e5f5", label: "En proceso",    val: cProc,  bar: enProceso   },
+          { icon: "bi-check-circle-fill",  color: "#2e7d32", bg: "#e8f5e9", label: "Completadas",   val: cComp,  bar: completadas },
         ].map((s, i) => (
           <div className="stat-card" key={i} style={{ "--d": `${i * 0.07}s` }}>
             <div className="stat-card-top">
@@ -251,9 +273,9 @@ function SecInicio({ setSeccion }) {
           </div>
           <div className="acciones-rapidas-row">
             {[
-              { icon: "bi-clipboard-check-fill", label: "Órdenes",       sec: "ordenes",       c: "#1a6bdc", cs: "#e8f0fe" },
-              { icon: "bi-car-front-fill",        label: "Vehículos",    sec: "vehiculos",     c: "#2e7d32", cs: "#e8f5e9" },
-              { icon: "bi-chat-left-text-fill",   label: "Observaciones",sec: "observaciones", c: "#7c3aed", cs: "#f3e5f5" },
+              { icon: "bi-clipboard-check",  label: "Órdenes",        sec: "ordenes",       c: "#1a6bdc", cs: "#e8f0fe" },
+              { icon: "bi-car-front",        label: "Vehículos",      sec: "vehiculos",     c: "#2e7d32", cs: "#e8f5e9" },
+              { icon: "bi-chat-left-text",   label: "Observaciones",  sec: "observaciones", c: "#7c3aed", cs: "#f3e5f5" },
             ].map((a, i) => (
               <button key={i} className="btn-action" style={{ "--c": a.c, "--cs": a.cs }} onClick={() => setSeccion(a.sec)}>
                 <i className={`bi ${a.icon}`}></i>
@@ -432,10 +454,10 @@ function SecObservaciones() {
    COMPONENTE PRINCIPAL
 ══════════════════════════════════════ */
 const navItems = [
-  { label: "Inicio",              sec: "inicio",        icon: "bi-grid-1x2"        },
-  { label: "Mis órdenes",         sec: "ordenes",       icon: "bi-clipboard-check" },
-  { label: "Vehículos asignados", sec: "vehiculos",     icon: "bi-car-front"       },
-  { label: "Observaciones",       sec: "observaciones", icon: "bi-chat-left-text"  },
+  { label: "Inicio",              sec: "inicio",        icon: "bi-grid-1x2"       },
+  { label: "Mis órdenes",         sec: "ordenes",       icon: "bi-clipboard-check"},
+  { label: "Vehículos asignados", sec: "vehiculos",     icon: "bi-car-front"      },
+  { label: "Observaciones",       sec: "observaciones", icon: "bi-chat-left-text" },
 ];
 
 export default function MecanicoDashboard() {
