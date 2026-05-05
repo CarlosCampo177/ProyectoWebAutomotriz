@@ -8,11 +8,12 @@ import DashboardLayout from '../layouts/DashboardLayout'
 
 import Admin         from '../modules/admin/admin'
 import UsuarioOk     from '../modules/Usuario/UsuarioDashboard'
-import MecanicoOK    from '../modules/Mecanico/mecanico'
+import MecanicoOK from "../modules/Mecanico/MecanicoDashboard";
 
 function AppRouter() {
   return (
     <Routes>
+      
       <Route path="/"               element={<Inicio />}   />
       <Route path="/page/register"  element={<Register />} />
       <Route path="/page/login"     element={<Login />}    />
