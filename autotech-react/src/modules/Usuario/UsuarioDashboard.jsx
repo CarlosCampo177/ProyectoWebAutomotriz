@@ -1,22 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-
-// TODO: todos estos imports se reemplazarán por llamadas a la API
-// GET /api/usuarios/:id/vehiculos  → initialVehiculos
-// GET /api/usuarios/:id/citas      → initialCitas
-// GET /api/usuarios/:id/facturas   → initialFacturas
-// GET /api/usuarios/:id/historial  → historial
-// GET /api/mecanicos/disponibles   → MECANICOS
 import {
-  initialVehiculos,
-  initialCitas,
-  initialFacturas,
-  historial,
-  MECANICOS,
-} from "./data/usuarioData.js";
+  getVehiculos, getCitas, getHistorial,
+  getFacturas, getMecanicos, getStats,
+  postVehiculo, postCita
+} from "../../services/clienteService";
 
 import Sidebar from "./components/Sidebar";
-import Header  from "./components/Header";
 import SecInicio    from "./sections/SecInicio";
 import SecVehiculos from "./sections/SecVehiculos";
 import SecCitas     from "./sections/SecCitas";
@@ -30,36 +20,103 @@ import Toast                from "./modals/Toast";
 import "./UsuarioDashboard.css";
 
 export default function UsuarioDashboard() {
-  // ← usuario viene del AuthContext (lo guardó Login al iniciar sesión)
-  // Con API real vendrá de: GET /api/auth/me
   const { user } = useAuth();
 
-  const [seccion,      setSeccion]      = useState("inicio");
-  const [vehiculos,    setVehiculos]    = useState(initialVehiculos);
-  const [citas,        setCitas]        = useState(initialCitas);
-  const [panelCita,    setPanelCita]    = useState(false);
-  const [panelVehiculo,setPanelVehiculo]= useState(false);
-  const [toast,        setToast]        = useState(null);
+  const [seccion, setSeccion] = useState("inicio");
+  const [vehiculos, setVehiculos] = useState([]);
+  const [citas, setCitas] = useState([]);
+  const [historial, setHistorial] = useState([]);
+  const [facturas, setFacturas] = useState([]);
+  const [mecanicos, setMecanicos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [panelCita, setPanelCita] = useState(false);
+  const [panelVehiculo, setPanelVehiculo] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [stats, setStats] = useState({ serviciosRealizados: 0 });
 
-  // MECANICOS ya es [{ id, nombre }] — listo para cuando venga de la API
-  const mecanicosObj = MECANICOS;
+  useEffect(() => {
+    if (!user?.id) return;
+    const cargarDatos = async () => {
+      try {
+        const [v, c, h, f, m, s] = await Promise.all([
+          getVehiculos(user.id),
+          getCitas(user.id),
+          getHistorial(user.id),
+          getFacturas(user.id),
+          getMecanicos(),
+          getStats(user.id), 
+        ]);
+        setVehiculos(v);
+        setCitas(c);
+        setHistorial(h);
+        setFacturas(f);
+        setMecanicos(m);
+        setStats(s);
+      } catch (err) {
+        console.error("Error cargando datos:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargarDatos();
+  }, [user?.id]);
 
   function showToast(msg) { setToast(msg); }
 
-  function handleGuardarCita(nuevaCita) {
-    // TODO API → POST /api/citas
-    setCitas(prev => [{ ...nuevaCita, id: Date.now() }, ...prev]);
-    setPanelCita(false);
-    showToast("¡Cita agendada exitosamente! Te notificaremos cuando sea confirmada.");
+  async function handleGuardarVehiculo(nuevoVeh) {
+    try {
+      const vehiculoCreado = await postVehiculo(user.id, {
+        idMarca:     nuevoVeh.idMarca,
+        modelo:      nuevoVeh.modelo,
+        placa:       nuevoVeh.placa,
+        anio:        nuevoVeh.anio,
+        km:          nuevoVeh.km,
+        color:       nuevoVeh.color,
+        combustible: nuevoVeh.combustible,
+        icono:       nuevoVeh.icono,
+        colorWrap:   nuevoVeh.colorWrap,
+      });
+      setVehiculos(prev => [...prev, vehiculoCreado]);
+      setPanelVehiculo(false);
+      showToast(`¡Vehículo ${nuevoVeh.nombre} agregado correctamente!`);
+    } catch (err) {
+      console.error("Error al agregar vehículo:", err);
+      showToast("Error al agregar el vehículo. Intenta de nuevo.");
+    }
   }
 
-  function handleGuardarVehiculo(nuevoVeh) {
-    // TODO API → POST /api/usuarios/:id/vehiculos
-    setVehiculos(prev => [...prev, { ...nuevoVeh, id: Date.now() }]);
-    setPanelVehiculo(false);
-    showToast(`¡El vehículo ${nuevoVeh.nombre} fue agregado correctamente!`);
+  async function handleGuardarCita(nuevaCita) {
+    try {
+      const meses = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
+      const citaCreada = await postCita(user.id, {
+        servicio:      nuevaCita.servicio,
+        vehiculoId:    parseInt(nuevaCita.vehiculoId),
+        mecanicoId:    parseInt(nuevaCita.mecanicoId),
+        dia:           parseInt(nuevaCita.dia),
+        mes:           meses.indexOf(nuevaCita.mes) + 1,
+        hora:          nuevaCita.hora,
+        observaciones: nuevaCita.observaciones ?? "",
+      });
+      setCitas(prev => [{
+        ...citaCreada,
+        mecanico: nuevaCita.mecanico,
+        vehiculo: nuevaCita.vehiculo,
+      }, ...prev]);
+      setPanelCita(false);
+      showToast("¡Cita agendada exitosamente!");
+    } catch (err) {
+      console.error("Error al agendar cita:", err);
+      showToast("Error al agendar la cita. Intenta de nuevo.");
+    }
   }
 
+  if (loading) {
+    return (
+      <div style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"100vh" }}>
+        <p style={{ color:"#888", fontSize:"0.9rem" }}>Cargando...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -72,21 +129,15 @@ export default function UsuarioDashboard() {
       `}</style>
 
       <div className="app-wrapper">
-        <Sidebar
-          seccion={seccion}
-          setSeccion={setSeccion}
-          usuario={user}
-        />
-
+        <Sidebar seccion={seccion} setSeccion={setSeccion} usuario={user} />
         <div className="main-content">
-          <Header seccion={seccion} />
           <div className="page-content">
             {seccion === "inicio"    && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={user} />}
             {seccion === "vehiculos" && <SecVehiculos vehiculos={vehiculos} onAgregar={() => setPanelVehiculo(true)} />}
             {seccion === "citas"     && <SecCitas     citas={citas} onAgendar={() => setPanelCita(true)} />}
             {seccion === "historial" && <SecHistorial historial={historial} />}
-            {seccion === "facturas"  && <SecFacturas  facturas={initialFacturas} />}
-            {seccion === "perfil"    && <SecPerfil    usuario={user} vehiculos={vehiculos} />}
+            {seccion === "facturas"  && <SecFacturas  facturas={facturas} />}
+            {seccion === "perfil" && (<SecPerfil usuario={user} vehiculos={vehiculos} stats={stats} />)}
           </div>
         </div>
       </div>
@@ -95,7 +146,7 @@ export default function UsuarioDashboard() {
         title="Agendar Cita" subtitle="Completa los datos para reservar tu cita">
         <ModalAgendarCita
           vehiculos={vehiculos}
-          mecanicos={mecanicosObj}
+          mecanicos={mecanicos}
           citas={citas}
           onClose={() => setPanelCita(false)}
           onSave={handleGuardarCita}

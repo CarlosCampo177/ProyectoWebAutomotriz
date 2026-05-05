@@ -1,12 +1,8 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — MODAL AGENDAR CITA
-   modals/ModalAgendarCita.jsx
-══════════════════════════════════════════ */
-import { useState } from "react";
+import { useState, useEffect } from "react";  // ← agrega useEffect
 import * as Icon from "../icons/Icons";
+import { get } from "../../../services/apiClient";  // ← nuevo
 import "./ModalAgendarCita.css";
 
-/* ── CONSTANTES ── */
 const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
 const MESES_LABELS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const HORAS_DISPONIBLES = [
@@ -14,7 +10,6 @@ const HORAS_DISPONIBLES = [
   "12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM",
 ];
 
-/* ── COMPONENTES INTERNOS ── */
 function FieldGroup({ label, error, children, style }) {
   return (
     <div className="field-group" style={style}>
@@ -25,30 +20,11 @@ function FieldGroup({ label, error, children, style }) {
   );
 }
 
-/* ── COMPONENTE PRINCIPAL ── */
 export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose, onSave }) {
-  /* ── NOTA API ──────────────────────────────
-     Props que vendrán de la API cuando se integre:
-
-     vehiculos → GET /api/usuarios/:id/vehiculos
-       [{ id, nombre, anio, placa }, ...]
-
-     mecanicos → GET /api/mecanicos/disponibles
-       [{ id, nombre }, ...]
-       Actualmente se pasa hardcoded desde UsuarioApp.
-       Reemplazar por un useEffect que llame a este endpoint.
-
-     citas → ya cargadas en UsuarioApp desde
-       GET /api/usuarios/:id/citas?estado=pendiente,confirmada
-       Se usan para calcular horas ocupadas por mecánico.
-
-     onSave → recibe el objeto de la nueva cita.
-     UsuarioApp hace POST /api/citas con ese objeto
-     y actualiza el estado local con la respuesta.
-  ────────────────────────────────────────── */
-
   const today = new Date();
   const [step, setStep] = useState(1);
+  const [guardando, setGuardando] = useState(false);
+  const [servicios, setServicios] = useState([]);
   const [form, setForm] = useState({
     servicio:      "",
     vehiculoId:    "",
@@ -61,10 +37,16 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
   });
   const [errors, setErrors] = useState({});
 
-  const mesNum     = parseInt(form.mes);
-  const diasEnMes  = new Date(today.getFullYear(), mesNum + 1, 0).getDate();
+  // ← nuevo: cargar servicios desde la API
+  useEffect(() => {
+    get('Servicios')
+      .then(data => setServicios(data))
+      .catch(() => setServicios([]))
+  }, [])
 
-  /* Horas ya ocupadas para el mecánico y día seleccionados */
+  const mesNum    = parseInt(form.mes);
+  const diasEnMes = new Date(today.getFullYear(), mesNum + 1, 0).getDate();
+
   const horasOcupadas = citas.filter(c =>
     c.mecanicoId === form.mecanicoId &&
     c.dia  === form.dia &&
@@ -100,42 +82,26 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
 
   function handleGuardar() {
     if (!validate2()) return;
+    if (guardando) return;
 
-// ✅ Compara como string para evitar errores de tipo
-  const veh = vehiculos.find(v => String(v.id) === String(form.vehiculoId));
-    /* ── NOTA API ──────────────────────────────
-       Aquí se construye el payload para:
-         POST /api/citas
-       Body:
-         {
-           usuarioId,        ← viene del contexto de auth
-           vehiculoId:       form.vehiculoId,
-           mecanicoId:       form.mecanicoId,
-           servicio:         form.servicio,
-           fecha:            `${anio}-${mes+1}-${dia}`,
-           hora:             form.hora,
-           observaciones:    form.observaciones,
-         }
-       Respuesta esperada: { id, ...datosCita, estado: "pendiente" }
-       onSave recibe esa respuesta y UsuarioApp actualiza el estado.
-    ────────────────────────────────────────── */
+    setGuardando(true);  
+    const veh = vehiculos.find(v => String(v.id) === String(form.vehiculoId));
     onSave({
-      servicio:       form.servicio,
-      dia:            form.dia,
-      mes:            MESES[mesNum],
-      hora:           form.hora,
-      vehiculoId:     form.vehiculoId,
-      vehiculo:       `${veh?.nombre ?? ""} ${veh?.anio ?? ""}`.trim(),
-      mecanicoId:     form.mecanicoId,
-      mecanico:       form.mecanicoNombre,
-      estado:         "pendiente",
-      observaciones:  form.observaciones,
+      servicio:      form.servicio,
+      dia:           form.dia,
+      mes:           MESES[mesNum],
+      hora:          form.hora,
+      vehiculoId:    form.vehiculoId,
+      vehiculo:      `${veh?.nombre ?? ""} ${veh?.anio ?? ""}`.trim(),
+      mecanicoId:    form.mecanicoId,
+      mecanico:      form.mecanicoNombre,
+      estado:        "pendiente",
+      observaciones: form.observaciones,
     });
   }
 
   return (
     <>
-      {/* Barra de progreso */}
       <div className="mac-progress">
         {[1, 2].map(s => (
           <div key={s} className={`mac-step${s <= step ? " active" : ""}`}>
@@ -146,14 +112,10 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
         <div className={`mac-progress-line${step === 2 ? " active" : ""}`} />
       </div>
 
-      {/* ─────────── PASO 1 ─────────── */}
       {step === 1 && (
         <div className="mac-fields">
-          {/* ── NOTA API ──────────────────────────
-              SERVICIOS_DISPONIBLES → GET /api/servicios
-              Reemplazar el <select> por datos del endpoint.
-              Estructura esperada: [{ id, nombre, duracionMin, precioBase }]
-          ───────────────────────────────────────── */}
+
+          {/* Servicios desde la API ← cambia esto */}
           <FieldGroup label="Servicio requerido *" error={errors.servicio}>
             <select
               className="mac-select"
@@ -161,22 +123,15 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
               onChange={e => set("servicio", e.target.value)}
             >
               <option value="">Selecciona un servicio</option>
-              {/* TODO API → servicios.map(s => <option key={s.id} value={s.nombre}>{s.nombre}</option>) */}
-              <option>Cambio de aceite y filtros</option>
-              <option>Revisión general de frenos</option>
-              <option>Alineación y balanceo</option>
-              <option>Revisión eléctrica</option>
-              <option>Mantenimiento preventivo</option>
-              <option>Cambio de llantas</option>
-              <option>Diagnóstico computarizado</option>
-              <option>Cambio de correa de distribución</option>
+              {servicios.map(s => (
+                <option key={s.idServicio} value={s.nombre}>
+                  {s.nombre}
+                </option>
+              ))}
             </select>
           </FieldGroup>
 
-          {/* ── NOTA API ──────────────────────────
-              vehiculos → prop desde UsuarioApp.
-              GET /api/usuarios/:id/vehiculos
-          ───────────────────────────────────────── */}
+          {/* Vehículos — igual que antes */}
           <FieldGroup label="Vehículo *" error={errors.vehiculoId}>
             <select
               className="mac-select"
@@ -192,11 +147,7 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
             </select>
           </FieldGroup>
 
-          {/* ── NOTA API ──────────────────────────
-              mecanicos → prop desde UsuarioApp.
-              GET /api/mecanicos/disponibles
-              Estructura: [{ id, nombre }]
-          ───────────────────────────────────────── */}
+          {/* Mecánicos — igual que antes */}
           <FieldGroup label="Mecánico *" error={errors.mecanicoId}>
             <select
               className="mac-select"
@@ -232,7 +183,6 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
         </div>
       )}
 
-      {/* ─────────── PASO 2 ─────────── */}
       {step === 2 && (
         <div className="mac-fields">
           <div className="mac-row">
@@ -262,16 +212,10 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
             </FieldGroup>
           </div>
 
-          {/* ── NOTA API ──────────────────────────
-              horasOcupadas se calcula localmente
-              sobre las citas ya cargadas.
-              Con API real: GET /api/mecanicos/:id/horario?fecha=YYYY-MM-DD
-              devuelve las horas ya reservadas para esa fecha.
-          ───────────────────────────────────────── */}
           <FieldGroup label="Hora disponible *" error={errors.hora}>
             <div className="mac-hora-grid">
               {HORAS_DISPONIBLES.map(h => {
-                const ocupada    = horasOcupadas.includes(h);
+                const ocupada     = horasOcupadas.includes(h);
                 const seleccionada = form.hora === h;
                 return (
                   <button
@@ -299,7 +243,7 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
 
           <div className="mac-actions between">
             <button className="btn-secondary" onClick={() => setStep(1)}>Atrás</button>
-            <button className="btn-primary" onClick={handleGuardar}>Confirmar cita</button>
+            <button className="btn-primary" onClick={handleGuardar} disabled={guardando}>Confirmar cita</button>
           </div>
         </div>
       )}

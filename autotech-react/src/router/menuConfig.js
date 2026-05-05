@@ -15,10 +15,4 @@ export const menuConfig = {
     { label: 'Vehículos asignados',  path: '/mecanico/vehiculos',       icon: 'bi-car-front'       },
     { label: 'Observaciones',        path: '/mecanico/observaciones',   icon: 'bi-chat-left-text'  },
   ],
-  cliente: [                                         
-    { label: 'Inicio',        path: '/usuario',            icon: 'bi-grid-1x2'       },
-    { label: 'Citas',         path: '/usuario/citas',      icon: 'bi-calendar-check' },
-    { label: 'Mis vehículos', path: '/usuario/vehiculos',  icon: 'bi-car-front'      },
-    { label: 'Historial',     path: '/usuario/historial',  icon: 'bi-clock-history'  },
-  ],
 }
