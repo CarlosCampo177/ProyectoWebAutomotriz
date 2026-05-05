@@ -2,12 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import {
   getVehiculos, getCitas, getHistorial,
-  getFacturas, getMecanicos,
+  getFacturas, getMecanicos, getStats,
   postVehiculo, postCita
 } from "../../services/clienteService";
 
 import Sidebar from "./components/Sidebar";
-import Header  from "./components/Header";
 import SecInicio    from "./sections/SecInicio";
 import SecVehiculos from "./sections/SecVehiculos";
 import SecCitas     from "./sections/SecCitas";
@@ -23,33 +22,36 @@ import "./UsuarioDashboard.css";
 export default function UsuarioDashboard() {
   const { user } = useAuth();
 
-  const [seccion,       setSeccion]       = useState("inicio");
-  const [vehiculos,     setVehiculos]     = useState([]);
-  const [citas,         setCitas]         = useState([]);
-  const [historial,     setHistorial]     = useState([]);
-  const [facturas,      setFacturas]      = useState([]);
-  const [mecanicos,     setMecanicos]     = useState([]);
-  const [loading,       setLoading]       = useState(true);
-  const [panelCita,     setPanelCita]     = useState(false);
+  const [seccion, setSeccion] = useState("inicio");
+  const [vehiculos, setVehiculos] = useState([]);
+  const [citas, setCitas] = useState([]);
+  const [historial, setHistorial] = useState([]);
+  const [facturas, setFacturas] = useState([]);
+  const [mecanicos, setMecanicos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [panelCita, setPanelCita] = useState(false);
   const [panelVehiculo, setPanelVehiculo] = useState(false);
-  const [toast,         setToast]         = useState(null);
+  const [toast, setToast] = useState(null);
+  const [stats, setStats] = useState({ serviciosRealizados: 0 });
 
   useEffect(() => {
     if (!user?.id) return;
     const cargarDatos = async () => {
       try {
-        const [v, c, h, f, m] = await Promise.all([
+        const [v, c, h, f, m, s] = await Promise.all([
           getVehiculos(user.id),
           getCitas(user.id),
           getHistorial(user.id),
           getFacturas(user.id),
           getMecanicos(),
+          getStats(user.id), 
         ]);
         setVehiculos(v);
         setCitas(c);
         setHistorial(h);
         setFacturas(f);
         setMecanicos(m);
+        setStats(s);
       } catch (err) {
         console.error("Error cargando datos:", err);
       } finally {
@@ -129,14 +131,13 @@ export default function UsuarioDashboard() {
       <div className="app-wrapper">
         <Sidebar seccion={seccion} setSeccion={setSeccion} usuario={user} />
         <div className="main-content">
-          <Header seccion={seccion} />
           <div className="page-content">
             {seccion === "inicio"    && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={user} />}
             {seccion === "vehiculos" && <SecVehiculos vehiculos={vehiculos} onAgregar={() => setPanelVehiculo(true)} />}
             {seccion === "citas"     && <SecCitas     citas={citas} onAgendar={() => setPanelCita(true)} />}
             {seccion === "historial" && <SecHistorial historial={historial} />}
             {seccion === "facturas"  && <SecFacturas  facturas={facturas} />}
-            {seccion === "perfil"    && <SecPerfil    usuario={user} vehiculos={vehiculos} />}
+            {seccion === "perfil" && (<SecPerfil usuario={user} vehiculos={vehiculos} stats={stats} />)}
           </div>
         </div>
       </div>

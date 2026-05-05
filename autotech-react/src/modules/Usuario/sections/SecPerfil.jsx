@@ -6,12 +6,6 @@ import * as Icon from "../icons/Icons";
 import "./SecPerfil.css";
 
 /* ── NOTA API ──────────────────────────────
-   Props recibidas desde UsuarioDashboard:
-     usuario  → GET /api/auth/me
-       { nombre, iniciales, cedula, correo, telefono, ciudad }
-     vehiculos → GET /api/usuarios/:id/vehiculos
-       (se usa para mostrar el resumen de vehículos)
-
    Para editar el perfil (botón futuro):
      PUT /api/usuarios/:id
      Body: { nombre, correo, telefono, ciudad }
@@ -27,14 +21,18 @@ function CampoInfo({ label, valor, icono: Icono }) {
     <div className="sp-campo">
       <label>{label}</label>
       <div className="sp-campo-valor">
-        {Icono && <div className="sp-campo-icon"><Icono /></div>}
+        {Icono && (
+          <div className="sp-campo-icon">
+            <Icono />
+          </div>
+        )}
         <span>{valor || "—"}</span>
       </div>
     </div>
   );
 }
 
-export default function SecPerfil({ usuario, vehiculos }) {
+export default function SecPerfil({ usuario, vehiculos, stats }) {
   if (!usuario) return null;
 
   const primerNombre = usuario.nombre?.split(" ")[0] ?? "Usuario";
@@ -44,7 +42,9 @@ export default function SecPerfil({ usuario, vehiculos }) {
       {/* ─── Header ─── */}
       <div className="sp-page-header">
         <div className="sp-page-title">Mi Perfil</div>
-        <div className="sp-page-sub">Información personal y configuración de tu cuenta</div>
+        <div className="sp-page-sub">
+          Información personal y configuración de tu cuenta
+        </div>
       </div>
 
       <div className="sp-layout">
@@ -63,8 +63,9 @@ export default function SecPerfil({ usuario, vehiculos }) {
               </div>
               <div className="sp-stat-divider" />
               <div className="sp-stat">
-                {/* TODO API → estadisticas.serviciosRealizados */}
-                <span className="sp-stat-val">5</span>
+                <span className="sp-stat-val">
+                  {stats?.serviciosRealizados ?? 0}
+                </span>
                 <span className="sp-stat-label">Servicios</span>
               </div>
             </div>
@@ -73,11 +74,14 @@ export default function SecPerfil({ usuario, vehiculos }) {
           {/* Tarjeta de seguridad */}
           <div className="sp-security-card">
             <div className="sp-sec-header">
-              <div className="sp-sec-icon"><Icon.Check /></div>
+              <div className="sp-sec-icon">
+                <Icon.Check />
+              </div>
               <span>Cuenta verificada</span>
             </div>
             <p className="sp-sec-text">
-              Tu cuenta está activa y verificada. Puedes agendar citas y gestionar tus vehículos.
+              Tu cuenta está activa y verificada. Puedes agendar citas y
+              gestionar tus vehículos.
             </p>
             {/* Botón futuro → cambiar contraseña */}
             <button className="sp-btn-outline" disabled title="Próximamente">
@@ -91,10 +95,14 @@ export default function SecPerfil({ usuario, vehiculos }) {
           {/* Información personal */}
           <div className="sp-datos-card">
             <div className="sp-datos-header">
-              <div className="sp-datos-header-icon"><Icon.User /></div>
+              <div className="sp-datos-header-icon">
+                <Icon.User />
+              </div>
               <div>
                 <div className="sp-datos-title">Información Personal</div>
-                <div className="sp-datos-sub">Datos registrados en tu cuenta</div>
+                <div className="sp-datos-sub">
+                  Datos registrados en tu cuenta
+                </div>
               </div>
               {/* Botón futuro → editar perfil */}
               <button className="sp-btn-edit" disabled title="Próximamente">
@@ -103,11 +111,26 @@ export default function SecPerfil({ usuario, vehiculos }) {
             </div>
 
             <div className="sp-campos-grid">
-              <CampoInfo label="Nombre completo"  valor={usuario.nombre}   icono={Icon.User}     />
-              <CampoInfo label="Cédula / CC"       valor={usuario.cedula}   icono={Icon.IdCard}   />
-              <CampoInfo label="Correo electrónico" valor={usuario.correo}  icono={Icon.Receipt}  />
-              <CampoInfo label="Teléfono"           valor={usuario.telefono} icono={Icon.Clock}   />
-              <CampoInfo label="Ciudad"             valor={usuario.ciudad}  icono={Icon.Home}     />
+              <CampoInfo
+                label="Nombre completo"
+                valor={usuario.nombre}
+                icono={Icon.User}
+              />
+              <CampoInfo
+                label="Cédula / CC"
+                valor={usuario.cedula}
+                icono={Icon.IdCard}
+              />
+              <CampoInfo
+                label="Correo electrónico"
+                valor={usuario.email}
+                icono={Icon.Receipt}
+              />
+              <CampoInfo
+                label="Teléfono"
+                valor={usuario.telefono}
+                icono={Icon.Clock}
+              />
             </div>
           </div>
 
@@ -115,10 +138,15 @@ export default function SecPerfil({ usuario, vehiculos }) {
           {vehiculos && vehiculos.length > 0 && (
             <div className="sp-datos-card">
               <div className="sp-datos-header">
-                <div className="sp-datos-header-icon"><Icon.Car /></div>
+                <div className="sp-datos-header-icon">
+                  <Icon.Car />
+                </div>
                 <div>
                   <div className="sp-datos-title">Vehículos Registrados</div>
-                  <div className="sp-datos-sub">{vehiculos.length} vehículo{vehiculos.length !== 1 ? "s" : ""} en tu cuenta</div>
+                  <div className="sp-datos-sub">
+                    {vehiculos.length} vehículo
+                    {vehiculos.length !== 1 ? "s" : ""} en tu cuenta
+                  </div>
                 </div>
               </div>
 
@@ -129,8 +157,12 @@ export default function SecPerfil({ usuario, vehiculos }) {
                       {v.icono === "truck" ? <Icon.Truck /> : <Icon.Car />}
                     </div>
                     <div className="sp-veh-body">
-                      <div className="sp-veh-nombre">{v.nombre} {v.anio}</div>
-                      <div className="sp-veh-meta">{v.placa} · {v.km?.toLocaleString("es-CO")} km</div>
+                      <div className="sp-veh-nombre">
+                        {v.nombre} {v.anio}
+                      </div>
+                      <div className="sp-veh-meta">
+                        {v.placa} · {v.km?.toLocaleString("es-CO")} km
+                      </div>
                     </div>
                     <span className={`sp-veh-badge ${v.estado}`}>
                       {v.estado === "ok" ? "Al día" : "Revisión"}
