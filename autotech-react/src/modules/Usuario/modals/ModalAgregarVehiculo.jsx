@@ -1,9 +1,6 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — MODAL AGREGAR VEHÍCULO
-   modals/ModalAgregarVehiculo.jsx
-══════════════════════════════════════════ */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./ModalAgregarVehiculo.css";
+import { get } from "../../../services/apiClient";
 
 function FieldGroup({ label, error, children, style }) {
   return (
@@ -16,21 +13,11 @@ function FieldGroup({ label, error, children, style }) {
 }
 
 export default function ModalAgregarVehiculo({ onClose, onSave }) {
-  /* ── NOTA API ──────────────────────────────
-     onSave recibe el objeto del nuevo vehículo.
-     UsuarioApp hace:
-       POST /api/usuarios/:id/vehiculos
-     Body:
-       {
-         nombre, placa, anio, km,
-         combustible, color, icono, colorWrap
-       }
-     Respuesta esperada: { id, ...datosVehiculo }
-     Con ese id se actualiza el estado local.
-  ────────────────────────────────────────── */
-
+  const [marcas, setMarcas] = useState([]);
   const [form, setForm] = useState({
-    nombre:      "",
+    idMarca:     "",
+    marcaNombre: "",
+    modelo:      "",
     placa:       "",
     anio:        "",
     km:          "",
@@ -41,6 +28,12 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
   });
   const [errors, setErrors] = useState({});
 
+  useEffect(() => {
+    get("Marcas")
+      .then(data => setMarcas(data))
+      .catch(() => setMarcas([]));
+  }, []);
+
   function set(k, v) {
     setForm(f => ({ ...f, [k]: v }));
     setErrors(e => ({ ...e, [k]: "" }));
@@ -48,9 +41,11 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
 
   function validate() {
     const e = {};
-    if (!form.nombre.trim()) e.nombre = "Ingresa la marca y modelo";
-    if (!form.placa.trim())  e.placa  = "Ingresa la placa";
-    if (!form.anio || isNaN(form.anio) || form.anio < 1990 || form.anio > new Date().getFullYear() + 1)
+    if (!form.idMarca)       e.idMarca = "Selecciona una marca";
+    if (!form.modelo.trim()) e.modelo  = "Ingresa el modelo";
+    if (!form.placa.trim())  e.placa   = "Ingresa la placa";
+    if (!form.anio || isNaN(form.anio) ||
+        form.anio < 1990 || form.anio > new Date().getFullYear() + 1)
       e.anio = "Año inválido";
     if (!form.km || isNaN(form.km) || Number(form.km) < 0)
       e.km = "Kilometraje inválido";
@@ -61,18 +56,18 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
 
   function handleGuardar() {
     if (!validate()) return;
-    const km = parseInt(form.km);
     onSave({
-      nombre:        form.nombre.trim(),
-      placa:         form.placa.trim().toUpperCase(),
-      anio:          parseInt(form.anio),
-      km,
-      combustible:   form.combustible,
-      color:         form.color.trim(),
-      ultimoServicio:"Sin registro",
-      estado:        km >= 80000 ? "warn" : "ok",
-      icono:         form.icono,
-      colorWrap:     form.colorWrap,
+      idMarca:     parseInt(form.idMarca),
+      marca:       form.marcaNombre,
+      modelo:      form.modelo.trim(),
+      nombre:      `${form.marcaNombre} ${form.modelo.trim()}`,
+      placa:       form.placa.trim().toUpperCase(),
+      anio:        parseInt(form.anio),
+      km:          parseInt(form.km),
+      color:       form.color.trim(),
+      combustible: form.combustible,
+      icono:       form.icono,
+      colorWrap:   form.colorWrap,
     });
   }
 
@@ -84,15 +79,38 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
 
   return (
     <div className="mav-fields">
-      {/* Marca y modelo */}
-      <FieldGroup label="Marca y Modelo *" error={errors.nombre}>
-        <input
-          className="mav-input"
-          value={form.nombre}
-          onChange={e => set("nombre", e.target.value)}
-          placeholder="Ej: Toyota Corolla"
-        />
-      </FieldGroup>
+
+      {/* Marca — select desde API */}
+      <div className="mav-row">
+        <FieldGroup label="Marca *" error={errors.idMarca} style={{ flex: 1 }}>
+          <select
+            className="mav-select"
+            value={form.idMarca}
+            onChange={e => {
+              const opt = e.target.options[e.target.selectedIndex];
+              set("idMarca", e.target.value);
+              set("marcaNombre", opt.text);
+            }}
+          >
+            <option value="">Selecciona marca</option>
+            {marcas.map(m => (
+              <option key={m.idMarca} value={m.idMarca}>
+                {m.nombreMarca}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+
+        {/* Modelo — input libre */}
+        <FieldGroup label="Modelo *" error={errors.modelo} style={{ flex: 1 }}>
+          <input
+            className="mav-input"
+            value={form.modelo}
+            onChange={e => set("modelo", e.target.value)}
+            placeholder="Ej: Corolla"
+          />
+        </FieldGroup>
+      </div>
 
       {/* Placa y año */}
       <div className="mav-row">
@@ -117,7 +135,7 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
 
       {/* Km y combustible */}
       <div className="mav-row">
-        <FieldGroup label="Kilometraje actual *" error={errors.km} style={{ flex: 1 }}>
+        <FieldGroup label="Kilometraje *" error={errors.km} style={{ flex: 1 }}>
           <input
             className="mav-input"
             type="number"
@@ -127,10 +145,6 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
           />
         </FieldGroup>
         <FieldGroup label="Combustible" style={{ flex: 1 }}>
-          {/* ── NOTA API ──────────────────────────
-              Tipos de combustible → GET /api/catalogos/combustibles
-              o dejarlos hardcoded si son estáticos.
-          ───────────────────────────────────────── */}
           <select
             className="mav-select"
             value={form.combustible}
@@ -159,8 +173,10 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
       <FieldGroup label="Tipo de vehículo">
         <div className="mav-toggle-row">
           {[
-            { val: "car",   label: "Auto"          },
-            { val: "truck", label: "SUV / Camioneta"},
+            { val: "car",   label: "Auto"           },
+            { val: "truck", label: "Camioneta/SUV"  },
+            { val: "moto",  label: "Moto"           },
+            { val: "van",   label: "Van/Bus"        },
           ].map(opt => (
             <button
               key={opt.val}
@@ -193,7 +209,6 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
         </div>
       </FieldGroup>
 
-      {/* Acciones */}
       <div className="mav-actions">
         <button className="btn-secondary" onClick={onClose}>Cancelar</button>
         <button className="btn-primary"   onClick={handleGuardar}>Agregar vehículo</button>
