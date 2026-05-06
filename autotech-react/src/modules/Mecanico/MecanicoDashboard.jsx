@@ -1,57 +1,13 @@
 import { useState, useEffect } from "react";
 import "./MecanicoDashboard.css";
-
-/* ══════════════════════════════════════════════════════════════
-   🔌 PRÓXIMAMENTE — INTEGRACIÓN CON API REST
-   ──────────────────────────────────────────────────────────────
-   Todos estos datos simulados serán reemplazados por llamadas
-   a la API propia del proyecto. Estructura esperada:
-
-   GET /api/mecanico/perfil          → datos del mecánico autenticado
-   GET /api/mecanico/ordenes         → lista de órdenes asignadas
-   GET /api/mecanico/vehiculos       → vehículos a cargo
-   GET /api/mecanico/observaciones   → observaciones registradas
-   POST /api/mecanico/observaciones  → crear nueva observación
-   PUT  /api/mecanico/ordenes/:id    → actualizar estado de una orden
-
-   Cuando la API esté lista, reemplaza cada const por un useState([])
-   y un useEffect que haga fetch() o axios.get() al endpoint.
-   Ejemplo:
-     const [ordenes, setOrdenes] = useState([]);
-     useEffect(() => {
-       fetch("http://localhost:8080/api/mecanico/ordenes")
-         .then(res => res.json())
-         .then(data => setOrdenes(data));
-     }, []);
-══════════════════════════════════════════════════════════════ */
-
-/* ── Datos simulados (solo para desarrollo visual) ── */
-
-const mecanico = {
-  nombre:       "Carlos Mendoza",
-  iniciales:    "CM",
-  especialidad: "Motor & Transmisión",
-  // TODO: reemplazar con /api/mecanico/perfil
-};
-
-const ordenes = [
-  // TODO: reemplazar con GET /api/mecanico/ordenes
-  { id: "ORD-001", servicio: "Cambio de aceite y filtros",  vehiculo: "Toyota Corolla 2020",  placa: "ABC-123", cliente: "Oscar Avila", fecha: { dia: "28", mes: "MAR" }, hora: "10:00 AM", prioridad: "normal",  estado: "en_proceso" },
-  { id: "ORD-002", servicio: "Revisión general de frenos",  vehiculo: "Chevrolet Spark 2018", placa: "XYZ-789", cliente: "María López", fecha: { dia: "05", mes: "ABR" }, hora: "2:00 PM",  prioridad: "urgente", estado: "pendiente"  },
-  { id: "ORD-003", servicio: "Alineación y balanceo",       vehiculo: "Renault Duster 2021",  placa: "DEF-456", cliente: "Luis H.",     fecha: { dia: "10", mes: "ABR" }, hora: "9:00 AM",  prioridad: "normal",  estado: "completada" },
-];
-
-const vehiculosAsignados = [
-  // TODO: reemplazar con GET /api/mecanico/vehiculos
-  { id: 1, nombre: "Toyota Corolla",  placa: "ABC-123", anio: 2020, km: 45200, combustible: "Gasolina", color: "Blanco", cliente: "Oscar Avila", servicio: "Cambio de aceite",   estado: "en_proceso", colorWrap: "blue"   },
-  { id: 2, nombre: "Chevrolet Spark", placa: "XYZ-789", anio: 2018, km: 82000, combustible: "Gasolina", color: "Rojo",   cliente: "María López", servicio: "Revisión de frenos", estado: "pendiente",  colorWrap: "orange" },
-];
-
-const observaciones = [
-  // TODO: reemplazar con GET /api/mecanico/observaciones
-  { id: 1, vehiculo: "Toyota Corolla — ABC-123",  cliente: "Oscar Avila", fecha: "10 Mar 2026", texto: "Filtro de aire en mal estado, se recomienda cambio inmediato. Se detectaron pequeñas fugas de aceite en la junta del motor.", tipo: "advertencia" },
-  { id: 2, vehiculo: "Chevrolet Spark — XYZ-789", cliente: "María López", fecha: "03 Mar 2026", texto: "Frenos traseros con desgaste crítico. Requiere cambio urgente de pastillas y revisión del disco.",                            tipo: "urgente"     },
-];
+import { useAuth } from "../../context/AuthContext";   
+import {
+  getMecanicoPerfil,
+  getMecanicoOrdenes,
+  getMecanicoVehiculos,
+  getMecanicoObservaciones,
+  postObservacion,
+} from "../../services/mecanicoService";
 
 /* ══════════════════════════════════════
    HELPERS
@@ -78,7 +34,11 @@ const obsConfig = {
 function Badge({ tipo, config }) {
   const c = config[tipo];
   if (!c) return null;
-  return <span className="badge-estado" style={{ background: c.bg, color: c.color }}>{c.label}</span>;
+  return (
+    <span className="badge-estado" style={{ background: c.bg, color: c.color }}>
+      {c.label}
+    </span>
+  );
 }
 
 function useCounter(target, active) {
@@ -102,22 +62,24 @@ function getSaludo() {
   const h = new Date().getHours();
   return h < 12 ? "Buenos días" : h < 18 ? "Buenas tardes" : "Buenas noches";
 }
+
 function getFecha() {
   const hoy   = new Date();
   const dias  = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto",
+                 "septiembre","octubre","noviembre","diciembre"];
   return `${dias[hoy.getDay()]}, ${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 }
 
 /* ══════════════════════════════════════
    SECCIÓN: INICIO
 ══════════════════════════════════════ */
-function SecInicio({ setSeccion }) {
+function SecInicio({ mecanico, ordenes, setSeccion }) {
   const total       = ordenes.length;
   const pendientes  = ordenes.filter(o => o.estado === "pendiente").length;
   const enProceso   = ordenes.filter(o => o.estado === "en_proceso").length;
   const completadas = ordenes.filter(o => o.estado === "completada").length;
-  const pctDia      = Math.round((completadas / total) * 100);
+  const pctDia      = total > 0 ? Math.round((completadas / total) * 100) : 0;
 
   const cTotal = useCounter(total,       true);
   const cPend  = useCounter(pendientes,  true);
@@ -127,19 +89,20 @@ function SecInicio({ setSeccion }) {
   const urgente    = ordenes.find(o => o.prioridad === "urgente" && o.estado !== "completada");
   const topOrdenes = ordenes.filter(o => o.estado !== "completada").slice(0, 2);
 
-  const circumference = 2 * Math.PI * 42; // r=42
+  const circumference = 2 * Math.PI * 42;
   const strokeOffset  = circumference - (pctDia / 100) * circumference;
 
   return (
     <div className="inicio-v2">
-
       {/* ── HERO ── */}
       <div className="hero-banner">
         <div className="hero-deco-circle c1"></div>
         <div className="hero-deco-circle c2"></div>
         <div className="hero-left">
           <div className="hero-saludo">{getSaludo()}</div>
-          <h2 className="hero-nombre">Carlos <span>Mendoza</span></h2>
+          <h2 className="hero-nombre">
+            {mecanico.nombre.split(" ")[0]} <span>{mecanico.nombre.split(" ")[1]}</span>
+          </h2>
           <div className="hero-fecha">{getFecha()}</div>
           <div className="hero-prog-wrap">
             <div className="hero-prog-labels">
@@ -168,7 +131,7 @@ function SecInicio({ setSeccion }) {
           </div>
           <div className="hero-spec-tag">
             <i className="bi bi-wrench-adjustable-circle-fill"></i>
-            Motor &amp; Transmisión
+            {mecanico.especialidad}
           </div>
         </div>
       </div>
@@ -177,7 +140,8 @@ function SecInicio({ setSeccion }) {
       {urgente && (
         <div className="alerta-urgente">
           <div className="alerta-pulse-dot"></div>
-          <i className="bi bi-exclamation-octagon-fill" style={{ color: "#c62828", fontSize: "1.2rem", flexShrink: 0 }}></i>
+          <i className="bi bi-exclamation-octagon-fill"
+             style={{ color: "#c62828", fontSize: "1.2rem", flexShrink: 0 }}></i>
           <div className="alerta-texto">
             <strong>Orden urgente:</strong> {urgente.servicio} — {urgente.vehiculo} · {urgente.cliente}
           </div>
@@ -188,10 +152,10 @@ function SecInicio({ setSeccion }) {
       {/* ── STAT CARDS ── */}
       <div className="stat-grid">
         {[
-          { icon: "bi-card-checklist",     color: "#1a6bdc", bg: "#e8f0fe", label: "Total órdenes", val: cTotal, bar: total      },
-          { icon: "bi-hourglass-split",    color: "#e65100", bg: "#fff3e0", label: "Pendientes",    val: cPend,  bar: pendientes  },
-          { icon: "bi-gear-fill",          color: "#7c3aed", bg: "#f3e5f5", label: "En proceso",    val: cProc,  bar: enProceso   },
-          { icon: "bi-check-circle-fill",  color: "#2e7d32", bg: "#e8f5e9", label: "Completadas",   val: cComp,  bar: completadas },
+          { icon: "bi-card-checklist",    color: "#1a6bdc", bg: "#e8f0fe", label: "Total órdenes", val: cTotal, bar: total      },
+          { icon: "bi-hourglass-split",   color: "#e65100", bg: "#fff3e0", label: "Pendientes",    val: cPend,  bar: pendientes  },
+          { icon: "bi-gear-fill",         color: "#7c3aed", bg: "#f3e5f5", label: "En proceso",    val: cProc,  bar: enProceso   },
+          { icon: "bi-check-circle-fill", color: "#2e7d32", bg: "#e8f5e9", label: "Completadas",   val: cComp,  bar: completadas },
         ].map((s, i) => (
           <div className="stat-card" key={i} style={{ "--d": `${i * 0.07}s` }}>
             <div className="stat-card-top">
@@ -202,7 +166,9 @@ function SecInicio({ setSeccion }) {
             </div>
             <div className="stat-lbl">{s.label}</div>
             <div className="stat-bar-track">
-              <div className="stat-bar-fill" style={{ width: `${Math.round((s.bar / (total || 1)) * 100)}%`, background: s.color }}></div>
+              <div className="stat-bar-fill"
+                   style={{ width: `${Math.round((s.bar / (total || 1)) * 100)}%`, background: s.color }}>
+              </div>
             </div>
           </div>
         ))}
@@ -210,7 +176,6 @@ function SecInicio({ setSeccion }) {
 
       {/* ── BOTTOM ── */}
       <div className="inicio-bottom-grid">
-
         {/* Órdenes prioritarias */}
         <div className="ib-panel">
           <div className="ib-panel-head">
@@ -221,6 +186,9 @@ function SecInicio({ setSeccion }) {
             <button className="link-ver" onClick={() => setSeccion("ordenes")}>Ver todas →</button>
           </div>
           <div className="ib-ordenes">
+            {topOrdenes.length === 0 && (
+              <p className="empty-msg">No hay órdenes activas.</p>
+            )}
             {topOrdenes.map((o, i) => {
               const pConf = prioridadConfig[o.prioridad];
               const eConf = estadoConfig[o.estado];
@@ -265,7 +233,9 @@ function SecInicio({ setSeccion }) {
                   <span>{r.label}</span>
                 </div>
                 <div className="taller-bar-track">
-                  <div className="taller-bar-fill" style={{ width: `${Math.round((r.val / (total || 1)) * 100)}%`, background: r.color }}></div>
+                  <div className="taller-bar-fill"
+                       style={{ width: `${Math.round((r.val / (total || 1)) * 100)}%`, background: r.color }}>
+                  </div>
                 </div>
                 <span className="taller-bar-num" style={{ color: r.color }}>{r.val}</span>
               </div>
@@ -273,18 +243,19 @@ function SecInicio({ setSeccion }) {
           </div>
           <div className="acciones-rapidas-row">
             {[
-              { icon: "bi-clipboard-check",  label: "Órdenes",        sec: "ordenes",       c: "#1a6bdc", cs: "#e8f0fe" },
-              { icon: "bi-car-front",        label: "Vehículos",      sec: "vehiculos",     c: "#2e7d32", cs: "#e8f5e9" },
-              { icon: "bi-chat-left-text",   label: "Observaciones",  sec: "observaciones", c: "#7c3aed", cs: "#f3e5f5" },
+              { icon: "bi-clipboard-check", label: "Órdenes",       sec: "ordenes",       c: "#1a6bdc", cs: "#e8f0fe" },
+              { icon: "bi-car-front",       label: "Vehículos",     sec: "vehiculos",     c: "#2e7d32", cs: "#e8f5e9" },
+              { icon: "bi-chat-left-text",  label: "Observaciones", sec: "observaciones", c: "#7c3aed", cs: "#f3e5f5" },
             ].map((a, i) => (
-              <button key={i} className="btn-action" style={{ "--c": a.c, "--cs": a.cs }} onClick={() => setSeccion(a.sec)}>
+              <button key={i} className="btn-action"
+                      style={{ "--c": a.c, "--cs": a.cs }}
+                      onClick={() => setSeccion(a.sec)}>
                 <i className={`bi ${a.icon}`}></i>
                 <span>{a.label}</span>
               </button>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -293,7 +264,7 @@ function SecInicio({ setSeccion }) {
 /* ══════════════════════════════════════
    SECCIÓN: MIS ÓRDENES
 ══════════════════════════════════════ */
-function SecOrdenes() {
+function SecOrdenes({ ordenes }) {
   const [filtro, setFiltro] = useState("todas");
   const lista = filtro === "todas" ? ordenes : ordenes.filter(o => o.estado === filtro);
 
@@ -306,8 +277,10 @@ function SecOrdenes() {
         </div>
       </div>
       <div className="filtros-row">
-        {["todas","pendiente","en_proceso","completada"].map(f => (
-          <button key={f} className={`filtro-btn ${filtro === f ? "active" : ""}`} onClick={() => setFiltro(f)}>
+        {["todas", "pendiente", "en_proceso", "completada"].map(f => (
+          <button key={f}
+                  className={`filtro-btn ${filtro === f ? "active" : ""}`}
+                  onClick={() => setFiltro(f)}>
             {f === "todas" ? "Todas" : estadoConfig[f]?.label || f}
           </button>
         ))}
@@ -323,7 +296,7 @@ function SecOrdenes() {
             <div className="orden-info">
               <div className="cr-titulo">{o.servicio}</div>
               <div className="cr-meta">
-                <span><i className="bi bi-tag"></i> {o.id}</span>
+                <span><i className="bi bi-tag"></i> #{o.id}</span>
                 <span><i className="bi bi-clock"></i> {o.hora}</span>
                 <span><i className="bi bi-car-front"></i> {o.vehiculo} — {o.placa}</span>
                 <span><i className="bi bi-person"></i> {o.cliente}</span>
@@ -343,7 +316,7 @@ function SecOrdenes() {
 /* ══════════════════════════════════════
    SECCIÓN: VEHÍCULOS ASIGNADOS
 ══════════════════════════════════════ */
-function SecVehiculos() {
+function SecVehiculos({ vehiculosAsignados }) {
   return (
     <div>
       <div className="sec-header">
@@ -352,6 +325,9 @@ function SecVehiculos() {
           <p className="block-sub">Vehículos que tienes actualmente a cargo</p>
         </div>
       </div>
+      {vehiculosAsignados.length === 0 && (
+        <p className="empty-msg">No tienes vehículos asignados actualmente.</p>
+      )}
       <div className="veh-grid">
         {vehiculosAsignados.map(v => (
           <div className="veh-card" key={v.id}>
@@ -364,15 +340,34 @@ function SecVehiculos() {
               <div className="veh-card-name">{v.nombre}</div>
               <div className="veh-card-plate">{v.placa} &nbsp;·&nbsp; {v.anio}</div>
               <div className="veh-card-stats">
-                <div className="veh-stat"><span className="veh-stat-label">Kilometraje</span><span className={`veh-stat-val ${v.km >= 80000 ? "warn" : ""}`}>{v.km.toLocaleString("es-CO")} km {v.km >= 80000 ? "⚠" : ""}</span></div>
-                <div className="veh-stat"><span className="veh-stat-label">Combustible</span><span className="veh-stat-val">{v.combustible}</span></div>
-                <div className="veh-stat"><span className="veh-stat-label">Color</span><span className="veh-stat-val">{v.color}</span></div>
-                <div className="veh-stat"><span className="veh-stat-label">Cliente</span><span className="veh-stat-val">{v.cliente}</span></div>
+                <div className="veh-stat">
+                  <span className="veh-stat-label">Kilometraje</span>
+                  <span className={`veh-stat-val ${v.km >= 80000 ? "warn" : ""}`}>
+                    {v.km?.toLocaleString("es-CO")} km {v.km >= 80000 ? "⚠" : ""}
+                  </span>
+                </div>
+                <div className="veh-stat">
+                  <span className="veh-stat-label">Combustible</span>
+                  <span className="veh-stat-val">{v.combustible}</span>
+                </div>
+                <div className="veh-stat">
+                  <span className="veh-stat-label">Color</span>
+                  <span className="veh-stat-val">{v.color}</span>
+                </div>
+                <div className="veh-stat">
+                  <span className="veh-stat-label">Cliente</span>
+                  <span className="veh-stat-val">{v.cliente}</span>
+                </div>
               </div>
               {v.km >= 80000 && (
-                <div className="km-alert"><i className="bi bi-exclamation-triangle-fill"></i> Supera 80,000 km — revisión preventiva recomendada</div>
+                <div className="km-alert">
+                  <i className="bi bi-exclamation-triangle-fill"></i>
+                  Supera 80,000 km — revisión preventiva recomendada
+                </div>
               )}
-              <div className="servicio-actual"><i className="bi bi-wrench-adjustable"></i> {v.servicio}</div>
+              <div className="servicio-actual">
+                <i className="bi bi-wrench-adjustable"></i> {v.servicio}
+              </div>
             </div>
             <div className="veh-card-footer">
               <Badge tipo={v.estado} config={estadoConfig} />
@@ -387,8 +382,38 @@ function SecVehiculos() {
 /* ══════════════════════════════════════
    SECCIÓN: OBSERVACIONES
 ══════════════════════════════════════ */
-function SecObservaciones() {
-  const [nueva, setNueva] = useState(false);
+function SecObservaciones({ idUsuario, ordenes, observaciones, setObservaciones }) {
+  const [nueva,     setNueva]     = useState(false);
+  const [ordenId,   setOrdenId]   = useState("");
+  const [texto,     setTexto]     = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [error,     setError]     = useState("");
+
+  const ordenesActivas = ordenes.filter(o => o.estado !== "completada");
+
+  const handleGuardar = async () => {
+    if (!ordenId || !texto.trim()) {
+      setError("Selecciona una orden y escribe una observación.");
+      return;
+    }
+    setError("");
+    setGuardando(true);
+    try {
+      const nueva = await postObservacion(idUsuario, {
+        idOrden: Number(ordenId),
+        texto,
+      });
+      setObservaciones(prev => [nueva, ...prev]);
+      setNueva(false);
+      setTexto("");
+      setOrdenId("");
+    } catch (e) {
+      setError("Error al guardar. Intenta de nuevo.");
+      console.error(e);
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   return (
     <div>
@@ -397,35 +422,55 @@ function SecObservaciones() {
           <h6 className="block-title">Observaciones</h6>
           <p className="block-sub">Notas técnicas sobre los vehículos atendidos</p>
         </div>
-        <button className="btn-nueva" onClick={() => setNueva(!nueva)}>
+        <button className="btn-nueva" onClick={() => { setNueva(!nueva); setError(""); }}>
           <i className="bi bi-plus-lg"></i> Nueva observación
         </button>
       </div>
+
       {nueva && (
         <div className="obs-form-card">
-          <div className="obs-form-title"><i className="bi bi-pencil-square"></i> Agregar observación</div>
+          <div className="obs-form-title">
+            <i className="bi bi-pencil-square"></i> Agregar observación
+          </div>
           <div className="obs-form-row">
-            <select className="obs-input">
-              <option>Seleccionar vehículo...</option>
-              {vehiculosAsignados.map(v => <option key={v.id}>{v.nombre} — {v.placa}</option>)}
-            </select>
-            <select className="obs-input">
-              <option value="info">Informativa</option>
-              <option value="advertencia">Advertencia</option>
-              <option value="urgente">Urgente</option>
-              <option value="ok">Todo OK</option>
+            <select
+              className="obs-input"
+              value={ordenId}
+              onChange={e => setOrdenId(e.target.value)}
+            >
+              <option value="">Seleccionar orden...</option>
+              {ordenesActivas.map(o => (
+                <option key={o.id} value={o.id}>
+                  {o.vehiculo} — {o.servicio}
+                </option>
+              ))}
             </select>
           </div>
-          <textarea className="obs-textarea" placeholder="Escribe aquí la observación técnica..." rows={3}></textarea>
+          {error && <p style={{ color: "#c62828", fontSize: "0.82rem", margin: "4px 0" }}>{error}</p>}
+          <textarea
+            className="obs-textarea"
+            placeholder="Escribe aquí la observación técnica..."
+            rows={3}
+            value={texto}
+            onChange={e => setTexto(e.target.value)}
+          />
           <div className="obs-form-actions">
-            <button className="btn-cancelar" onClick={() => setNueva(false)}>Cancelar</button>
-            <button className="btn-guardar"><i className="bi bi-check2"></i> Guardar</button>
+            <button className="btn-cancelar" onClick={() => { setNueva(false); setError(""); }}>
+              Cancelar
+            </button>
+            <button className="btn-guardar" onClick={handleGuardar} disabled={guardando}>
+              <i className="bi bi-check2"></i> {guardando ? "Guardando..." : "Guardar"}
+            </button>
           </div>
         </div>
       )}
+
       <div className="obs-lista">
+        {observaciones.length === 0 && (
+          <p className="empty-msg">No hay observaciones registradas.</p>
+        )}
         {observaciones.map(o => {
-          const conf = obsConfig[o.tipo];
+          const conf = obsConfig[o.tipo] ?? obsConfig["advertencia"];
           return (
             <div className="obs-card" key={o.id} style={{ borderLeftColor: conf.color }}>
               <div className="obs-header">
@@ -434,7 +479,11 @@ function SecObservaciones() {
                 </div>
                 <div className="obs-meta">
                   <div className="obs-vehiculo">{o.vehiculo}</div>
-                  <div className="obs-sub"><i className="bi bi-person"></i> {o.cliente} &nbsp;·&nbsp; <i className="bi bi-calendar3"></i> {o.fecha}</div>
+                  <div className="obs-sub">
+                    <i className="bi bi-person"></i> {o.cliente}
+                    &nbsp;·&nbsp;
+                    <i className="bi bi-calendar3"></i> {o.fecha}
+                  </div>
                 </div>
                 <span className="obs-tipo-badge" style={{ background: conf.bg, color: conf.color }}>
                   <i className={`bi ${conf.icon}`}></i>
@@ -454,14 +503,62 @@ function SecObservaciones() {
    COMPONENTE PRINCIPAL
 ══════════════════════════════════════ */
 const navItems = [
-  { label: "Inicio",              sec: "inicio",        icon: "bi-grid-1x2"       },
-  { label: "Mis órdenes",         sec: "ordenes",       icon: "bi-clipboard-check"},
-  { label: "Vehículos asignados", sec: "vehiculos",     icon: "bi-car-front"      },
-  { label: "Observaciones",       sec: "observaciones", icon: "bi-chat-left-text" },
+  { label: "Inicio",              sec: "inicio",        icon: "bi-grid-1x2"        },
+  { label: "Mis órdenes",         sec: "ordenes",       icon: "bi-clipboard-check" },
+  { label: "Vehículos asignados", sec: "vehiculos",     icon: "bi-car-front"       },
+  { label: "Observaciones",       sec: "observaciones", icon: "bi-chat-left-text"  },
 ];
 
 export default function MecanicoDashboard() {
-  const [seccion, setSeccion] = useState("inicio");
+  const { user } = useAuth();                    // ← ajusta si tu contexto usa otro nombre
+  const idUsuario = user?.id;                    // ← ajusta si el campo es user.idUsuario, etc.
+
+  const [seccion,            setSeccion]            = useState("inicio");
+  const [mecanico,           setMecanico]           = useState(null);
+  const [ordenes,            setOrdenes]            = useState([]);
+  const [vehiculosAsignados, setVehiculosAsignados] = useState([]);
+  const [observaciones,      setObservaciones]      = useState([]);
+  const [cargando,           setCargando]           = useState(true);
+  const [errorGlobal,        setErrorGlobal]        = useState("");
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setCargando(true);
+    Promise.all([
+      getMecanicoPerfil(idUsuario),
+      getMecanicoOrdenes(idUsuario),
+      getMecanicoVehiculos(idUsuario),
+      getMecanicoObservaciones(idUsuario),
+    ])
+      .then(([perfil, ords, vehs, obs]) => {
+        setMecanico(perfil);
+        setOrdenes(ords);
+        setVehiculosAsignados(vehs);
+        setObservaciones(obs);
+      })
+      .catch(e => {
+        console.error(e);
+        setErrorGlobal("No se pudo cargar la información. Verifica tu conexión.");
+      })
+      .finally(() => setCargando(false));
+  }, [idUsuario]);
+
+  if (cargando) return (
+    <div className="at-loading-screen">
+      <i className="bi bi-gear-fill spin"></i>
+      <span>Cargando dashboard...</span>
+    </div>
+  );
+
+  if (errorGlobal) return (
+    <div className="at-loading-screen">
+      <i className="bi bi-exclamation-triangle-fill" style={{ color: "#c62828" }}></i>
+      <span>{errorGlobal}</span>
+    </div>
+  );
+
+  if (!mecanico) return null;
+
   const tituloActual = navItems.find(n => n.sec === seccion)?.label || "Inicio";
 
   return (
@@ -477,7 +574,9 @@ export default function MecanicoDashboard() {
         </div>
         <nav className="at-nav">
           {navItems.map(item => (
-            <button key={item.sec} className={`at-nav-item ${seccion === item.sec ? "active" : ""}`} onClick={() => setSeccion(item.sec)}>
+            <button key={item.sec}
+                    className={`at-nav-item ${seccion === item.sec ? "active" : ""}`}
+                    onClick={() => setSeccion(item.sec)}>
               <i className={`bi ${item.icon}`}></i>
               {item.label}
             </button>
@@ -494,10 +593,27 @@ export default function MecanicoDashboard() {
           <span className="at-role-badge">Mecánico</span>
         </div>
         <div className="at-content">
-          {seccion === "inicio"        && <SecInicio setSeccion={setSeccion} />}
-          {seccion === "ordenes"       && <SecOrdenes />}
-          {seccion === "vehiculos"     && <SecVehiculos />}
-          {seccion === "observaciones" && <SecObservaciones />}
+          {seccion === "inicio" && (
+            <SecInicio
+              mecanico={mecanico}
+              ordenes={ordenes}
+              setSeccion={setSeccion}
+            />
+          )}
+          {seccion === "ordenes" && (
+            <SecOrdenes ordenes={ordenes} />
+          )}
+          {seccion === "vehiculos" && (
+            <SecVehiculos vehiculosAsignados={vehiculosAsignados} />
+          )}
+          {seccion === "observaciones" && (
+            <SecObservaciones
+              idUsuario={idUsuario}
+              ordenes={ordenes}
+              observaciones={observaciones}
+              setObservaciones={setObservaciones}
+            />
+          )}
         </div>
       </div>
     </div>
