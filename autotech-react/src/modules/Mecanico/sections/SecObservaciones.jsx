@@ -1,24 +1,52 @@
 // src/modules/Mecanico/sections/SecObservaciones.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import {
+  getMecanicoObservaciones,
+  getMecanicoOrdenes,
+  postObservacion,
+} from "../../../services/mecanicoService";
 import { obsConfig } from "../mecanicoHelpers.jsx";
-import { postObservacion } from "../../../services/mecanicoService";
 
-export default function SecObservaciones({ idUsuario, ordenes, observaciones, setObservaciones }) {
+export default function SecObservaciones() {
+  const { user }  = useAuth();
+  const idUsuario = user?.id;
+
+  const [observaciones, setObservaciones] = useState([]);
+  const [ordenes,       setOrdenes]       = useState([]);
+  const [cargando,      setCargando]      = useState(true);
+  const [error,         setError]         = useState("");
+
   const [nueva,     setNueva]     = useState(false);
   const [ordenId,   setOrdenId]   = useState("");
   const [texto,     setTexto]     = useState("");
   const [guardando, setGuardando] = useState(false);
-  const [error,     setError]     = useState("");
+  const [errForm,   setErrForm]   = useState("");
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setCargando(true);
+    Promise.all([
+      getMecanicoObservaciones(idUsuario),
+      getMecanicoOrdenes(idUsuario),
+    ])
+      .then(([obs, ords]) => {
+        setObservaciones(obs);
+        setOrdenes(ords);
+      })
+      .catch(e => { console.error(e); setError("No se pudieron cargar las observaciones."); })
+      .finally(() => setCargando(false));
+  }, [idUsuario]);
 
   const ordenesActivas = ordenes.filter(o => o.estado !== "completada");
 
   const handleGuardar = async () => {
     if (!ordenId || !texto.trim()) {
-      setError("Selecciona una orden y escribe una observación.");
+      setErrForm("Selecciona una orden y escribe una observación.");
       return;
     }
-    setError("");
+    setErrForm("");
     setGuardando(true);
     try {
       const creada = await postObservacion(idUsuario, {
@@ -30,12 +58,15 @@ export default function SecObservaciones({ idUsuario, ordenes, observaciones, se
       setTexto("");
       setOrdenId("");
     } catch (e) {
-      setError("Error al guardar. Intenta de nuevo.");
+      setErrForm("Error al guardar. Intenta de nuevo.");
       console.error(e);
     } finally {
       setGuardando(false);
     }
   };
+
+  if (cargando) return <p className="empty-msg">Cargando observaciones...</p>;
+  if (error)    return <p className="empty-msg" style={{ color: "#c62828" }}>{error}</p>;
 
   return (
     <div>
@@ -44,7 +75,7 @@ export default function SecObservaciones({ idUsuario, ordenes, observaciones, se
           <h6 className="block-title">Observaciones</h6>
           <p className="block-sub">Notas técnicas sobre los vehículos atendidos</p>
         </div>
-        <button className="btn-nueva" onClick={() => { setNueva(!nueva); setError(""); }}>
+        <button className="btn-nueva" onClick={() => { setNueva(!nueva); setErrForm(""); }}>
           <i className="bi bi-plus-lg"></i> Nueva observación
         </button>
       </div>
@@ -69,8 +100,8 @@ export default function SecObservaciones({ idUsuario, ordenes, observaciones, se
               ))}
             </select>
           </div>
-          {error && (
-            <p style={{ color: "#c62828", fontSize: "0.82rem", margin: "4px 0" }}>{error}</p>
+          {errForm && (
+            <p style={{ color: "#c62828", fontSize: "0.82rem", margin: "4px 0" }}>{errForm}</p>
           )}
           <textarea
             className="obs-textarea"
@@ -80,7 +111,7 @@ export default function SecObservaciones({ idUsuario, ordenes, observaciones, se
             onChange={e => setTexto(e.target.value)}
           />
           <div className="obs-form-actions">
-            <button className="btn-cancelar" onClick={() => { setNueva(false); setError(""); }}>
+            <button className="btn-cancelar" onClick={() => { setNueva(false); setErrForm(""); }}>
               Cancelar
             </button>
             <button className="btn-guardar" onClick={handleGuardar} disabled={guardando}>

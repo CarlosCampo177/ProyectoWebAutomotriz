@@ -1,24 +1,54 @@
-// src/modules/Mecanico/sections/SecInicio.jsx
-
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { getMecanicoPerfil, getMecanicoOrdenes } from "../../../services/mecanicoService";
 import { estadoConfig, prioridadConfig, useCounter, getSaludo, getFecha } from "../mecanicoHelpers.jsx";
 
-export default function SecInicio({ mecanico, ordenes, setSeccion }) {
+export default function SecInicio() {
+  const { user }  = useAuth();
+  const idUsuario = user?.id;
+  const navigate  = useNavigate();
+
+  const [mecanico,  setMecanico]  = useState(null);
+  const [ordenes,   setOrdenes]   = useState([]);
+  const [cargando,  setCargando]  = useState(true);
+  const [error,     setError]     = useState("");
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setCargando(true);
+    Promise.all([
+      getMecanicoPerfil(idUsuario),
+      getMecanicoOrdenes(idUsuario),
+    ])
+      .then(([perfil, ords]) => {
+        setMecanico(perfil);
+        setOrdenes(ords);
+      })
+      .catch(e => { console.error(e); setError("No se pudo cargar la información."); })
+      .finally(() => setCargando(false));
+  }, [idUsuario]);
+
   const total       = ordenes.length;
   const pendientes  = ordenes.filter(o => o.estado === "pendiente").length;
   const enProceso   = ordenes.filter(o => o.estado === "en_proceso").length;
   const completadas = ordenes.filter(o => o.estado === "completada").length;
   const pctDia      = total > 0 ? Math.round((completadas / total) * 100) : 0;
 
-  const cTotal = useCounter(total,       true);
-  const cPend  = useCounter(pendientes,  true);
-  const cProc  = useCounter(enProceso,   true);
-  const cComp  = useCounter(completadas, true);
+  const cTotal = useCounter(total,       !cargando);
+  const cPend  = useCounter(pendientes,  !cargando);
+  const cProc  = useCounter(enProceso,   !cargando);
+  const cComp  = useCounter(completadas, !cargando);
 
   const urgente    = ordenes.find(o => o.prioridad === "urgente" && o.estado !== "completada");
   const topOrdenes = ordenes.filter(o => o.estado !== "completada").slice(0, 2);
 
   const circumference = 2 * Math.PI * 42;
   const strokeOffset  = circumference - (pctDia / 100) * circumference;
+
+  if (cargando) return <p className="empty-msg">Cargando...</p>;
+  if (error)    return <p className="empty-msg" style={{ color: "#c62828" }}>{error}</p>;
+  if (!mecanico) return null;
 
   return (
     <div className="inicio-v2">
@@ -74,7 +104,9 @@ export default function SecInicio({ mecanico, ordenes, setSeccion }) {
           <div className="alerta-texto">
             <strong>Orden urgente:</strong> {urgente.servicio} — {urgente.vehiculo} · {urgente.cliente}
           </div>
-          <button className="alerta-cta" onClick={() => setSeccion("ordenes")}>Ver orden →</button>
+          <button className="alerta-cta" onClick={() => navigate("/mecanico/ordenes")}>
+            Ver orden →
+          </button>
         </div>
       )}
 
@@ -113,7 +145,7 @@ export default function SecInicio({ mecanico, ordenes, setSeccion }) {
               <i className="bi bi-lightning-charge-fill" style={{ color: "#e65100" }}></i>
               Órdenes prioritarias
             </div>
-            <button className="link-ver" onClick={() => setSeccion("ordenes")}>Ver todas →</button>
+            <button className="link-ver" onClick={() => navigate("/mecanico/ordenes")}>Ver todas →</button>
           </div>
           <div className="ib-ordenes">
             {topOrdenes.length === 0 && <p className="empty-msg">No hay órdenes activas.</p>}
@@ -171,13 +203,13 @@ export default function SecInicio({ mecanico, ordenes, setSeccion }) {
           </div>
           <div className="acciones-rapidas-row">
             {[
-              { icon: "bi-clipboard-check", label: "Órdenes",       sec: "ordenes",       c: "#1a6bdc", cs: "#e8f0fe" },
-              { icon: "bi-car-front",       label: "Vehículos",     sec: "vehiculos",     c: "#2e7d32", cs: "#e8f5e9" },
-              { icon: "bi-chat-left-text",  label: "Observaciones", sec: "observaciones", c: "#7c3aed", cs: "#f3e5f5" },
+              { icon: "bi-clipboard-check", label: "Órdenes",       path: "/mecanico/ordenes"       },
+              { icon: "bi-car-front",       label: "Vehículos",     path: "/mecanico/vehiculos"     },
+              { icon: "bi-chat-left-text",  label: "Observaciones", path: "/mecanico/observaciones" },
             ].map((a, i) => (
               <button key={i} className="btn-action"
                       style={{ "--c": a.c, "--cs": a.cs }}
-                      onClick={() => setSeccion(a.sec)}>
+                      onClick={() => navigate(a.path)}>
                 <i className={`bi ${a.icon}`}></i>
                 <span>{a.label}</span>
               </button>

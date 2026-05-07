@@ -1,8 +1,30 @@
 // src/modules/Mecanico/sections/SecVehiculos.jsx
 
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { getMecanicoVehiculos } from "../../../services/mecanicoService";
 import { estadoConfig, Badge } from "../mecanicoHelpers.jsx";
 
-export default function SecVehiculos({ vehiculosAsignados }) {
+export default function SecVehiculos() {
+  const { user }  = useAuth();
+  const idUsuario = user?.id;
+
+  const [vehiculos, setVehiculos] = useState([]);
+  const [cargando,  setCargando]  = useState(true);
+  const [error,     setError]     = useState("");
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setCargando(true);
+    getMecanicoVehiculos(idUsuario)
+      .then(data => setVehiculos(data))
+      .catch(e => { console.error(e); setError("No se pudieron cargar los vehículos."); })
+      .finally(() => setCargando(false));
+  }, [idUsuario]);
+
+  if (cargando) return <p className="empty-msg">Cargando vehículos...</p>;
+  if (error)    return <p className="empty-msg" style={{ color: "#c62828" }}>{error}</p>;
+
   return (
     <div>
       <div className="sec-header">
@@ -12,15 +34,15 @@ export default function SecVehiculos({ vehiculosAsignados }) {
         </div>
       </div>
 
-      {vehiculosAsignados.length === 0 && (
+      {vehiculos.length === 0 && (
         <p className="empty-msg">No tienes vehículos asignados actualmente.</p>
       )}
 
       <div className="veh-grid">
-        {vehiculosAsignados.map(v => (
+        {vehiculos.map(v => (
           <div className="veh-card" key={v.id}>
             <div className="veh-card-top">
-              <div className={`veh-icon-wrap ${v.colorWrap}`}>
+              <div className={`veh-icon-wrap ${v.colorWrap ?? "blue"}`}>
                 <i className="bi bi-car-front-fill"></i>
               </div>
             </div>

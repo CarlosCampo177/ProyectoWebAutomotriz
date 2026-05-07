@@ -1,14 +1,34 @@
 // src/modules/Mecanico/sections/SecOrdenes.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { getMecanicoOrdenes } from "../../../services/mecanicoService";
 import { estadoConfig, prioridadConfig, Badge } from "../mecanicoHelpers.jsx";
 
-export default function SecOrdenes({ ordenes }) {
-  const [filtro, setFiltro] = useState("todas");
+export default function SecOrdenes() {
+  const { user }  = useAuth();
+  const idUsuario = user?.id;
+
+  const [ordenes,  setOrdenes]  = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error,    setError]    = useState("");
+  const [filtro,   setFiltro]   = useState("todas");
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setCargando(true);
+    getMecanicoOrdenes(idUsuario)
+      .then(data => setOrdenes(data))
+      .catch(e => { console.error(e); setError("No se pudieron cargar las órdenes."); })
+      .finally(() => setCargando(false));
+  }, [idUsuario]);
 
   const lista = filtro === "todas"
     ? ordenes
     : ordenes.filter(o => o.estado === filtro);
+
+  if (cargando) return <p className="empty-msg">Cargando órdenes...</p>;
+  if (error)    return <p className="empty-msg" style={{ color: "#c62828" }}>{error}</p>;
 
   return (
     <div>
