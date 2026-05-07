@@ -1,9 +1,8 @@
-// src/modules/Mecanico/sections/SecOrdenes.jsx
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { getMecanicoOrdenes } from "../../../services/mecanicoService";
 import { estadoConfig, prioridadConfig, Badge } from "../mecanicoHelpers.jsx";
+import "./SecOrdenes.css";
 
 export default function SecOrdenes() {
   const { user }  = useAuth();

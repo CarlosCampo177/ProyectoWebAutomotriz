@@ -1,0 +1,119 @@
+/* ══════════════════════════════════════
+   SecOrdenes.css — Mecánico
+══════════════════════════════════════ */
+
+.sec-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0d1d2c;
+  margin-bottom: 2px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.block-sub {
+  font-size: .78rem;
+  color: #8a9bbf;
+  margin: 0;
+}
+
+/* ── FILTROS ── */
+.filtros-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+/* ── TABLA DE ÓRDENES ── */
+.citas-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orden-row {
+  background: #fff;
+  border: 1px solid #e2e6ef;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: box-shadow .18s, transform .18s;
+}
+.orden-row:hover {
+  box-shadow: 0 4px 16px rgba(46,125,50,.1);
+  transform: translateX(3px);
+}
+
+.fecha-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+  background: #f0f2f7;
+  border-radius: 8px;
+  padding: 8px 6px;
+}
+
+.cr-dia {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0d1d2c;
+  line-height: 1;
+  font-family: 'Montserrat', sans-serif;
+}
+.cr-mes {
+  font-size: .6rem;
+  color: #8a9bbf;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.orden-info { flex: 1; }
+
+.cr-titulo {
+  font-size: .9rem;
+  font-weight: 600;
+  color: #0d1d2c;
+  margin-bottom: 4px;
+}
+
+.cr-meta {
+  display: flex;
+  gap: 12px;
+  font-size: .75rem;
+  color: #8a9bbf;
+  flex-wrap: wrap;
+}
+.cr-meta span { display: flex; align-items: center; gap: 4px; }
+
+.orden-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.badge-estado {
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.empty-msg {
+  color: #8a9bbf;
+  font-size: .85rem;
+  padding: 1rem 0;
+}

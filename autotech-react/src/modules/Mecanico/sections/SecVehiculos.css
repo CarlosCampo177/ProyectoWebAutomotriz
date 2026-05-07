@@ -1,0 +1,80 @@
+/* ══════════════════════════════════════
+   SecVehiculos.css — AutoTech
+   Contiene: grid de vehículos, cards,
+   stats de vehículo, alertas de km
+   y servicio actual.
+══════════════════════════════════════ */
+
+/* ══════════════════════
+   GRID
+══════════════════════ */
+.veh-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ══════════════════════
+   CARD
+══════════════════════ */
+.veh-card {
+  background: #fff; border: 1px solid #e2e6ef; border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+  transition: box-shadow .2s, transform .2s;
+}
+.veh-card:hover {
+  box-shadow: 0 8px 24px rgba(46,125,50,.12);
+  transform: translateY(-3px);
+}
+
+.veh-card-top {
+  display: flex; align-items: center; padding: 18px 18px 0;
+}
+
+/* Ícono de tipo de vehículo */
+.veh-icon-wrap {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.veh-icon-wrap.blue   { background: #e8f0fe; color: #1a6bdc; }
+.veh-icon-wrap.orange { background: #fff3e0; color: #e65100; }
+.veh-icon-wrap.green  { background: #e8f5e9; color: #2e7d32; }
+.veh-icon-wrap.purple { background: #f3e5f5; color: #6a1b9a; }
+
+/* Cuerpo */
+.veh-card-body  { padding: 14px 18px; flex: 1; }
+.veh-card-name  { font-size: 1rem; font-weight: 700; color: #1c2a45; margin-bottom: 2px; }
+.veh-card-plate { font-size: .78rem; color: #8a9bbf; margin-bottom: 14px; }
+
+/* Stats internos */
+.veh-card-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 12px;
+}
+.veh-stat { display: flex; flex-direction: column; gap: 2px; }
+.veh-stat-label {
+  font-size: .68rem; color: #8a9bbf;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.veh-stat-val { font-size: .82rem; font-weight: 600; color: #1c2a45; }
+.veh-stat-val.warn { color: #e65100; }
+
+/* Alerta de kilómetros */
+.km-alert {
+  background: #fff8e1; border: 1px solid #ffe082; border-radius: 7px;
+  padding: 6px 10px; font-size: .75rem; color: #e65100;
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+
+/* Servicio en curso */
+.servicio-actual {
+  background: #f0f2f7; border-radius: 7px; padding: 7px 12px;
+  font-size: .78rem; color: #5a6a8a;
+  display: flex; align-items: center; gap: 7px; font-weight: 500;
+}
+
+/* Footer */
+.veh-card-footer {
+  display: flex; align-items: center;
+  padding: 12px 18px; border-top: 1px solid #f0f2f7; background: #fafbfd;
+}

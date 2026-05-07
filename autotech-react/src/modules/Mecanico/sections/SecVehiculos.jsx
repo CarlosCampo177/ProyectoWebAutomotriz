@@ -1,9 +1,8 @@
-// src/modules/Mecanico/sections/SecVehiculos.jsx
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { getMecanicoVehiculos } from "../../../services/mecanicoService";
 import { estadoConfig, Badge } from "../mecanicoHelpers.jsx";
+import "./SecVehiculos.css";
 
 export default function SecVehiculos() {
   const { user }  = useAuth();

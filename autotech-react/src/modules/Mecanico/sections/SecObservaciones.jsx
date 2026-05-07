@@ -1,5 +1,3 @@
-// src/modules/Mecanico/sections/SecObservaciones.jsx
-
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import {
@@ -8,6 +6,7 @@ import {
   postObservacion,
 } from "../../../services/mecanicoService";
 import { obsConfig } from "../mecanicoHelpers.jsx";
+import "./SecObservaciones.css";
 
 export default function SecObservaciones() {
   const { user }  = useAuth();

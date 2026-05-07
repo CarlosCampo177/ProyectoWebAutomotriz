@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { getMecanicoPerfil, getMecanicoOrdenes } from "../../../services/mecanicoService";
 import { estadoConfig, prioridadConfig, useCounter, getSaludo, getFecha } from "../mecanicoHelpers.jsx";
+import "./SecInicio.css";
 
 export default function SecInicio() {
   const { user }  = useAuth();

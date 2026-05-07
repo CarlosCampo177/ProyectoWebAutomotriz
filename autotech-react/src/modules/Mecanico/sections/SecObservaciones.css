@@ -1,0 +1,107 @@
+/* ══════════════════════════════════════
+   SecObservaciones.css — AutoTech
+   Contiene: formulario de nueva
+   observación, lista de observaciones
+   y sus cards con tipo y badge.
+══════════════════════════════════════ */
+
+/* ══════════════════════
+   FORMULARIO
+══════════════════════ */
+.obs-form-card {
+  background: #fff; border: 1px solid #e2e6ef; border-radius: 12px;
+  padding: 20px 24px; margin-bottom: 20px;
+  animation: fadeUp .25s ease both;
+}
+
+.obs-form-title {
+  font-size: .82rem; font-weight: 700; color: #1c2a45;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+
+.obs-form-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 10px;
+}
+
+.obs-input,
+.obs-textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid #e2e6ef; border-radius: 8px;
+  font-size: .85rem; color: #1c2a45; background: #f8f9fb;
+  outline: none; font-family: 'Segoe UI', sans-serif;
+  transition: border-color .15s;
+}
+.obs-input:focus,
+.obs-textarea:focus { border-color: #2e7d32; }
+
+.obs-textarea { resize: vertical; }
+
+.obs-form-actions {
+  display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;
+}
+
+/* Botones del formulario */
+.btn-cancelar {
+  padding: 8px 18px; border-radius: 8px;
+  border: 1.5px solid #e2e6ef; background: #fff; color: #5a6a8a;
+  font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.btn-cancelar:hover { background: #f0f2f7; }
+
+.btn-guardar {
+  padding: 8px 18px; border-radius: 8px; border: none;
+  background: #2e7d32; color: #fff; font-size: .82rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background .15s;
+}
+.btn-guardar:hover { background: #1b5e20; }
+
+.btn-nueva {
+  background: #2e7d32; color: #fff; border: none; border-radius: 9px;
+  padding: 9px 18px; font-size: .84rem; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 7px; transition: background .15s;
+}
+.btn-nueva:hover { background: #1b5e20; }
+
+/* ══════════════════════
+   LISTA DE OBSERVACIONES
+══════════════════════ */
+.obs-lista { display: flex; flex-direction: column; gap: 12px; }
+
+.obs-card {
+  background: #fff; border: 1px solid #e2e6ef; border-left: 4px solid;
+  border-radius: 10px; padding: 18px 20px;
+  transition: box-shadow .18s, transform .18s;
+}
+.obs-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  transform: translateX(3px);
+}
+
+/* Header de la observación */
+.obs-header {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+}
+
+.obs-icon-wrap {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+
+.obs-meta { flex: 1; }
+.obs-vehiculo { font-size: .88rem; font-weight: 700; color: #1c2a45; margin-bottom: 3px; }
+.obs-sub {
+  font-size: .75rem; color: #8a9bbf;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+
+/* Badge de tipo */
+.obs-tipo-badge {
+  font-size: .72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+}
+
+/* Texto de la observación */
+.obs-texto { font-size: .84rem; color: #5a6a8a; line-height: 1.55; }
