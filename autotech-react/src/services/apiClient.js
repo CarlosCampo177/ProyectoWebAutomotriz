@@ -1,4 +1,4 @@
-const BASE_URL = 'https://localhost:7192/api'  // ← confirma que es tu puerto
+const BASE_URL = 'https://localhost:7192/api' 
 
 export async function get(endpoint) {
   const response = await fetch(`${BASE_URL}/${endpoint}`)

@@ -1,5 +1,3 @@
-// src/modules/Mecanico/mecanicoHelpers.js
-
 import { useState, useEffect } from "react";
 
 /* ── Configs de badges ── */

@@ -78,3 +78,74 @@
   display: flex; align-items: center;
   padding: 12px 18px; border-top: 1px solid #f0f2f7; background: #fafbfd;
 }
+
+/* ── Botón observación en el footer de la tarjeta ── */
+.veh-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* badge a la izq, botón a la der */
+  padding: 10px 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-obs-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #1565c0;
+  background: #e3f2fd;
+  border: none;
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.btn-obs-inline:hover { background: #bbdefb; }
+
+/* ── Panel inline ── */
+.obs-inline-panel {
+  padding: 12px 16px 14px;
+  border-top: 1px solid #e3f2fd;
+  background: #f7fbff;
+  border-radius: 0 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.obs-inline-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1565c0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.obs-inline-textarea {
+  width: 100%;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.83rem;
+  resize: vertical;
+  font-family: inherit;
+  color: #333;
+  background: #fff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border 0.18s;
+}
+.obs-inline-textarea:focus { border-color: #1565c0; }
+
+.obs-inline-err { font-size: 0.78rem; color: #c62828; margin: 0; }
+.obs-inline-ok  { font-size: 0.78rem; color: #2e7d32; margin: 0; }
+
+.obs-inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

@@ -75,7 +75,7 @@ export default function SecObservaciones() {
           <p className="block-sub">Notas técnicas sobre los vehículos atendidos</p>
         </div>
         <button className="btn-nueva" onClick={() => { setNueva(!nueva); setErrForm(""); }}>
-          <i className="bi bi-plus-lg"></i> Nueva observación
+          <i className="bi bi-plus-lg"></i> Editar observación
         </button>
       </div>
 

@@ -5,6 +5,7 @@ export const menuConfig = {
     { label: 'Vehículos',       path: '/admin/vehiculos',    icon: 'bi-car-front'      },
     { label: 'Mecánicos',       path: '/admin/mecanicos',    icon: 'bi-person-badge'   },
     { label: 'Servicios',       path: '/admin/servicios',    icon: 'bi-tools'          },
+    { label: 'Producto',        path: '/admin/producto',     icon: 'bi-shop'          },
     { label: 'Órdenes y citas', path: '/admin/citas',        icon: 'bi-calendar-check' },
     { label: 'Facturación',     path: '/admin/facturacion',  icon: 'bi-receipt'        },
     { label: 'Estadísticas',    path: '/admin/estadisticas', icon: 'bi-bar-chart-line' },
