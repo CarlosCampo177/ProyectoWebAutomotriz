@@ -1,25 +1,26 @@
 // src/layouts/DashboardLayout.jsx
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { menuConfig } from '../router/menuConfig'
-import './DashboardLayout.css'
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { menuConfig } from "../router/menuConfig";
+import "./DashboardLayout.css";
 
 export default function DashboardLayout() {
-  const { user, logout } = useAuth()
-  const navigate = useNavigate()
-  const menuItems = menuConfig[user?.rol] ?? [] // ?.El Optional Chaining, El Nullish Coalescing (??)
-                                                
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const menuItems = menuConfig[user?.rol] ?? []; // ?.El Optional Chaining, El Nullish Coalescing (??)
+
   const handleLogout = () => {
-    logout()
-    navigate('/page/login')
-  }
+    logout();
+    navigate("/page/login");
+  };
 
   return (
-    <div style={{ display: 'flex' }}>
-
+    <div style={{ display: "flex" }}>
       {/* ── SIDEBAR ── */}
       <div className="sidebar">
-        <div className="sidebar-logo">AUTO<span>TECH</span></div>
+        <div className="sidebar-logo">
+          AUTO<span>TECH</span>
+        </div>
 
         <div className="sidebar-user">
           <div className="sidebar-user-avatar">{user?.iniciales}</div>
@@ -35,7 +36,7 @@ export default function DashboardLayout() {
               key={item.path}
               to={item.path}
               end
-              className={({ isActive }) => isActive ? 'active' : ''}
+              className={({ isActive }) => (isActive ? "active" : "")}
             >
               <i className={`bi ${item.icon}`}></i>
               {item.label}
@@ -47,7 +48,13 @@ export default function DashboardLayout() {
           <button
             className="sidebar-logout"
             onClick={handleLogout}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              width: "100%",
+              textAlign: "left",
+            }}
           >
             <i className="bi bi-box-arrow-left"></i> Cerrar sesión
           </button>
@@ -68,14 +75,34 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </div>
-
     </div>
-  )
+  );
 }
 
 function getFechaHoy() {
-  const dias  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']
-  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
-  const hoy   = new Date()
-  return `${dias[hoy.getDay()]} ${hoy.getDate()} ${meses[hoy.getMonth()]}`
+  const dias = [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ];
+  const meses = [
+    "ene",
+    "feb",
+    "mar",
+    "abr",
+    "may",
+    "jun",
+    "jul",
+    "ago",
+    "sep",
+    "oct",
+    "nov",
+    "dic",
+  ];
+  const hoy = new Date();
+  return `${dias[hoy.getDay()]} ${hoy.getDate()} ${meses[hoy.getMonth()]}`;
 }
