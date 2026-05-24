@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./ModalAgregarVehiculo.css";
-import { get } from "../../../services/apiClient";
+import apiClient from "../../../services/apiClient";
 
 function FieldGroup({ label, error, children, style }) {
   return (
@@ -29,7 +29,7 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    get("Marcas")
+    apiClient.get("Marcas")
       .then(data => setMarcas(data))
       .catch(() => setMarcas([]));
   }, []);
@@ -179,6 +179,7 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
             { val: "van",   label: "Van/Bus"        },
           ].map(opt => (
             <button
+              type="button"
               key={opt.val}
               onClick={() => set("icono", opt.val)}
               className={`mav-toggle-btn${form.icono === opt.val ? " active-blue" : ""}`}
@@ -194,6 +195,7 @@ export default function ModalAgregarVehiculo({ onClose, onSave }) {
         <div className="mav-toggle-row">
           {coloresCard.map(c => (
             <button
+              type="button"
               key={c.val}
               onClick={() => set("colorWrap", c.val)}
               className="mav-toggle-btn"

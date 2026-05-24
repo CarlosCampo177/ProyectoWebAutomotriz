@@ -1,10 +1,11 @@
-import { get, post } from './apiClient'
+import apiClient from './apiClient' 
 
-export const getVehiculos  = (idUsuario) => get(`Cliente/${idUsuario}/vehiculos`)
-export const getCitas      = (idUsuario) => get(`Cliente/${idUsuario}/citas`)
-export const getHistorial  = (idUsuario) => get(`Cliente/${idUsuario}/historial`)
-export const getFacturas   = (idUsuario) => get(`Cliente/${idUsuario}/facturas`)
-export const getMecanicos  = ()          => get('Auth/mecanicos')
-export const postVehiculo  = (idUsuario, data) => post(`Cliente/${idUsuario}/vehiculos`, data)
-export const postCita      = (idUsuario, data) => post(`Cliente/${idUsuario}/citas`, data)
-export const getStats      = (idUsuario) => get(`Cliente/${idUsuario}/stats`)
+export const getVehiculos  = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/vehiculos`)
+export const getCitas      = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/citas`)
+export const getHistorial  = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/historial`)
+export const getFacturas   = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/facturas`)
+export const getStats      = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/stats`)
+export const getMecanicos  = ()          => apiClient.get('Auth/mecanicos')
+
+export const postVehiculo  = (idUsuario, data) => apiClient.post(`Cliente/${idUsuario}/vehiculos`, data)
+export const postCita      = (idUsuario, data) => apiClient.post(`Cliente/${idUsuario}/citas`, data)

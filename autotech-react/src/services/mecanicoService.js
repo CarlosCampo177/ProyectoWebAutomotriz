@@ -1,9 +1,7 @@
-import { get, post } from './apiClient'  
+import apiClient from './apiClient'  
 
-const r = (id) => `Mecanico/${id}`
-
-export const getMecanicoPerfil        = (id) => get(`${r(id)}/perfil`)
-export const getMecanicoOrdenes       = (id) => get(`${r(id)}/ordenes`)
-export const getMecanicoVehiculos     = (id) => get(`${r(id)}/vehiculos`)
-export const getMecanicoObservaciones = (id) => get(`${r(id)}/observaciones`)
-export const postObservacion          = (id, data) => post(`${r(id)}/observaciones`, data)
+export const getMecanicoPerfil        = (id) => apiClient.get(`Mecanico/${id}/perfil`)
+export const getMecanicoOrdenes       = (id) => apiClient.get(`Mecanico/${id}/ordenes`)
+export const getMecanicoVehiculos     = (id) => apiClient.get(`Mecanico/${id}/vehiculos`)
+export const getMecanicoObservaciones = (id) => apiClient.get(`Mecanico/${id}/observaciones`)
+export const postObservacion          = (id, data) => apiClient.post(`Mecanico/${id}/observaciones`, data)

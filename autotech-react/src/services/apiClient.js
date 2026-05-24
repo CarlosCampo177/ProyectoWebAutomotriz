@@ -1,17 +1,29 @@
-const BASE_URL = 'https://localhost:7192/api' 
+const BASE_URL = 'https://localhost:7192/api'
 
-export async function get(endpoint) {
-  const response = await fetch(`${BASE_URL}/${endpoint}`)
-  if (!response.ok) throw new Error(`Error ${response.status}`)
-  return response.json()
-}
-
-export async function post(endpoint, body) {
+async function request(endpoint, options = {}) {
   const response = await fetch(`${BASE_URL}/${endpoint}`, {
-    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    ...options,
   })
-  if (!response.ok) throw new Error(`Error ${response.status}`)
-  return response.json()
+
+  // Para respuestas sin cuerpo (204)
+  if (response.status === 204) return null
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    // Lanza el mensaje que manda el backend directamente
+    throw { status: response.status, data }
+  }
+
+  return data
 }
+
+const apiClient = {
+  get:    (endpoint)       => request(endpoint),
+  post:   (endpoint, body) => request(endpoint, { method: 'POST',   body: JSON.stringify(body) }),
+  put:    (endpoint, body) => request(endpoint, { method: 'PUT',    body: JSON.stringify(body) }),
+  delete: (endpoint)       => request(endpoint, { method: 'DELETE' }),
+}
+
+export default apiClient
