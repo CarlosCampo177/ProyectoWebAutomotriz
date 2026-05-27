@@ -36,7 +36,6 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    // Validaciones locales
     if (form.password !== form.confirmPassword) {
       setError("¡Las contraseñas no coinciden!");
       return;
@@ -66,8 +65,10 @@ export default function Register() {
       });
 
       navigate("/page/login");
-    } catch {
-      setError("El correo o usuario ya está registrado.");
+    } catch (err) {
+      console.log("STATUS:", err?.status);
+      console.log("DATA:", err?.data);
+      setError(err?.data?.mensaje || "Error al registrarse. Revisa la consola.");
     } finally {
       setLoading(false);
     }
@@ -86,188 +87,74 @@ export default function Register() {
         {error && <div className="rg-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* Nombres */}
+          <div className="rg-row">
+            <div className="rg-field">
+              <label>Primer nombre <span className="rg-req">*</span></label>
+              <input type="text" name="primerNombre" value={form.primerNombre} onChange={handleChange} placeholder="Juan" required />
+            </div>
+            <div className="rg-field">
+              <label>Segundo Nombre <span className="rg-opt">(opcional)</span></label>
+              <input type="text" name="segundoNombre" value={form.segundoNombre} onChange={handleChange} placeholder="Carlos" />
+            </div>
+          </div>
 
           <div className="rg-row">
             <div className="rg-field">
-              <label>
-                Primer nombre <span className="rg-req">*</span>
-              </label>
-              <input
-                type="text"
-                name="primerNombre"
-                value={form.primerNombre}
-                onChange={handleChange}
-                placeholder="Juan"
-                required
-              />
+              <label>Primer Apellido <span className="rg-req">*</span></label>
+              <input type="text" name="primerApellido" value={form.primerApellido} onChange={handleChange} placeholder="Pérez" required />
             </div>
             <div className="rg-field">
-              <label>
-                Segundo Nombre <span className="rg-opt">(opcional)</span>
-              </label>
-              <input
-                type="text"
-                name="segundoNombre"
-                value={form.segundoNombre}
-                onChange={handleChange}
-                placeholder="Carlos"
-              />
+              <label>Segundo Apellido <span className="rg-opt">(opcional)</span></label>
+              <input type="text" name="segundoApellido" value={form.segundoApellido} onChange={handleChange} placeholder="García" />
             </div>
-          </div>
-
-          {/* Apellidos */}
-          <div className="rg-row">
-            <div className="rg-field">
-              <label>
-                Primer Apellido <span className="rg-req">*</span>
-              </label>
-              <input
-                type="text"
-                name="primerApellido"
-                value={form.primerApellido}
-                onChange={handleChange}
-                placeholder="Pérez"
-                required
-              />
-            </div>
-            <div className="rg-field">
-              <label>
-                Segundo Apellido <span className="rg-opt">(opcional)</span>
-              </label>
-              <input
-                type="text"
-                name="segundoApellido"
-                value={form.segundoApellido}
-                onChange={handleChange}
-                placeholder="García"
-              />
-            </div>
-          </div>
-
-          {/* Documento */}
-          <div className="rg-field">
-            <label>
-              Documento <span className="rg-req">*</span>
-            </label>
-            <input
-              type="text"
-              name="documento"
-              value={form.documento}
-              onChange={handleChange}
-              placeholder="123456789"
-              required
-            />
-          </div>
-          
-          {/* Cuenta */}
-
-          <div className="rg-field">
-            <label>
-              Nombre de usuario <span className="rg-req">*</span>
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              placeholder="juan_perez"
-              required
-            />
           </div>
 
           <div className="rg-field">
-            <label>
-              Correo electrónico <span className="rg-req">*</span>
-            </label>
-            <input
-              type="email"
-              name="correo"
-              value={form.correo}
-              onChange={handleChange}
-              placeholder="tu@correo.com"
-              required
-            />
+            <label>Documento <span className="rg-req">*</span></label>
+            <input type="text" name="documento" value={form.documento} onChange={handleChange} placeholder="123456789" required />
+          </div>
+
+          <div className="rg-field">
+            <label>Nombre de usuario <span className="rg-req">*</span></label>
+            <input type="text" name="username" value={form.username} onChange={handleChange} placeholder="juan_perez" required />
+          </div>
+
+          <div className="rg-field">
+            <label>Correo electrónico <span className="rg-req">*</span></label>
+            <input type="email" name="correo" value={form.correo} onChange={handleChange} placeholder="tu@correo.com" required />
           </div>
 
           <div className="rg-row">
             <div className="rg-field">
-              <label>
-                Teléfono <span className="rg-req">*</span>
-              </label>
-              <input
-                type="tel"
-                name="telefono"
-                value={form.telefono}
-                onChange={handleChange}
-                placeholder="+57 300 000 0000"
-                required
-              />
+              <label>Teléfono <span className="rg-req">*</span></label>
+              <input type="tel" name="telefono" value={form.telefono} onChange={handleChange} placeholder="+57 300 000 0000" required />
             </div>
             <div className="rg-field">
-              <label>
-                Dirección <span className="rg-req">*</span>
-              </label>
-              <input
-                type="text"
-                name="direccion"
-                value={form.direccion}
-                onChange={handleChange}
-                placeholder="Calle 10 # 5-23"
-                required
-              />
+              <label>Dirección <span className="rg-req">*</span></label>
+              <input type="text" name="direccion" value={form.direccion} onChange={handleChange} placeholder="Calle 10 # 5-23" required />
             </div>
           </div>
 
-          {/* Contraseñas */}
           <div className="rg-row">
             <div className="rg-field">
-              <label>
-                Contraseña <span className="rg-req">*</span>
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-              />
+              <label>Contraseña <span className="rg-req">*</span></label>
+              <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
             </div>
             <div className="rg-field">
-              <label>
-                Confirmar <span className="rg-req">*</span>
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-              />
+              <label>Confirmar <span className="rg-req">*</span></label>
+              <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="••••••••" required />
             </div>
           </div>
 
-          {/* Términos */}
           <div className="rg-check">
-            <input
-              type="checkbox"
-              id="terminos"
-              name="terminos"
-              checked={form.terminos}
-              onChange={handleChange}
-            />
+            <input type="checkbox" id="terminos" name="terminos" checked={form.terminos} onChange={handleChange} />
             <label htmlFor="terminos">
-              Acepto los{" "}
-              <a href="#" className="rg-link">
-                términos y condiciones
-              </a>
+              Acepto los <a href="#" className="rg-link">términos y condiciones</a>
             </label>
           </div>
 
-          <button type="submit" className="rg-btn">
-            Crear cuenta
+          <button type="submit" className="rg-btn" disabled={loading}>
+            {loading ? "Registrando..." : "Crear cuenta"}
           </button>
         </form>
 
@@ -275,15 +162,11 @@ export default function Register() {
 
         <p className="rg-login-text">
           ¿Ya tienes cuenta?{" "}
-          <a href="/page/login" className="rg-link-red">
-            Inicia sesión
-          </a>
+          <a href="/page/login" className="rg-link-red">Inicia sesión</a>
         </p>
 
         <div className="rg-back">
-          <a href="/" className="rg-link">
-            ← Volver al inicio
-          </a>
+          <a href="/" className="rg-link">← Volver al inicio</a>
         </div>
       </div>
     </div>
