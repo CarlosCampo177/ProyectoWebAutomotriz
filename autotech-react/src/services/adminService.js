@@ -16,13 +16,26 @@ export const marcaService = {
 }
 
 /* ══════════════════════════════════
+   MECÁNICOS
+══════════════════════════════════ */
+export const mecanicoAdminService = {
+  getAll:          ()         => apiClient.get('MecanicoAdmin'),
+  getDisponibles:  ()         => apiClient.get('MecanicoAdmin/disponibles'),
+  getOrdenes:      (id)       => apiClient.get(`MecanicoAdmin/${id}/ordenes`),
+  getEstadisticas: (id)       => apiClient.get(`MecanicoAdmin/${id}/estadisticas`),
+  crear:           (data)     => apiClient.post('MecanicoAdmin', data),
+  actualizar:      (id, data) => apiClient.put(`MecanicoAdmin/${id}`, data),
+  cambiarEstado:   (id)       => apiClient.patch(`MecanicoAdmin/${id}/estado`),
+}
+
+/* ══════════════════════════════════
    ESPECIALIDADES
 ══════════════════════════════════ */
 export const especialidadService = {
-  getAll:     ()         => apiClient.get('Especialidad'),
-  crear:      (data)     => apiClient.post('Especialidad', data),
-  actualizar: (id, data) => apiClient.put(`Especialidad/${id}`, data),
-  eliminar:   (id)       => apiClient.delete(`Especialidad/${id}`),
+  getAll:     ()         => apiClient.get('Especialidads'),
+  crear:      (data)     => apiClient.post('Especialidads', data),
+  actualizar: (id, data) => apiClient.put(`Especialidads/${id}`, data),
+  eliminar:   (id)       => apiClient.delete(`Especialidads/${id}`),
 }
 
 /* ══════════════════════════════════
@@ -86,8 +99,13 @@ export const estadisticaService = {
 }
 
 /* ══════════════════════════════════
-   CLIENTES — para selectores
+   CLIENTES 
 ══════════════════════════════════ */
 export const clienteAdminService = {
-  getAll: () => apiClient.get('Cliente/admin/todos'),
+  getAll:        ()         => apiClient.get('ClienteAdmin'),
+  getTodos:      ()         => apiClient.get('ClienteAdmin/todos'),
+  getById:       (id)       => apiClient.get(`ClienteAdmin/${id}`),
+  crear:         (data)     => apiClient.post('ClienteAdmin', data),
+  actualizar:    (id, data) => apiClient.put(`ClienteAdmin/${id}`, data),
+  cambiarEstado: (id)       => apiClient.patch(`ClienteAdmin/${id}/estado`),
 }
