@@ -1,10 +1,10 @@
 /* ══════════════════════════════════════════
    AUTOTECH — SECCIÓN CITAS
-   sections/SecCitas.jsx
+   sections/SecCitasU.jsx
 ══════════════════════════════════════════ */
 import { useState } from "react";
 import * as Icon from "../icons/Icons";
-import "./SecCitas.css";
+import "./SecCitasU.css";
 
 /* ── NOTA API ──────────────────────────────
    Props recibidas desde UsuarioApp:

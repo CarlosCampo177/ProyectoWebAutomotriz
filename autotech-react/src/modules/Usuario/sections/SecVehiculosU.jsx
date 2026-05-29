@@ -3,7 +3,7 @@
    sections/SecVehiculos.jsx
 ══════════════════════════════════════════ */
 import * as Icon from "../icons/Icons";
-import "./SecVehiculos.css";
+import "./SecVehiculosU.css";
 
 /* ── NOTA API ──────────────────────────────
    Props recibidas desde UsuarioApp:
