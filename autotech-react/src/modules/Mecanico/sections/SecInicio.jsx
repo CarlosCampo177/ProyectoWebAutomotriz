@@ -5,6 +5,21 @@ import { getMecanicoPerfil, getMecanicoOrdenes } from "../../../services/mecanic
 import { estadoConfig, prioridadConfig, useCounter, getSaludo, getFecha } from "../mecanicoHelpers.jsx";
 import "./SecInicio.css";
 
+// ── Detectar si una orden ya pasó su fecha/hora y no fue completada ──
+function esPerdida(o) {
+  if (!o || o.estado === "completada") return false;
+  const MESES = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5,
+                  JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+  const mes = MESES[o.fecha?.mes?.toUpperCase()];
+  if (mes === undefined) return false;
+  const [horaStr, periodo] = (o.hora ?? "").split(" ");
+  let [h, m] = horaStr.split(":").map(Number);
+  if (periodo === "PM" && h !== 12) h += 12;
+  if (periodo === "AM" && h === 12) h = 0;
+  const fechaOrden = new Date(2026, mes, Number(o.fecha.dia), h, m);
+  return fechaOrden < new Date();
+}
+
 export default function SecInicio() {
   const { user }  = useAuth();
   const idUsuario = user?.id;
@@ -24,7 +39,8 @@ export default function SecInicio() {
     ])
       .then(([perfil, ords]) => {
         setMecanico(perfil);
-        setOrdenes(ords);
+        // Enriquecer cada orden con estado "perdida" si aplica
+        setOrdenes(ords.map(o => esPerdida(o) ? { ...o, estado: "perdida" } : o));
       })
       .catch(e => { console.error(e); setError("No se pudo cargar la información."); })
       .finally(() => setCargando(false));
@@ -34,6 +50,7 @@ export default function SecInicio() {
   const pendientes  = ordenes.filter(o => o.estado === "pendiente").length;
   const enProceso   = ordenes.filter(o => o.estado === "en_proceso").length;
   const completadas = ordenes.filter(o => o.estado === "completada").length;
+  const perdidas    = ordenes.filter(o => o.estado === "perdida").length;
   const pctDia      = total > 0 ? Math.round((completadas / total) * 100) : 0;
 
   const cTotal = useCounter(total,       !cargando);
@@ -41,8 +58,12 @@ export default function SecInicio() {
   const cProc  = useCounter(enProceso,   !cargando);
   const cComp  = useCounter(completadas, !cargando);
 
-  const urgente    = ordenes.find(o => o.prioridad === "urgente" && o.estado !== "completada");
-  const topOrdenes = ordenes.filter(o => o.estado !== "completada").slice(0, 2);
+  const urgente    = ordenes.find(o => o.prioridad === "urgente" && o.estado !== "completada" && o.estado !== "perdida");
+
+  // Solo órdenes activas (sin perdidas) para la sección prioritaria
+  const topOrdenes = ordenes
+    .filter(o => o.estado !== "completada" && o.estado !== "perdida")
+    .slice(0, 2);
 
   const circumference = 2 * Math.PI * 42;
   const strokeOffset  = circumference - (pctDia / 100) * circumference;
@@ -139,7 +160,7 @@ export default function SecInicio() {
       {/* ── BOTTOM ── */}
       <div className="inicio-bottom-grid">
 
-        {/* Órdenes prioritarias */}
+        {/* Órdenes prioritarias — sin perdidas */}
         <div className="ib-panel">
           <div className="ib-panel-head">
             <div className="ib-panel-title">
@@ -165,8 +186,8 @@ export default function SecInicio() {
                     </div>
                   </div>
                   <div className="ib-orden-tags">
-                    <span className="tag-pill" style={{ background: pConf.bg, color: pConf.color }}>{pConf.label}</span>
-                    <span className="tag-pill" style={{ background: eConf.bg, color: eConf.color }}>{eConf.label}</span>
+                    <span className="tag-pill" style={{ background: pConf?.bg, color: pConf?.color }}>{pConf?.label}</span>
+                    <span className="tag-pill" style={{ background: eConf?.bg, color: eConf?.color }}>{eConf?.label}</span>
                   </div>
                 </div>
               );
@@ -174,7 +195,7 @@ export default function SecInicio() {
           </div>
         </div>
 
-        {/* Estado del taller */}
+        {/* Estado del taller — incluye perdidas */}
         <div className="ib-panel">
           <div className="ib-panel-head">
             <div className="ib-panel-title">
@@ -187,6 +208,7 @@ export default function SecInicio() {
               { label: "Completadas", val: completadas, color: "#2e7d32", icon: "bi-check-circle-fill" },
               { label: "En proceso",  val: enProceso,   color: "#7c3aed", icon: "bi-gear-fill"         },
               { label: "Pendientes",  val: pendientes,  color: "#e65100", icon: "bi-clock-fill"        },
+              { label: "Perdidas",    val: perdidas,    color: "#c62828", icon: "bi-x-circle-fill"     },
             ].map((r, i) => (
               <div className="taller-bar-row" key={i}>
                 <div className="taller-bar-left">
@@ -209,7 +231,6 @@ export default function SecInicio() {
               { icon: "bi-chat-left-text",  label: "Observaciones", path: "/mecanico/observaciones" },
             ].map((a, i) => (
               <button key={i} className="btn-action"
-                      style={{ "--c": a.c, "--cs": a.cs }}
                       onClick={() => navigate(a.path)}>
                 <i className={`bi ${a.icon}`}></i>
                 <span>{a.label}</span>

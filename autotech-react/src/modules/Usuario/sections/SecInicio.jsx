@@ -53,12 +53,6 @@ function AlertaKm({ km }) {
 }
 
 export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
-  /* ── NOTA API ──────────────────────────────
-     Cálculos locales — cuando exista el endpoint
-     GET /api/usuarios/:id/estadisticas
-     estos valores vendrán directamente de la API
-     como props o de un useEffect en este componente.
-  ────────────────────────────────────────── */
   const pendientes = citas.filter(c => c.estado === "pendiente").length;
   const proximas   = citas.filter(c => c.estado === "pendiente" || c.estado === "confirmada");
   const dotColor   = { pendiente: "#1a6bdc", confirmada: "#2e7d32" };
@@ -71,10 +65,10 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
   ];
 
   const acciones = [
-    { Icono: Icon.Calendar, label: "Mis citas",     c: "#1a6bdc", cs: "#e8f0fe", sec: "citas"     },
-    { Icono: Icon.Car,      label: "Mis vehículos", c: "#2e7d32", cs: "#e8f5e9", sec: "vehiculos" },
-    { Icono: Icon.Bot,      label: "Consultar IA",  c: "#6a1b9a", cs: "#f3e5f5", sec: ""          },
-    { Icono: Icon.Clock,    label: "Ver historial", c: "#e65100", cs: "#fff3e0", sec: "historial" },
+    { Icono: Icon.Calendar, label: "Mis citas",     c: "#1a6bdc", cs: "#e8f0fe", sec: "citas"      },
+    { Icono: Icon.Car,      label: "Mis vehículos", c: "#2e7d32", cs: "#e8f5e9", sec: "vehiculos"  },
+    { Icono: Icon.Bot,      label: "Consultar IA",  c: "#6a1b9a", cs: "#f3e5f5", sec: "consultaIA" }, // ✅ corregido
+    { Icono: Icon.Clock,    label: "Ver historial", c: "#e65100", cs: "#fff3e0", sec: "historial"  },
   ];
 
   return (
@@ -82,7 +76,6 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
       {/* Bienvenida */}
       <div className="si-greeting">
         <div className="si-greeting-sub">{getGreeting()}</div>
-        {/* usuario?.nombre viene de GET /api/auth/me en UsuarioApp */}
         <h1 className="si-greeting-title">
           Bienvenido, <span>{usuario?.nombre?.split(" ")[0] ?? "Usuario"}</span>
         </h1>

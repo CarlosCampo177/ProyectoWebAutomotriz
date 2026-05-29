@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import {
-  getMecanicoObservaciones,
-  getMecanicoOrdenes,
-  postObservacion,
-} from "../../../services/mecanicoService";
-import { obsConfig } from "../mecanicoHelpers.jsx";
+import { getMecanicoObservaciones } from "../../../services/mecanicoService";
 import "./SecObservaciones.css";
 
 export default function SecObservaciones() {
@@ -13,144 +8,109 @@ export default function SecObservaciones() {
   const idUsuario = user?.id;
 
   const [observaciones, setObservaciones] = useState([]);
-  const [ordenes,       setOrdenes]       = useState([]);
   const [cargando,      setCargando]      = useState(true);
   const [error,         setError]         = useState("");
-
-  const [nueva,     setNueva]     = useState(false);
-  const [ordenId,   setOrdenId]   = useState("");
-  const [texto,     setTexto]     = useState("");
-  const [guardando, setGuardando] = useState(false);
-  const [errForm,   setErrForm]   = useState("");
+  const [seleccion,     setSeleccion]     = useState(null);
 
   useEffect(() => {
     if (!idUsuario) return;
     setCargando(true);
-    Promise.all([
-      getMecanicoObservaciones(idUsuario),
-      getMecanicoOrdenes(idUsuario),
-    ])
-      .then(([obs, ords]) => {
-        setObservaciones(obs);
-        setOrdenes(ords);
-      })
+    getMecanicoObservaciones(idUsuario)
+      .then(obs => setObservaciones(obs))
       .catch(e => { console.error(e); setError("No se pudieron cargar las observaciones."); })
       .finally(() => setCargando(false));
   }, [idUsuario]);
 
-  const ordenesActivas = ordenes.filter(o => o.estado !== "completada");
-
-  const handleGuardar = async () => {
-    if (!ordenId || !texto.trim()) {
-      setErrForm("Selecciona una orden y escribe una observación.");
-      return;
-    }
-    setErrForm("");
-    setGuardando(true);
-    try {
-      const creada = await postObservacion(idUsuario, {
-        idOrden: Number(ordenId),
-        texto,
-      });
-      setObservaciones(prev => [creada, ...prev]);
-      setNueva(false);
-      setTexto("");
-      setOrdenId("");
-    } catch (e) {
-      setErrForm("Error al guardar. Intenta de nuevo.");
-      console.error(e);
-    } finally {
-      setGuardando(false);
-    }
-  };
-
-  if (cargando) return <p className="empty-msg">Cargando observaciones...</p>;
-  if (error)    return <p className="empty-msg" style={{ color: "#c62828" }}>{error}</p>;
+  if (cargando) return <p className="obs2-empty">Cargando observaciones...</p>;
+  if (error)    return <p className="obs2-empty" style={{ color: "#c62828" }}>{error}</p>;
 
   return (
-    <div>
-      <div className="sec-header">
+    <div className="obs2-page">
+
+      <div className="obs2-header">
         <div>
-          <h6 className="block-title">Observaciones</h6>
-          <p className="block-sub">Notas técnicas sobre los vehículos atendidos</p>
+          <h2 className="obs2-title">
+            <i className="bi bi-chat-left-text-fill" />
+            Observaciones
+          </h2>
+          <p className="obs2-sub">Notas técnicas sobre los vehículos atendidos</p>
         </div>
-        <button className="btn-nueva" onClick={() => { setNueva(!nueva); setErrForm(""); }}>
-          <i className="bi bi-plus-lg"></i> Editar observación
-        </button>
       </div>
 
-      {/* Formulario */}
-      {nueva && (
-        <div className="obs-form-card">
-          <div className="obs-form-title">
-            <i className="bi bi-pencil-square"></i> Agregar observación
+      {observaciones.length === 0 && (
+        <p className="obs2-empty">No hay observaciones registradas.</p>
+      )}
+
+      <div className="obs2-lista">
+        {observaciones.map((o, i) => (
+          <div
+            key={o.id ?? i}
+            className="obs2-card"
+            onClick={() => setSeleccion(o)}
+          >
+            <div className="obs2-card-left">
+              <div className="obs2-dot dot-azul" />
+            </div>
+            <div className="obs2-card-body">
+              <div className="obs2-card-vehiculo">{o.vehiculo}</div>
+              <div className="obs2-card-meta">
+                <span><i className="bi bi-person" /> {o.cliente}</span>
+                <span><i className="bi bi-calendar3" /> {o.fecha}</span>
+              </div>
+              <p className="obs2-card-texto">{o.texto}</p>
+            </div>
+            <div className="obs2-card-right">
+              <i className="bi bi-chevron-right obs2-chevron" />
+            </div>
           </div>
-          <div className="obs-form-row">
-            <select
-              className="obs-input"
-              value={ordenId}
-              onChange={e => setOrdenId(e.target.value)}
-            >
-              <option value="">Seleccionar orden...</option>
-              {ordenesActivas.map(o => (
-                <option key={o.id} value={o.id}>
-                  {o.vehiculo} — {o.servicio}
-                </option>
-              ))}
-            </select>
-          </div>
-          {errForm && (
-            <p style={{ color: "#c62828", fontSize: "0.82rem", margin: "4px 0" }}>{errForm}</p>
-          )}
-          <textarea
-            className="obs-textarea"
-            placeholder="Escribe aquí la observación técnica..."
-            rows={3}
-            value={texto}
-            onChange={e => setTexto(e.target.value)}
-          />
-          <div className="obs-form-actions">
-            <button className="btn-cancelar" onClick={() => { setNueva(false); setErrForm(""); }}>
-              Cancelar
-            </button>
-            <button className="btn-guardar" onClick={handleGuardar} disabled={guardando}>
-              <i className="bi bi-check2"></i> {guardando ? "Guardando..." : "Guardar"}
-            </button>
+        ))}
+      </div>
+
+      {seleccion && (
+        <div className="obs2-overlay" onClick={() => setSeleccion(null)}>
+          <div className="obs2-modal" onClick={e => e.stopPropagation()}>
+
+            <div className="obs2-modal-top">
+              <div className="obs2-modal-icon">
+                <i className="bi bi-chat-left-text-fill" />
+              </div>
+              <button className="obs2-modal-close" onClick={() => setSeleccion(null)}>
+                <i className="bi bi-x-lg" />
+              </button>
+            </div>
+
+            <div className="obs2-modal-body">
+              <div className="obs2-modal-vehiculo">{seleccion.vehiculo}</div>
+
+              <div className="obs2-modal-grid">
+                <div className="obs2-modal-item">
+                  <span className="obs2-modal-label">Cliente</span>
+                  <span className="obs2-modal-val">
+                    <i className="bi bi-person-fill" /> {seleccion.cliente}
+                  </span>
+                </div>
+                <div className="obs2-modal-item">
+                  <span className="obs2-modal-label">Fecha</span>
+                  <span className="obs2-modal-val">
+                    <i className="bi bi-calendar3" /> {seleccion.fecha}
+                  </span>
+                </div>
+                {seleccion.tipo && (
+                  <div className="obs2-modal-item">
+                    <span className="obs2-modal-label">Tipo</span>
+                    <span className="obs2-modal-val" style={{ textTransform: "capitalize" }}>
+                      {seleccion.tipo}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="obs2-modal-obs-label">Observación</div>
+              <div className="obs2-modal-obs-texto">{seleccion.texto}</div>
+            </div>
           </div>
         </div>
       )}
-
-      {/* Lista */}
-      <div className="obs-lista">
-        {observaciones.length === 0 && (
-          <p className="empty-msg">No hay observaciones registradas.</p>
-        )}
-        {observaciones.map(o => {
-          const conf = obsConfig[o.tipo] ?? obsConfig["advertencia"];
-          return (
-            <div className="obs-card" key={o.id} style={{ borderLeftColor: conf.color }}>
-              <div className="obs-header">
-                <div className="obs-icon-wrap" style={{ background: conf.bg, color: conf.color }}>
-                  <i className={`bi ${conf.icon}`}></i>
-                </div>
-                <div className="obs-meta">
-                  <div className="obs-vehiculo">{o.vehiculo}</div>
-                  <div className="obs-sub">
-                    <i className="bi bi-person"></i> {o.cliente}
-                    &nbsp;·&nbsp;
-                    <i className="bi bi-calendar3"></i> {o.fecha}
-                  </div>
-                </div>
-                <span className="obs-tipo-badge" style={{ background: conf.bg, color: conf.color }}>
-                  <i className={`bi ${conf.icon}`}></i>
-                  {o.tipo.charAt(0).toUpperCase() + o.tipo.slice(1)}
-                </span>
-              </div>
-              <p className="obs-texto">{o.texto}</p>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

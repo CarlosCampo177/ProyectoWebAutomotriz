@@ -1,107 +1,213 @@
 /* ══════════════════════════════════════
-   SecObservaciones.css — AutoTech
-   Contiene: formulario de nueva
-   observación, lista de observaciones
-   y sus cards con tipo y badge.
+   SecObservaciones.css
 ══════════════════════════════════════ */
 
-/* ══════════════════════
-   FORMULARIO
-══════════════════════ */
-.obs-form-card {
-  background: #fff; border: 1px solid #e2e6ef; border-radius: 12px;
-  padding: 20px 24px; margin-bottom: 20px;
-  animation: fadeUp .25s ease both;
+.obs2-page {
+  padding: 2rem 2.25rem;
+  min-height: 100vh;
+  background: #f4f6f9;
+  font-family: 'DM Sans', sans-serif;
 }
 
-.obs-form-title {
-  font-size: .82rem; font-weight: 700; color: #1c2a45;
-  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+/* ── Header ── */
+.obs2-header { margin-bottom: 1.5rem; }
+.obs2-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.obs2-title i { color: var(--accent, #1a6bdc); font-size: 1rem; }
+.obs2-sub { font-size: .8rem; color: #94a3b8; margin: 0; }
+
+/* ── Lista ── */
+.obs2-lista { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Card ── */
+.obs2-card {
+  background: #fff;
+  border: 1.5px solid #e8edf4;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.obs2-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.09);
+  transform: translateY(-1px);
+  border-color: #d1dbe8;
 }
 
-.obs-form-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 10px;
+.obs2-card-left { flex-shrink: 0; }
+.obs2-dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-verde { background: #22c55e; }
+.dot-gris  { background: #cbd5e1; }
+
+.obs2-card-body { flex: 1; min-width: 0; }
+.obs2-card-vehiculo {
+  font-size: .9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+  font-family: 'DM Sans', sans-serif;
+}
+.obs2-card-meta {
+  display: flex;
+  gap: 12px;
+  font-size: .74rem;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  font-family: 'DM Sans', sans-serif;
+}
+.obs2-card-meta span { display: flex; align-items: center; gap: 4px; }
+.obs2-card-texto {
+  font-size: .82rem;
+  color: #475569;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 500px;
+  font-family: 'DM Sans', sans-serif;
 }
 
-.obs-input,
-.obs-textarea {
-  width: 100%; padding: 9px 12px;
-  border: 1.5px solid #e2e6ef; border-radius: 8px;
-  font-size: .85rem; color: #1c2a45; background: #f8f9fb;
-  outline: none; font-family: 'Segoe UI', sans-serif;
-  transition: border-color .15s;
+.obs2-card-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.obs2-chevron { font-size: .75rem; color: #cbd5e1; }
+
+.obs2-empty { color: #94a3b8; font-size: .85rem; padding: 1rem 0; }
+
+/* ══════════════════════════════════════
+   MODAL CENTRAL
+══════════════════════════════════════ */
+.obs2-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: obsOverlayIn .18s ease;
 }
-.obs-input:focus,
-.obs-textarea:focus { border-color: #2e7d32; }
-
-.obs-textarea { resize: vertical; }
-
-.obs-form-actions {
-  display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;
+@keyframes obsOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* Botones del formulario */
-.btn-cancelar {
-  padding: 8px 18px; border-radius: 8px;
-  border: 1.5px solid #e2e6ef; background: #fff; color: #5a6a8a;
-  font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s;
+.obs2-modal {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.08);
+  overflow: hidden;
+  animation: obsModalIn .2s ease;
 }
-.btn-cancelar:hover { background: #f0f2f7; }
+@keyframes obsModalIn {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-.btn-guardar {
-  padding: 8px 18px; border-radius: 8px; border: none;
-  background: #2e7d32; color: #fff; font-size: .82rem; font-weight: 600;
-  cursor: pointer; display: flex; align-items: center; gap: 6px;
+.obs2-modal-top {
+  background: linear-gradient(135deg, #1a6bdc, #0d4fa8);
+  padding: 1.3rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.obs2-modal-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #fff;
+}
+.obs2-modal-close {
+  background: rgba(255,255,255,.15);
+  border: none;
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: .9rem;
   transition: background .15s;
 }
-.btn-guardar:hover { background: #1b5e20; }
+.obs2-modal-close:hover { background: rgba(255,255,255,.28); }
 
-.btn-nueva {
-  background: #2e7d32; color: #fff; border: none; border-radius: 9px;
-  padding: 9px 18px; font-size: .84rem; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; gap: 7px; transition: background .15s;
-}
-.btn-nueva:hover { background: #1b5e20; }
+.obs2-modal-body { padding: 1.5rem; }
 
-/* ══════════════════════
-   LISTA DE OBSERVACIONES
-══════════════════════ */
-.obs-lista { display: flex; flex-direction: column; gap: 12px; }
-
-.obs-card {
-  background: #fff; border: 1px solid #e2e6ef; border-left: 4px solid;
-  border-radius: 10px; padding: 18px 20px;
-  transition: box-shadow .18s, transform .18s;
-}
-.obs-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,.08);
-  transform: translateX(3px);
+.obs2-modal-vehiculo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1.2rem;
 }
 
-/* Header de la observación */
-.obs-header {
-  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px;
+.obs2-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.2rem;
+}
+.obs2-modal-item { display: flex; flex-direction: column; gap: 3px; }
+.obs2-modal-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--accent, #1a6bdc);
+  font-family: 'DM Sans', sans-serif;
+}
+.obs2-modal-val {
+  font-size: .84rem;
+  font-weight: 500;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Sans', sans-serif;
+}
+.obs2-modal-val i { color: #94a3b8; font-size: .85rem; }
+
+.obs2-modal-obs-label {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--accent, #1a6bdc);
+  margin-bottom: .5rem;
+  font-family: 'DM Sans', sans-serif;
+}
+.obs2-modal-obs-texto {
+  background: #f8fafc;
+  border: 1.5px solid #e8edf4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: .88rem;
+  color: #1e293b;
+  line-height: 1.6;
+  font-family: 'DM Sans', sans-serif;
 }
 
-.obs-icon-wrap {
-  width: 36px; height: 36px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
+@media (max-width: 768px) {
+  .obs2-page { padding: 1.25rem 1rem; }
+  .obs2-modal { max-width: calc(100vw - 2rem); }
+  .obs2-card-texto { max-width: 200px; }
 }
-
-.obs-meta { flex: 1; }
-.obs-vehiculo { font-size: .88rem; font-weight: 700; color: #1c2a45; margin-bottom: 3px; }
-.obs-sub {
-  font-size: .75rem; color: #8a9bbf;
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-}
-
-/* Badge de tipo */
-.obs-tipo-badge {
-  font-size: .72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px;
-  display: flex; align-items: center; gap: 5px; white-space: nowrap;
-}
-
-/* Texto de la observación */
-.obs-texto { font-size: .84rem; color: #5a6a8a; line-height: 1.55; }
