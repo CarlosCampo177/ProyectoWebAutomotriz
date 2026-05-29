@@ -2,10 +2,26 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import {
   getMecanicoVehiculos,
+  getMecanicoOrdenes,
   postObservacion,
 } from "../../../services/mecanicoService";
 import { estadoConfig, Badge } from "../mecanicoHelpers.jsx";
 import "./SecVehiculos.css";
+
+// ── Detectar si una orden ya pasó su fecha/hora y no fue completada ──
+function esPerdida(orden) {
+  if (!orden || orden.estado === "completada") return false;
+  const MESES = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5,
+                  JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+  const mes = MESES[orden.fecha?.mes?.toUpperCase()];
+  if (mes === undefined) return false;
+  const [horaStr, periodo] = (orden.hora ?? "").split(" ");
+  let [h, m] = horaStr.split(":").map(Number);
+  if (periodo === "PM" && h !== 12) h += 12;
+  if (periodo === "AM" && h === 12) h = 0;
+  const fechaOrden = new Date(2026, mes, Number(orden.fecha.dia), h, m);
+  return fechaOrden < new Date();
+}
 
 export default function SecVehiculos() {
   const { user } = useAuth();
@@ -16,7 +32,6 @@ export default function SecVehiculos() {
   const [error,      setError]      = useState("");
   const [seleccion,  setSeleccion]  = useState(null);
 
-  // obs — solo en panel lateral
   const [obsAbierta, setObsAbierta] = useState(false);
   const [texto,      setTexto]      = useState("");
   const [guardando,  setGuardando]  = useState(false);
@@ -26,8 +41,24 @@ export default function SecVehiculos() {
   useEffect(() => {
     if (!idUsuario) return;
     setCargando(true);
-    getMecanicoVehiculos(idUsuario)
-      .then((data) => setVehiculos(data))
+
+    // Cargamos vehículos y órdenes en paralelo
+    Promise.all([
+      getMecanicoVehiculos(idUsuario),
+      getMecanicoOrdenes(idUsuario),
+    ])
+      .then(([vehs, ordenes]) => {
+        // Filtramos vehículos cuya orden asociada esté perdida
+        const ordenPorId = {};
+        ordenes.forEach(o => { ordenPorId[o.id] = o; });
+
+        const activos = vehs.filter(v => {
+          const orden = ordenPorId[v.idOrden];
+          return !esPerdida(orden);
+        });
+
+        setVehiculos(activos);
+      })
       .catch((e) => { console.error(e); setError("No se pudieron cargar los vehículos."); })
       .finally(() => setCargando(false));
   }, [idUsuario]);
@@ -138,7 +169,6 @@ export default function SecVehiculos() {
                 </div>
               </div>
 
-              {/* Footer sin botón de observación */}
               <div className="veh-card-footer">
                 <Badge tipo={v.estado} config={estadoConfig} />
               </div>
@@ -208,7 +238,6 @@ export default function SecVehiculos() {
               <Badge tipo={seleccion.estado} config={estadoConfig} />
             </div>
 
-            {/* Formulario de observación inline en el panel */}
             {obsAbierta && (
               <div className="veh-obs-form">
                 <p className="obs-inline-label">
