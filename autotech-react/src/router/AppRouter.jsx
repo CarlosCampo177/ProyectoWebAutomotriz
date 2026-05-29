@@ -63,7 +63,7 @@ function AppRouter() {
       </Route>
 
       {/* ── Usuario/Cliente ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['cliente']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['Usuario']} />}>
         <Route path="/usuario" element={<DashboardLayout />}>
           <Route index element={<UsuarioOk />} />
         </Route>
