@@ -124,9 +124,8 @@
   flex-shrink: 0;
 }
 .fecha-dia {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: #0f172a;
   line-height: 1;
 }
