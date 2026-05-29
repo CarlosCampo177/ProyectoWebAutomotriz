@@ -1,30 +1,78 @@
-import { createContext, useContext, useState } from 'react'
+// src/context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from 'react'
+import apiClient from '../services/apiClient'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  // Inicializamos el estado intentando recuperar si había una sesión activa al recargar la página
-  const [user, setUser] = useState(() => {
-    const token = localStorage.getItem('token');
-    // Si necesitas persistir los datos básicos del usuario, podrías guardarlos serializados,
-    // pero por ahora mantengamos el flujo del token.
-    return null; 
-  })
+  const [user, setUser]       = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verificarSesion = async () => {
+      const token     = localStorage.getItem('token');
+      const savedUser = localStorage.getItem('user_data');
+
+      // Si no hay token o datos guardados, no hay nada que verificar
+      if (!token || !savedUser) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Llama al backend con el token actual — si responde 401, el catch limpia todo
+        await apiClient.get('Auth/verify');
+        // Token válido → restaura la sesión en memoria
+        setUser(JSON.parse(savedUser));
+      } catch {
+        // Token expirado, manipulado o inválido → borra todo y fuerza login
+        localStorage.removeItem('token');
+        localStorage.removeItem('user_data');
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verificarSesion();
+  }, []);
 
   const login = (userData) => {
-    // 1. Guardamos el token en el navegador apenas inicia sesión
     if (userData && userData.token) {
+      // Limpia cualquier sesión anterior antes de guardar la nueva
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_data');
+
       localStorage.setItem('token', userData.token);
+
+      const infoUsuario = {
+        id:        userData.id,
+        nombre:    userData.nombre,
+        email:     userData.email,
+        rol:       userData.rol,
+        iniciales: userData.iniciales
+      };
+
+      localStorage.setItem('user_data', JSON.stringify(infoUsuario));
+      setUser(infoUsuario);
     }
-    // 2. Guardamos el resto de los datos en el estado global de React
-    setUser(userData);
-  }
+  };
 
   const logout = () => {
-    // 1. Limpiamos el token por completo del navegador para cerrar las puertas
     localStorage.removeItem('token');
-    // 2. Limpiamos el usuario en React
+    localStorage.removeItem('user_data');
     setUser(null);
+    // RutasProtegidas detecta user=null y redirige sola a /page/login
+  };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Verificando sesión...</span>
+        </div>
+      </div>
+    );
   }
 
   return (

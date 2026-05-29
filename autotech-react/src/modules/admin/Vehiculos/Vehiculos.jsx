@@ -15,57 +15,60 @@ const COLORES_WRAP = [
   { value: 'orange', label: 'Naranja',  hex: '#ea580c' },
 ];
 
-const ICONOS = [
-  { val: 'car',   label: 'Auto',         icon: 'bi-car-front' },
-  { val: 'truck', label: 'Camioneta',    icon: 'bi-truck'     },
-  { val: 'moto',  label: 'Moto',         icon: 'bi-bicycle'   },
-  { val: 'van',   label: 'Van',          icon: 'bi-bus-front' },
+const TIPOS = [
+  { val: 'car',   label: 'Auto',      icon: 'bi-car-front' },
+  { val: 'truck', label: 'Camioneta', icon: 'bi-truck'     },
+  { val: 'moto',  label: 'Moto',      icon: 'bi-bicycle'   },
+  { val: 'van',   label: 'Van',       icon: 'bi-bus-front' },
 ];
 
+const tipoIcon = (tipo) =>
+  TIPOS.find(t => t.val === tipo)?.icon || 'bi-car-front';
+
 const EMPTY_FORM = {
-  placa: '', 
+  placa: '',
   anio: new Date().getFullYear(),
-  color: '', 
+  color: '',
   kilometraje: 0,
-  combustible: 'Gasolina', 
-  icono: 'car', 
+  combustible: 'Gasolina',
+  tipoVehiculo: 'car',       // ← reemplaza icono
   colorWrap: 'blue',
-  idMarca: '', 
-  modeloTexto: '', // 💡 Cambiado de idModelo a modeloTexto para reflejar que es libre
+  idMarca: '',
+  modeloTexto: '',
   idCliente: '',
 };
 
 export default function Vehiculos() {
-  const [vehiculos,    setVehiculos]    = useState([]);
-  const [marcas,       setMarcas]       = useState([]);
-  const [modelos,      setModelos]      = useState([]);
-  const [clientes,     setClientes]     = useState([]);
-  const [form,         setForm]         = useState(EMPTY_FORM);
-  const [editingId,    setEditingId]    = useState(null);
-  const [showModal,    setShowModal]    = useState(false);
-  const [showMarca,    setShowMarca]    = useState(false);
-  const [nuevaMarca,   setNuevaMarca]   = useState('');
-  const [loading,      setLoading]      = useState(true);
-  const [loadMod,      setLoadMod]      = useState(false);
-  const [saving,       setSaving]       = useState(false);
-  const [error,        setError]        = useState('');
-  const [busqueda,     setBusqueda]     = useState('');
-  const [detalle,      setDetalle]      = useState(null);
+  const [vehiculos,         setVehiculos]         = useState([]);
+  const [marcas,            setMarcas]            = useState([]);
+  const [modelos,           setModelos]           = useState([]);
+  const [clientes,          setClientes]          = useState([]);
+  const [form,              setForm]              = useState(EMPTY_FORM);
+  const [editingId,         setEditingId]         = useState(null);
+  const [showModal,         setShowModal]         = useState(false);
+  const [showMarca,         setShowMarca]         = useState(false);
+  const [nuevaMarca,        setNuevaMarca]        = useState('');
+  const [loading,           setLoading]           = useState(true);
+  const [loadMod,           setLoadMod]           = useState(false);
+  const [saving,            setSaving]            = useState(false);
+  const [error,             setError]             = useState('');
+  const [busqueda,          setBusqueda]          = useState('');
+  const [detalle,           setDetalle]           = useState(null);
+  const [tipoAutoDetectado, setTipoAutoDetectado] = useState(false); // ← nuevo
 
   useEffect(() => {
     Promise.all([cargarVehiculos(), cargarMarcas(), cargarClientes()]);
   }, []);
 
-  /* ── Carga de datos ── */
   const cargarVehiculos = async () => {
     try {
       setLoading(true);
       const data = await vehiculoService.getAll();
       setVehiculos(data || []);
-    } catch { 
-      setVehiculos([]); 
-    } finally { 
-      setLoading(false); 
+    } catch {
+      setVehiculos([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,8 +76,8 @@ export default function Vehiculos() {
     try {
       const data = await marcaService.getAll();
       setMarcas((data || []).map(m => ({ id: String(m.idMarca), nombre: m.nombreMarca })));
-    } catch { 
-      setMarcas([]); 
+    } catch {
+      setMarcas([]);
     }
   };
 
@@ -82,24 +85,44 @@ export default function Vehiculos() {
     try {
       const data = await clienteAdminService.getAll();
       setClientes(data || []);
-    } catch { 
-      setClientes([]); 
+    } catch {
+      setClientes([]);
     }
   };
 
-  /* ── Cambio de marca → carga modelos existentes ── */
+  /* ── Cambio de marca → carga modelos ── */
   const handleMarcaChange = async (idMarca) => {
     setForm(f => ({ ...f, idMarca, modeloTexto: '' }));
     setModelos([]);
+    setTipoAutoDetectado(false);
     if (!idMarca) return;
     try {
       setLoadMod(true);
       const data = await marcaService.getModelos(idMarca);
-      setModelos((data || []).map(mod => ({ id: String(mod.id), nombre: mod.nombre })));
-    } catch { 
-      setModelos([]); 
-    } finally { 
-      setLoadMod(false); 
+      // Los modelos ahora incluyen tipoVehiculo
+      setModelos((data || []).map(mod => ({
+        id:           String(mod.id),
+        nombre:       mod.nombre,
+        tipoVehiculo: mod.tipoVehiculo || 'car', // ← nuevo
+      })));
+    } catch {
+      setModelos([]);
+    } finally {
+      setLoadMod(false);
+    }
+  };
+
+  /* ── Cambio de modelo → detecta tipo automáticamente ── */
+  const handleModeloChange = (texto) => {
+    f('modeloTexto', texto);
+    const match = modelos.find(
+      m => m.nombre.toLowerCase() === texto.toLowerCase()
+    );
+    if (match) {
+      f('tipoVehiculo', match.tipoVehiculo);
+      setTipoAutoDetectado(true);
+    } else {
+      setTipoAutoDetectado(false);
     }
   };
 
@@ -109,30 +132,42 @@ export default function Vehiculos() {
     setModelos([]);
     setEditingId(null);
     setError('');
+    setTipoAutoDetectado(false);
     setShowModal(true);
   };
 
   const abrirEditar = async (v) => {
     setForm({
-      placa:       v.placa,
-      anio:        v.anio,
-      color:       v.color,
-      kilometraje: v.kilometraje,
-      combustible: v.combustible,
-      icono:       v.icono     || 'car',
-      colorWrap:   v.colorWrap || 'blue',
-      idMarca:     String(v.idMarca),
-      modeloTexto: String(v.modelo), // 💡 Cargamos el nombre textual del modelo en el input libre
-      idCliente:   String(v.idCliente),
+      placa:        v.placa,
+      anio:         v.anio,
+      color:        v.color,
+      kilometraje:  v.kilometraje,
+      combustible:  v.combustible,
+      tipoVehiculo: v.tipoVehiculo || 'car', // ← reemplaza icono
+      colorWrap:    v.colorWrap || 'blue',
+      idMarca:      String(v.idMarca),
+      modeloTexto:  String(v.modelo),
+      idCliente:    String(v.idCliente),
     });
     try {
       setLoadMod(true);
       const data = await marcaService.getModelos(v.idMarca);
-      setModelos((data || []).map(mod => ({ id: String(mod.id), nombre: mod.nombre })));
-    } catch { 
-      setModelos([]); 
-    } finally { 
-      setLoadMod(false); 
+      const lista = (data || []).map(mod => ({
+        id:           String(mod.id),
+        nombre:       mod.nombre,
+        tipoVehiculo: mod.tipoVehiculo || 'car',
+      }));
+      setModelos(lista);
+      // Si el modelo ya existe en BD → tipo auto detectado
+      const match = lista.find(
+        m => m.nombre.toLowerCase() === v.modelo.toLowerCase()
+      );
+      setTipoAutoDetectado(!!match);
+    } catch {
+      setModelos([]);
+      setTipoAutoDetectado(false);
+    } finally {
+      setLoadMod(false);
     }
     setEditingId(v.id);
     setError('');
@@ -149,20 +184,18 @@ export default function Vehiculos() {
     try {
       setSaving(true);
       setError('');
-      
       const payload = {
         placa:        form.placa.trim().toUpperCase(),
         anio:         Number(form.anio),
         color:        form.color.trim(),
         kilometraje:  Number(form.kilometraje),
         combustible:  form.combustible,
-        icono:        form.icono,
+        tipoVehiculo: form.tipoVehiculo, // ← reemplaza icono
         colorWrap:    form.colorWrap,
-        nombreModelo: form.modeloTexto.trim(), 
-        idMarca:      Number(form.idMarca),    
+        nombreModelo: form.modeloTexto.trim(),
+        idMarca:      Number(form.idMarca),
         idCliente:    Number(form.idCliente),
       };
-
       if (editingId) {
         await vehiculoService.actualizar(editingId, payload);
       } else {
@@ -189,7 +222,6 @@ export default function Vehiculos() {
     }
   };
 
-  /* ── Marca rápida ── */
   const guardarMarcaRapida = async () => {
     if (!nuevaMarca.trim()) return;
     try {
@@ -206,22 +238,19 @@ export default function Vehiculos() {
   const colorInfo = (val) => COLORES_WRAP.find(c => c.value === val) || COLORES_WRAP[0];
 
   const filtrados = vehiculos.filter(v =>
-    (v.placa || '').toLowerCase().includes(busqueda.toLowerCase())     || 
-    (v.cliente || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-    (v.marca   || '').toLowerCase().includes(busqueda.toLowerCase())
+    (v.placa    || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+    (v.cliente  || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+    (v.marca    || '').toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
     <div className={`veh-page ${detalle ? 'veh-has-detalle' : ''}`}>
 
       {/* ── COLUMNA PRINCIPAL ── */}
-      <div className="veh-main">
-        {/* HEADER */}
+      <div className={`veh-main ${detalle ? 'con-panel' : ''}`}>
         <div className="page-header">
           <div>
-            <h1 className="page-title">
-              <i className="bi bi-car-front" /> Vehículos
-            </h1>
+            <h1 className="page-title"><i className="bi bi-car-front" /> Vehículos</h1>
             <p className="page-subtitle">Gestiona todos los vehículos registrados en el sistema</p>
           </div>
           <button className="btn-primary" type="button" onClick={abrirCrear}>
@@ -229,7 +258,6 @@ export default function Vehiculos() {
           </button>
         </div>
 
-        {/* TOOLBAR */}
         <div className="veh-toolbar">
           <div className="search-bar">
             <i className="bi bi-search" />
@@ -249,7 +277,6 @@ export default function Vehiculos() {
           </span>
         </div>
 
-        {/* TABLA */}
         {loading ? (
           <div className="loading-state">
             <i className="bi bi-arrow-repeat spin" /> Cargando vehículos...
@@ -287,23 +314,24 @@ export default function Vehiculos() {
                   >
                     <td className="veh-td-num">{i + 1}</td>
                     <td>
-                      <span
-                        className="badge-placa"
-                        style={{ borderLeft: `3px solid ${colorInfo(v.colorWrap).hex}` }}
-                      >
+                      <span className="badge-placa" style={{ borderLeft: `3px solid ${colorInfo(v.colorWrap).hex}` }}>
                         {v.placa}
                       </span>
                     </td>
                     <td>
-                      <div className="veh-nombre">{v.marca} {v.modelo}</div>
-                      <div className="veh-sub">{v.color}</div>
+                      {/* ← ícono viene del tipoVehiculo del modelo */}
+                      <div className="mec-cell">
+                        <i className={`bi ${tipoIcon(v.tipoVehiculo)}`} style={{ fontSize: '1.1rem', color: 'var(--accent)' }} />
+                        <div>
+                          <div className="veh-nombre">{v.marca} {v.modelo}</div>
+                          <div className="veh-sub">{v.color}</div>
+                        </div>
+                      </div>
                     </td>
                     <td>{v.cliente}</td>
                     <td>{v.anio}</td>
                     <td className="veh-td-km">{v.kilometraje?.toLocaleString()} km</td>
-                    <td>
-                      <span className="veh-badge-comb">{v.combustible}</span>
-                    </td>
+                    <td><span className="veh-badge-comb">{v.combustible}</span></td>
                     <td>
                       <span className={`badge-estado ${v.estado === 'warn' ? 'warn' : 'ok'}`}>
                         {v.estado === 'warn' ? '⚠ Alto km' : '✓ OK'}
@@ -331,10 +359,7 @@ export default function Vehiculos() {
           <div className="veh-detalle-header">
             <div>
               <h3 className="veh-detalle-title">{detalle.marca} {detalle.modelo}</h3>
-              <span
-                className="badge-placa"
-                style={{ borderLeft: `3px solid ${colorInfo(detalle.colorWrap).hex}` }}
-              >
+              <span className="badge-placa" style={{ borderLeft: `3px solid ${colorInfo(detalle.colorWrap).hex}` }}>
                 {detalle.placa}
               </span>
             </div>
@@ -348,6 +373,14 @@ export default function Vehiculos() {
           <div className="veh-detalle-body">
             <p className="veh-section-title">Información del vehículo</p>
             <div className="veh-info-grid">
+              <div className="veh-info-item">
+                <span className="veh-info-label">Tipo</span>
+                {/* ← muestra el tipo con ícono */}
+                <span className="veh-info-val">
+                  <i className={`bi ${tipoIcon(detalle.tipoVehiculo)} me-1`} />
+                  {TIPOS.find(t => t.val === detalle.tipoVehiculo)?.label || 'Auto'}
+                </span>
+              </div>
               <div className="veh-info-item">
                 <span className="veh-info-label">Año</span>
                 <span className="veh-info-val">{detalle.anio}</span>
@@ -404,7 +437,7 @@ export default function Vehiculos() {
                 </div>
               )}
 
-              {/* Cliente */}
+              {/* Propietario */}
               <div className="veh-form-section">
                 <div className="veh-form-section-label"><i className="bi bi-person" /> Propietario</div>
                 <div className="form-group">
@@ -418,7 +451,7 @@ export default function Vehiculos() {
                 </div>
               </div>
 
-              {/* Marca y Modelo */}
+              {/* Identificación */}
               <div className="veh-form-section">
                 <div className="veh-form-section-label"><i className="bi bi-tag" /> Identificación</div>
                 <div className="form-grid-2">
@@ -437,7 +470,6 @@ export default function Vehiculos() {
                     </div>
                   </div>
 
-                  {/* 💡 AQUÍ ESTÁ EL CAMBIO PRINCIPAL: Campo Libre con Datalist de apoyo */}
                   <div className="form-group">
                     <label>Modelo *</label>
                     <input
@@ -445,7 +477,7 @@ export default function Vehiculos() {
                       list="lista-modelos-sugeridos"
                       placeholder={loadMod ? 'Cargando modelos...' : !form.idMarca ? '— Elige marca primero —' : 'Escribe o selecciona modelo'}
                       value={form.modeloTexto}
-                      onChange={e => f('modeloTexto', e.target.value)}
+                      onChange={e => handleModeloChange(e.target.value)} // ← cambiado
                       disabled={!form.idMarca || loadMod}
                     />
                     <datalist id="lista-modelos-sugeridos">
@@ -457,12 +489,14 @@ export default function Vehiculos() {
 
                   <div className="form-group">
                     <label>Placa *</label>
-                    <input type="text" placeholder="Ej: ABC-123" value={form.placa} onChange={e => f('placa', e.target.value.toUpperCase())} className="veh-mono" />
+                    <input type="text" placeholder="Ej: ABC-123" value={form.placa}
+                      onChange={e => f('placa', e.target.value.toUpperCase())} className="veh-mono" />
                   </div>
 
                   <div className="form-group">
                     <label>Año *</label>
-                    <input type="number" min="1990" max={new Date().getFullYear() + 1} value={form.anio} onChange={e => f('anio', e.target.value)} />
+                    <input type="number" min="1990" max={new Date().getFullYear() + 1}
+                      value={form.anio} onChange={e => f('anio', e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -473,11 +507,13 @@ export default function Vehiculos() {
                 <div className="form-grid-2">
                   <div className="form-group">
                     <label>Color *</label>
-                    <input type="text" placeholder="Ej: Blanco perla" value={form.color} onChange={e => f('color', e.target.value)} />
+                    <input type="text" placeholder="Ej: Blanco perla" value={form.color}
+                      onChange={e => f('color', e.target.value)} />
                   </div>
                   <div className="form-group">
                     <label>Kilometraje</label>
-                    <input type="number" min="0" value={form.kilometraje} onChange={e => f('kilometraje', e.target.value)} />
+                    <input type="number" min="0" value={form.kilometraje}
+                      onChange={e => f('kilometraje', e.target.value)} />
                   </div>
                   <div className="form-group">
                     <label>Combustible</label>
@@ -489,35 +525,55 @@ export default function Vehiculos() {
                     <label>Color de tarjeta</label>
                     <div className="veh-color-picker">
                       {COLORES_WRAP.map(c => (
-                        <button
-                          key={c.value} type="button"
+                        <button key={c.value} type="button"
                           className={`veh-color-dot ${form.colorWrap === c.value ? 'active' : ''}`}
-                          style={{ background: c.hex }} title={c.label} onClick={() => f('colorWrap', c.value)}
-                        />
+                          style={{ background: c.hex }} title={c.label}
+                          onClick={() => f('colorWrap', c.value)} />
                       ))}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Tipo */}
-              <div className="veh-form-section">
-                <div className="veh-form-section-label"><i className="bi bi-collection" /> Tipo de vehículo</div>
-                <div className="veh-tipo-row">
-                  {ICONOS.map(opt => (
-                    <button key={opt.val} type="button" className={`veh-tipo-btn ${form.icono === opt.val ? 'active' : ''}`} onClick={() => f('icono', opt.val)}>
-                      <i className={`bi ${opt.icon}`} />
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
+              {/* Tipo — solo si el modelo es nuevo */}
+              {!tipoAutoDetectado && (
+                <div className="veh-form-section">
+                  <div className="veh-form-section-label">
+                    <i className="bi bi-collection" /> Tipo de vehículo
+                    <span style={{ fontSize: '.75rem', color: 'var(--text-3)', fontWeight: 400, marginLeft: '.5rem' }}>
+                      (modelo nuevo — se guardará para la próxima vez)
+                    </span>
+                  </div>
+                  <div className="veh-tipo-row">
+                    {TIPOS.map(opt => (
+                      <button key={opt.val} type="button"
+                        className={`veh-tipo-btn ${form.tipoVehiculo === opt.val ? 'active' : ''}`}
+                        onClick={() => f('tipoVehiculo', opt.val)}>
+                        <i className={`bi ${opt.icon}`} />
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Si el tipo fue auto detectado, muéstralo como solo lectura */}
+              {tipoAutoDetectado && (
+                <div className="veh-form-section">
+                  <div className="veh-form-section-label"><i className="bi bi-collection" /> Tipo de vehículo</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', color: 'var(--text-2)', fontSize: '.88rem' }}>
+                    <i className={`bi ${tipoIcon(form.tipoVehiculo)}`} style={{ color: 'var(--accent)', fontSize: '1.2rem' }} />
+                    <span>{TIPOS.find(t => t.val === form.tipoVehiculo)?.label}</span>
+                    <span style={{ fontSize: '.75rem', color: 'var(--text-3)' }}>— asignado automáticamente por el modelo</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="modal-footer">
               <button className="btn-secondary" type="button" onClick={cerrarModal} disabled={saving}>Cancelar</button>
               <button className="btn-primary" type="button" onClick={guardar} disabled={saving}>
-                {saving 
+                {saving
                   ? <><i className="bi bi-arrow-repeat spin me-1" /> Guardando...</>
                   : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} /> {editingId ? 'Guardar cambios' : 'Registrar vehículo'}</>
                 }
@@ -527,23 +583,29 @@ export default function Vehiculos() {
         </div>
       )}
 
-      {/* ══ MINI-MODAL MARCA RAPIDA (Mantenido porque las marcas sí usan ID rígido) ══ */}
+      {/* ══ MINI-MODAL MARCA ══ */}
       {showMarca && (
         <div className="modal-overlay" onClick={() => setShowMarca(false)}>
           <div className="modal-card modal-sm" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Nueva Marca</h2>
-              <button className="modal-close" type="button" onClick={() => setShowMarca(false)}><i className="bi bi-x-lg" /></button>
+              <button className="modal-close" type="button" onClick={() => setShowMarca(false)}>
+                <i className="bi bi-x-lg" />
+              </button>
             </div>
             <div className="modal-body">
               <div className="form-group">
                 <label>Nombre</label>
-                <input type="text" placeholder="Ej: Toyota" value={nuevaMarca} onChange={e => setNuevaMarca(e.target.value)} onKeyDown={e => e.key === 'Enter' && guardarMarcaRapida()} autoFocus />
+                <input type="text" placeholder="Ej: Toyota" value={nuevaMarca}
+                  onChange={e => setNuevaMarca(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && guardarMarcaRapida()} autoFocus />
               </div>
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" type="button" onClick={() => setShowMarca(false)}>Cancelar</button>
-              <button className="btn-primary" type="button" onClick={guardarMarcaRapida}><i className="bi bi-check-lg me-1" /> Crear</button>
+              <button className="btn-primary" type="button" onClick={guardarMarcaRapida}>
+                <i className="bi bi-check-lg me-1" /> Crear
+              </button>
             </div>
           </div>
         </div>

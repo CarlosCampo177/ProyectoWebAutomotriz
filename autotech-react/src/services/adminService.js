@@ -53,10 +53,12 @@ export const vehiculoService = {
    SERVICIOS
 ══════════════════════════════════ */
 export const servicioService = {
-  getAll:     ()         => apiClient.get('Servicios'),
-  crear:      (data)     => apiClient.post('Servicios', data),
-  actualizar: (id, data) => apiClient.put(`Servicios/${id}`, data),
-  eliminar:   (id)       => apiClient.delete(`Servicios/${id}`),
+  getAll:        ()         => apiClient.get('Servicios'),
+  getActivos:    ()         => apiClient.get('Servicios/activos'),
+  getById:       (id)       => apiClient.get(`Servicios/${id}`),
+  crear:         (data)     => apiClient.post('Servicios', data),
+  actualizar:    (id, data) => apiClient.put(`Servicios/${id}`, data),
+  cambiarEstado: (id)       => apiClient.patch(`Servicios/${id}/estado`),
 }
 
 /* ══════════════════════════════════

@@ -23,6 +23,7 @@ import SecInicio        from '../modules/Mecanico/sections/SecInicio'
 import SecOrdenes       from '../modules/Mecanico/sections/SecOrdenes'
 import SecVehiculos     from '../modules/Mecanico/sections/SecVehiculos'
 import SecObservaciones from '../modules/Mecanico/sections/SecObservaciones'
+import RutasProtegidas from './RutasProtegidas'
 
 // Usuario
 import UsuarioOk from '../modules/Usuario/UsuarioDashboard'
@@ -37,29 +38,35 @@ function AppRouter() {
       <Route path="/page/login"    element={<Login />}    />
 
       {/* ── Admin ── */}
-      <Route path="/admin" element={<DashboardLayout />}>
-        <Route path="inicio"       element={<AdminInicio />}  />
-        <Route path="clientes"     element={<Clientes/>} />
-        <Route path="vehiculos"    element={<Vehiculos />}    />
-        <Route path="mecanicos"    element={<Mecanicos />}    />
-        <Route path="servicios"    element={<Servicios />}    />
-        <Route path="producto"     element={<Productos />}    />
-        <Route path="citas"        element={<Ordenes />}      />
-        <Route path="facturacion"  element={<Facturacion />}  />
-        <Route path="estadisticas" element={<Estadisticas />} />
+      <Route element={<RutasProtegidas rolesPermitidos={['admin']} />}>
+        <Route path="/admin" element={<DashboardLayout />}>
+          <Route path="inicio"       element={<AdminInicio />}  />
+          <Route path="clientes"     element={<Clientes/>} />
+          <Route path="vehiculos"    element={<Vehiculos />}    />
+          <Route path="mecanicos"    element={<Mecanicos />}    />
+          <Route path="servicios"    element={<Servicios />}    />
+          <Route path="producto"     element={<Productos />}    />
+          <Route path="citas"        element={<Ordenes />}      />
+          <Route path="facturacion"  element={<Facturacion />}  />
+          <Route path="estadisticas" element={<Estadisticas />} />
+        </Route>
       </Route>
 
       {/* ── Mecánico ── */}
-      <Route path="/mecanico" element={<DashboardLayout />}>
-        <Route index                element={<SecInicio />}        />
-        <Route path="ordenes"       element={<SecOrdenes />}       />
-        <Route path="vehiculos"     element={<SecVehiculos />}     />
-        <Route path="observaciones" element={<SecObservaciones />} />
+      <Route element={<RutasProtegidas rolesPermitidos={['mecanico']} />}>
+        <Route path="/mecanico" element={<DashboardLayout />}>
+          <Route index                element={<SecInicio />}        />
+          <Route path="ordenes"       element={<SecOrdenes />}       />
+          <Route path="vehiculos"     element={<SecVehiculos />}     />
+          <Route path="observaciones" element={<SecObservaciones />} />
+        </Route>
       </Route>
 
       {/* ── Usuario/Cliente ── */}
-      <Route path="/usuario" element={<DashboardLayout />}>
-        <Route index element={<UsuarioOk />} />
+      <Route element={<RutasProtegidas rolesPermitidos={['cliente']} />}>
+        <Route path="/usuario" element={<DashboardLayout />}>
+          <Route index element={<UsuarioOk />} />
+        </Route>
       </Route>
 
     </Routes>
