@@ -110,6 +110,7 @@
 .orden-card[data-estado="pendiente"]  { border-left-color: #f59e0b; }
 .orden-card[data-estado="en_proceso"] { border-left-color: #3b82f6; }
 .orden-card[data-estado="cancelada"]  { border-left-color: #ef4444; }
+.orden-card[data-estado="perdida"]    { border-left-color: #c62828; background: #fff8f8; }
 
 /* ── Fecha box ── */
 .orden-fecha {
@@ -180,6 +181,7 @@
 .estado-en_proceso { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
 .estado-completada { background: #dcfce7; color: #14532d; border: 1px solid #bbf7d0; }
 .estado-cancelada  { background: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca; }
+.estado-perdida    { background: #fce4ec; color: #c62828; border: 1px solid #f48fb1; }
 
 /* Prioridad */
 .prioridad-normal  { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }

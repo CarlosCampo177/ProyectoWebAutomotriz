@@ -27,12 +27,36 @@ export default function SecOrdenes() {
     { key: "todas",      label: "Todas"      },
     { key: "pendiente",  label: "Pendiente"  },
     { key: "en_proceso", label: "En proceso" },
+    { key: "perdida",    label: "Perdida"    },
     { key: "completada", label: "Completada" },
   ];
 
-  const lista = filtro === "todas"
-    ? ordenes
-    : ordenes.filter(o => o.estado === filtro);
+  // ── Detectar si una orden ya pasó su fecha/hora y no fue completada ──
+  const esPerdida = (o) => {
+    if (o.estado === "completada") return false;
+    const MESES = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5,
+                    JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
+    const mes = MESES[o.fecha?.mes?.toUpperCase()];
+    if (mes === undefined) return false;
+    const [horaStr, periodo] = (o.hora ?? "").split(" ");
+    let [h, m] = horaStr.split(":").map(Number);
+    if (periodo === "PM" && h !== 12) h += 12;
+    if (periodo === "AM" && h === 12) h = 0;
+    const fechaOrden = new Date(2026, mes, Number(o.fecha.dia), h, m);
+    return fechaOrden < new Date();
+  };
+
+  // ── Orden: pendiente → en_proceso → perdida → completada ──
+  const ORDEN_ESTADO = { pendiente: 1, en_proceso: 2, perdida: 3, completada: 4 };
+
+  const lista = (filtro === "todas"
+    ? [...ordenes]
+    : ordenes.filter(o => {
+        const estado = esPerdida(o) ? "perdida" : o.estado;
+        return estado === filtro;
+      })
+  ).map(o => esPerdida(o) ? { ...o, estado: "perdida" } : o)
+   .sort((a, b) => (ORDEN_ESTADO[a.estado] ?? 99) - (ORDEN_ESTADO[b.estado] ?? 99));
 
   const iniciales = (nombre = "") =>
     nombre.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase();
@@ -44,7 +68,7 @@ export default function SecOrdenes() {
 
   const actualizarEstado = async () => {
     if (!seleccion) return;
-    if (seleccion.estado === "completada") return;
+    if (seleccion.estado === "completada" || seleccion.estado === "perdida") return;
     try {
       const res = await cambiarEstadoOrden(idUsuario, seleccion.id);
       setOrdenes(prev =>
@@ -98,6 +122,7 @@ export default function SecOrdenes() {
             <div
               key={o.id}
               className={`orden-card ${seleccion?.id === o.id ? "orden-selected" : ""}`}
+              data-estado={o.estado}
               onClick={() => seleccionar(o)}
             >
               <div className="orden-fecha">
