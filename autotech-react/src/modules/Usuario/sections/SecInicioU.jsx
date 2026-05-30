@@ -4,7 +4,7 @@
 ══════════════════════════════════════════ */
 import { useState, useEffect } from "react";
 import * as Icon from "../icons/Icons";
-import "./SecInicio.css";
+import "./SecInicioU.css";
 
 const MESES_FULL = [
   "enero","febrero","marzo","abril","mayo","junio",
@@ -113,7 +113,7 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
   const acciones = [
     { icono: Icon.Calendar, label: "Nueva cita",      color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal("nuevaCita") },
     { icono: Icon.Car,      label: "Mis vehículos",   color: "#2e7d32", bg: "#e8f5e9", action: () => setSeccion("vehiculos") },
-    { icono: Icon.Bot,      label: "Consultar IA",    color: "#6a1b9a", bg: "#f3e5f5", action: () => setModal("ia") },
+    { icono: Icon.Bot,      label: "Consultar IA",    color: "#6a1b9a", bg: "#f3e5f5", action: () => setSeccion("consultaIA") },
     { icono: Icon.Clock,    label: "Ver historial",   color: "#e65100", bg: "#fff3e0", action: () => setSeccion("historial") },
   ];
 

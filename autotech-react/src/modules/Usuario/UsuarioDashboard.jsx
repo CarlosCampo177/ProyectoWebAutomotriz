@@ -6,14 +6,14 @@ import {
   postVehiculo, postCita
 } from "../../services/clienteService";
 
-import SecConsultaIA from "./sections/SecConsultaIA";
-import Sidebar from "./components/Sidebar";
-import SecInicio    from "./sections/SecInicioU";
-import SecVehiculos from "./sections/SecVehiculosU";
-import SecCitas     from "./sections/SecCitasU";
-import SecHistorial from "./sections/SecHistorial";
-import SecFacturas  from "./sections/SecFacturas";
-import SecPerfil    from "./sections/SecPerfil";
+import SecConsultaIA        from "./sections/SecConsultaIA";
+import Sidebar              from "./components/Sidebar";
+import SecInicio            from "./sections/SecInicioU";
+import SecVehiculos         from "./sections/SecVehiculosU";
+import SecCitas             from "./sections/SecCitasU";
+import SecHistorial         from "./sections/SecHistorial";
+import SecFacturas          from "./sections/SecFacturas";
+import SecPerfil            from "./sections/SecPerfil";
 import SlidePanel           from "./modals/SlidePanel";
 import ModalAgendarCita     from "./modals/ModalAgendarCita";
 import ModalAgregarVehiculo from "./modals/ModalAgregarVehiculo";
@@ -23,17 +23,18 @@ import "./UsuarioDashboard.css";
 export default function UsuarioDashboard() {
   const { user } = useAuth();
 
-  const [seccion, setSeccion] = useState("inicio");
+  const [seccion,   setSeccion]   = useState("inicio");
+  const [usuario,   setUsuario]   = useState(user);   // ← estado local editable
   const [vehiculos, setVehiculos] = useState([]);
-  const [citas, setCitas] = useState([]);
+  const [citas,     setCitas]     = useState([]);
   const [historial, setHistorial] = useState([]);
-  const [facturas, setFacturas] = useState([]);
+  const [facturas,  setFacturas]  = useState([]);
   const [mecanicos, setMecanicos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [panelCita, setPanelCita] = useState(false);
+  const [loading,   setLoading]   = useState(true);
+  const [panelCita,     setPanelCita]     = useState(false);
   const [panelVehiculo, setPanelVehiculo] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [stats, setStats] = useState({ serviciosRealizados: 0 });
+  const [toast,     setToast]     = useState(null);
+  const [stats,     setStats]     = useState({ serviciosRealizados: 0 });
 
   useEffect(() => {
     if (!user?.id) return;
@@ -45,7 +46,7 @@ export default function UsuarioDashboard() {
           getHistorial(user.id),
           getFacturas(user.id),
           getMecanicos(),
-          getStats(user.id), 
+          getStats(user.id),
         ]);
         setVehiculos(v);
         setCitas(c);
@@ -62,7 +63,16 @@ export default function UsuarioDashboard() {
     cargarDatos();
   }, [user?.id]);
 
+  // Sincroniza si el contexto de auth cambia
+  useEffect(() => { setUsuario(user); }, [user]);
+
   function showToast(msg) { setToast(msg); }
+
+  // Actualiza el usuario local cuando SecPerfil guarda cambios
+  function handleActualizarUsuario(datos) {
+    setUsuario(prev => ({ ...prev, ...datos }));
+    showToast("Perfil actualizado correctamente.");
+  }
 
   async function handleGuardarVehiculo(nuevoVeh) {
     try {
@@ -88,7 +98,7 @@ export default function UsuarioDashboard() {
 
   async function handleGuardarCita(nuevaCita) {
     try {
-      const meses = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"]
+      const meses = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
       const citaCreada = await postCita(user.id, {
         servicio:      nuevaCita.servicio,
         vehiculoId:    parseInt(nuevaCita.vehiculoId),
@@ -130,15 +140,22 @@ export default function UsuarioDashboard() {
       `}</style>
 
       <div className="app-wrapper">
-        <Sidebar seccion={seccion} setSeccion={setSeccion} usuario={user} />
+        <Sidebar seccion={seccion} setSeccion={setSeccion} usuario={usuario} />
         <div className="main-content">
           <div className="page-content">
-            {seccion === "inicio"     && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={user} />}
+            {seccion === "inicio"     && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={usuario} />}
             {seccion === "vehiculos"  && <SecVehiculos vehiculos={vehiculos} onAgregar={() => setPanelVehiculo(true)} />}
             {seccion === "citas"      && <SecCitas     citas={citas} onAgendar={() => setPanelCita(true)} />}
             {seccion === "historial"  && <SecHistorial historial={historial} />}
             {seccion === "facturas"   && <SecFacturas  facturas={facturas} />}
-            {seccion === "perfil"     && <SecPerfil    usuario={user} vehiculos={vehiculos} stats={stats} />}
+            {seccion === "perfil"     && (
+              <SecPerfil
+                usuario={usuario}
+                vehiculos={vehiculos}
+                stats={stats}
+                onActualizar={handleActualizarUsuario}
+              />
+            )}
             {seccion === "consultaIA" && <SecConsultaIA />}
           </div>
         </div>
