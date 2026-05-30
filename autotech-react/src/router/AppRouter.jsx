@@ -25,8 +25,15 @@ import SecVehiculos     from '../modules/Mecanico/sections/SecVehiculos'
 import SecObservaciones from '../modules/Mecanico/sections/SecObservaciones'
 import RutasProtegidas from './RutasProtegidas'
 
+
 // Usuario
-import UsuarioOk from '../modules/Usuario/UsuarioDashboard'
+import SecInicioUsuario from '../modules/Usuario/sections/SecInicioU'
+import SecCitas         from '../modules/Usuario/sections/SecCitasU'
+import SecConsultaIA   from '../modules/Usuario/sections/SecConsultaIA'
+import SecFacturas     from '../modules/Usuario/sections/SecFacturas'
+import SecHistorial    from '../modules/Usuario/sections/SecHistorial'
+import SecMVehiculos     from '../modules/Usuario/sections/SecVehiculosU'
+import SecPerfil       from '../modules/Usuario/sections/SecPerfil'
 
 function AppRouter() {
   return (
@@ -65,7 +72,13 @@ function AppRouter() {
       {/* ── Usuario/Cliente ── */}
       <Route element={<RutasProtegidas rolesPermitidos={['Usuario']} />}>
         <Route path="/usuario" element={<DashboardLayout />}>
-          <Route index element={<UsuarioOk />} />
+          <Route index                element={<SecInicioUsuario />} />
+          <Route path="citas"         element={<SecCitas />}         />
+          <Route path="vehiculos"      element={<SecMVehiculos />}     />
+          <Route path="facturas"      element={<SecFacturas />}      />
+          <Route path="historial"     element={<SecHistorial />}     />
+          <Route path="perfil"        element={<SecPerfil/>}       />
+
         </Route>
       </Route>
 

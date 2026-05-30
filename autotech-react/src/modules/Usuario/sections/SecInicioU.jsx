@@ -1,9 +1,6 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — SECCIÓN INICIO (REDISEÑADA)
-   sections/SecInicio.jsx
-══════════════════════════════════════════ */
 import { useState, useEffect } from "react";
-import * as Icon from "../icons/Icons";
+import { useAuth } from '../../../context/AuthContext';
+import { getVehiculos, getCitas } from '../../../services/clienteService';
 import "./SecInicioU.css";
 
 const MESES_FULL = [
@@ -22,7 +19,6 @@ function getDateLabel() {
   return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES_FULL[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
-/* ── MODAL ── */
 function Modal({ title, onClose, children }) {
   useEffect(() => {
     const handler = (e) => e.key === "Escape" && onClose();
@@ -36,7 +32,7 @@ function Modal({ title, onClose, children }) {
         <div className="si-modal-header">
           <h3 className="si-modal-title">{title}</h3>
           <button className="si-modal-close" onClick={onClose}>
-            <Icon.X />
+            <i className="bi bi-x-lg" />
           </button>
         </div>
         <div className="si-modal-body">{children}</div>
@@ -45,7 +41,6 @@ function Modal({ title, onClose, children }) {
   );
 }
 
-/* ── BADGE ── */
 function Badge({ estado }) {
   return (
     <span className={`si-badge si-badge-${estado}`}>
@@ -54,19 +49,17 @@ function Badge({ estado }) {
   );
 }
 
-/* ── ALERTA KM ── */
 function AlertaKm({ km }) {
   if (km < 80000) return null;
   return (
     <div className="si-alerta-km">
-      <Icon.AlertTriangle />
+      <i className="bi bi-exclamation-triangle" />
       Supera 80,000 km — revisión preventiva recomendada
     </div>
   );
 }
 
-/* ── STAT CARD ANIMADA ── */
-function StatCard({ icono: Icono, label, value, color, bg, onClick }) {
+function StatCard({ icon, label, value, color, bg, onClick }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -84,7 +77,7 @@ function StatCard({ icono: Icono, label, value, color, bg, onClick }) {
   return (
     <div className="si-stat-card" onClick={onClick} style={{ cursor: onClick ? "pointer" : "default" }}>
       <div className="si-stat-icon" style={{ background: bg, color }}>
-        <Icono />
+        <i className={`bi ${icon}`} style={{ fontSize: "1.2rem" }} />
       </div>
       <div className="si-stat-info">
         <span className="si-stat-value">{count}</span>
@@ -95,42 +88,67 @@ function StatCard({ icono: Icono, label, value, color, bg, onClick }) {
   );
 }
 
-/* ══ COMPONENTE PRINCIPAL ══ */
-export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
-  const [modal, setModal] = useState(null); // null | 'citas' | 'vehiculos' | 'ia'
+export default function SecInicioU() {
+  const { user } = useAuth();
+  const [modal, setModal]         = useState(null);
+  const [vehiculos, setVehiculos] = useState([]);
+  const [citas, setCitas]         = useState([]);
+  const [loading, setLoading]     = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchData = async () => {
+      try {
+        const [resV, resC] = await Promise.all([
+          getVehiculos(user.id),
+          getCitas(user.id),
+        ]);
+        setVehiculos(Array.isArray(resV) ? resV : []);
+        setCitas(Array.isArray(resC) ? resC : []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   const pendientes  = citas.filter(c => c.estado === "pendiente").length;
   const completadas = citas.filter(c => c.estado === "completada").length;
   const proximas    = citas.filter(c => c.estado === "pendiente" || c.estado === "confirmada");
 
   const stats = [
-    { icono: Icon.Car,      bg: "#e8f0fe", color: "#1a6bdc", label: "Vehículos",           value: vehiculos.length, sec: "vehiculos" },
-    { icono: Icon.Calendar, bg: "#fff3e0", color: "#e65100", label: "Citas pendientes",     value: pendientes,       sec: "citas"     },
-    { icono: Icon.Wrench,   bg: "#e8f5e9", color: "#2e7d32", label: "Servicios realizados", value: completadas,      sec: null        },
-    { icono: Icon.Bot,      bg: "#f3e5f5", color: "#6a1b9a", label: "Consultas IA",         value: 0,                sec: "consultaIA"},
+    { icon: "bi-car-front",      bg: "#e8f0fe", color: "#1a6bdc", label: "Vehículos",           value: vehiculos.length },
+    { icon: "bi-calendar-check", bg: "#fff3e0", color: "#e65100", label: "Citas pendientes",     value: pendientes       },
+    { icon: "bi-tools",          bg: "#e8f5e9", color: "#2e7d32", label: "Servicios realizados", value: completadas      },
+    { icon: "bi-robot",          bg: "#f3e5f5", color: "#6a1b9a", label: "Consultas IA",         value: 0                },
   ];
 
   const acciones = [
-    { icono: Icon.Calendar, label: "Nueva cita",      color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal("nuevaCita") },
-    { icono: Icon.Car,      label: "Mis vehículos",   color: "#2e7d32", bg: "#e8f5e9", action: () => setSeccion("vehiculos") },
-    { icono: Icon.Bot,      label: "Consultar IA",    color: "#6a1b9a", bg: "#f3e5f5", action: () => setSeccion("consultaIA") },
-    { icono: Icon.Clock,    label: "Ver historial",   color: "#e65100", bg: "#fff3e0", action: () => setSeccion("historial") },
+    { icon: "bi-calendar-plus", label: "Nueva cita",    color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal("nuevaCita") },
+    { icon: "bi-car-front",     label: "Mis vehículos", color: "#2e7d32", bg: "#e8f5e9", action: () => {}                    },
+    { icon: "bi-robot",         label: "Consultar IA",  color: "#6a1b9a", bg: "#f3e5f5", action: () => {}                    },
+    { icon: "bi-clock-history", label: "Ver historial", color: "#e65100", bg: "#fff3e0", action: () => {}                    },
   ];
+
+  if (loading) return <div className="si-wrapper"><p style={{ color: "#888" }}>Cargando...</p></div>;
 
   return (
     <div className="si-wrapper">
 
-      {/* ── HERO BANNER ── */}
+      {/* HERO */}
       <div className="si-hero">
         <div className="si-hero-bg" />
         <div className="si-hero-content">
           <p className="si-hero-sub">{getGreeting()} · {getDateLabel()}</p>
           <h1 className="si-hero-title">
-            Hola, <span>{usuario?.nombre?.split(" ")[0] ?? "Usuario"}</span> <i className="bi bi-person-circle si-hero-icon" />
+            Hola, <span>{user?.nombre?.split(" ")[0] ?? "Usuario"}</span>{" "}
+            <i className="bi bi-person-circle si-hero-icon" />
           </h1>
           <p className="si-hero-desc">Gestiona tus vehículos y citas desde aquí.</p>
           <button className="si-hero-btn" onClick={() => setModal("nuevaCita")}>
-            <Icon.Calendar /> Agendar cita
+            <i className="bi bi-calendar-plus" /> Agendar cita
           </button>
         </div>
         <div className="si-hero-deco">
@@ -140,51 +158,38 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
         </div>
       </div>
 
-      {/* ── STATS ── */}
+      {/* STATS */}
       <div className="si-stats">
         {stats.map((s, i) => (
-          <StatCard
-            key={i}
-            icono={s.icono}
-            label={s.label}
-            value={s.value}
-            color={s.color}
-            bg={s.bg}
-            onClick={s.sec ? () => setSeccion(s.sec) : null}
-          />
+          <StatCard key={i} icon={s.icon} label={s.label} value={s.value} color={s.color} bg={s.bg} />
         ))}
       </div>
 
-      {/* ── ACCIONES RÁPIDAS ── */}
+      {/* ACCIONES RÁPIDAS */}
       <div className="si-section-header">
         <span className="si-section-title">Acciones rápidas</span>
       </div>
       <div className="si-acciones">
         {acciones.map((a, i) => (
-          <button
-            key={i}
-            className="si-accion"
-            style={{ "--c": a.color, "--bg": a.bg }}
-            onClick={a.action}
-          >
-            <div className="si-accion-icon"><a.icono /></div>
+          <button key={i} className="si-accion" style={{ "--c": a.color, "--bg": a.bg }} onClick={a.action}>
+            <i className={`bi ${a.icon}`} style={{ fontSize: "1.4rem" }} />
             <span>{a.label}</span>
           </button>
         ))}
       </div>
 
-      {/* ── GRID 2 COL ── */}
+      {/* GRID 2 COL */}
       <div className="si-grid2">
 
         {/* Próximas citas */}
         <div className="si-panel">
           <div className="si-panel-header">
-            <span className="si-panel-title"><Icon.Calendar /> Próximas citas</span>
-            <button className="si-ver-mas" onClick={() => setSeccion("citas")}>Ver todas →</button>
+            <span className="si-panel-title"><i className="bi bi-calendar-check" /> Próximas citas</span>
+            <button className="si-ver-mas">Ver todas →</button>
           </div>
           {proximas.length === 0 ? (
             <div className="si-empty">
-              <Icon.Calendar />
+              <i className="bi bi-calendar-x" style={{ fontSize: "2rem", opacity: .4 }} />
               <p>Sin citas próximas</p>
               <button className="si-empty-btn" onClick={() => setModal("nuevaCita")}>Agendar ahora</button>
             </div>
@@ -205,19 +210,18 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
         {/* Mis vehículos */}
         <div className="si-panel">
           <div className="si-panel-header">
-            <span className="si-panel-title"><Icon.Car /> Mis vehículos</span>
-            <button className="si-ver-mas" onClick={() => setSeccion("vehiculos")}>Ver todos →</button>
+            <span className="si-panel-title"><i className="bi bi-car-front" /> Mis vehículos</span>
+            <button className="si-ver-mas">Ver todos →</button>
           </div>
           {vehiculos.length === 0 ? (
             <div className="si-empty">
-              <Icon.Car />
+              <i className="bi bi-car-front" style={{ fontSize: "2rem", opacity: .4 }} />
               <p>Sin vehículos registrados</p>
-              <button className="si-empty-btn" onClick={() => setSeccion("vehiculos")}>Agregar vehículo</button>
             </div>
           ) : (
             vehiculos.map((v, i) => (
               <div key={i} className="si-item si-item--veh">
-                <div className="si-veh-icon"><Icon.Car /></div>
+                <div className="si-veh-icon"><i className="bi bi-car-front" /></div>
                 <div className="si-item-body">
                   <p className="si-item-title">{v.nombre}</p>
                   <p className="si-item-meta">{v.placa} · {v.anio}</p>
@@ -230,9 +234,7 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
         </div>
       </div>
 
-      {/* ══ MODALES ══ */}
-
-      {/* Modal: Nueva cita */}
+      {/* MODAL NUEVA CITA */}
       {modal === "nuevaCita" && (
         <Modal title="Agendar nueva cita" onClose={() => setModal(null)}>
           <div className="si-form">
@@ -276,23 +278,6 @@ export default function SecInicio({ vehiculos, citas, setSeccion, usuario }) {
               <button className="si-btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
               <button className="si-btn-primary" onClick={() => setModal(null)}>Confirmar cita</button>
             </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* Modal: Consultar IA */}
-      {modal === "ia" && (
-        <Modal title="Consultar IA AutoTech" onClose={() => setModal(null)}>
-          <div className="si-ia">
-            <div className="si-ia-avatar"><Icon.Bot /></div>
-            <p className="si-ia-desc">
-              Pregúntame sobre el mantenimiento de tu vehículo, síntomas de fallas o recomendaciones de servicio.
-            </p>
-            <div className="si-ia-input-row">
-              <input type="text" placeholder="¿Cuándo debo cambiar el aceite?" className="si-ia-input" />
-              <button className="si-btn-primary">Preguntar</button>
-            </div>
-            <p className="si-ia-note"><i className="bi bi-info-circle" /> Próximamente disponible</p>
           </div>
         </Modal>
       )}

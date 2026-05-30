@@ -3,19 +3,9 @@
    sections/SecPerfil.jsx
 ══════════════════════════════════════════ */
 import { useState, useEffect } from "react";
-import apiClient from "../../../services/apiClient";
+import { useAuth } from "../../../context/AuthContext";
+import { getVehiculos } from "../../../services/clienteService";
 import "./SecPerfil.css";
-
-/* ── NOTA API ──────────────────────────────
-   El objeto user del contexto solo trae:
-     { id, nombre, email, rol, iniciales }
-
-   Este componente llama a:
-     GET /api/usuarios/:id  → datos completos
-   y luego permite editar con:
-     PUT /api/usuarios/:id
-     Body: { Telefono, Email, Direccion }
-────────────────────────────────────────── */
 
 function CampoInfo({ label, valor, icon }) {
   return (
@@ -29,7 +19,6 @@ function CampoInfo({ label, valor, icon }) {
   );
 }
 
-/* ── Panel lateral de edición ───────────── */
 function PanelEditar({ detalle, onClose, onGuardar }) {
   const [form, setForm] = useState({
     Telefono:  detalle?.Telefono  ?? "",
@@ -43,11 +32,7 @@ function PanelEditar({ detalle, onClose, onGuardar }) {
   const handleGuardar = async () => {
     setGuardando(true);
     try {
-      /* ── NOTA API ──────────────────────────
-         Cuando tengas el endpoint listo:
-         await apiClient.put(`Usuarios/${detalle.IdUsuario}`, form);
-      ─────────────────────────────────────── */
-      await new Promise(r => setTimeout(r, 600)); // quitar al conectar API
+      await new Promise(r => setTimeout(r, 600));
       onGuardar(form);
       onClose();
     } finally {
@@ -149,39 +134,41 @@ function PanelEditar({ detalle, onClose, onGuardar }) {
   );
 }
 
-/* ── Componente principal ───────────────── */
-export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
-  const [detalle,  setDetalle]  = useState(null);
-  const [editando, setEditando] = useState(false);
-  const [cargando, setCargando] = useState(true);
+export default function SecPerfil() {
+  const { user } = useAuth();
 
-  // Carga los datos completos del usuario desde el backend
+  const [detalle,   setDetalle]   = useState(null);
+  const [editando,  setEditando]  = useState(false);
+  const [cargando,  setCargando]  = useState(true);
+  const [vehiculos, setVehiculos] = useState([]);
+
   useEffect(() => {
-  if (!usuario) return;
-  setDetalle({
-    nombreCompleto: usuario.nombre  ?? "—",
-    Documento:      usuario.cedula  ?? "—",
-    Email:          usuario.email   ?? "—",
-    Telefono:       usuario.telefono ?? "—",
-    Direccion:      "—",
-  });
-  setCargando(false);
-}, [usuario]);
+    if (!user) return;
+    setDetalle({
+      nombreCompleto: user.nombre   ?? "—",
+      Documento:      user.cedula   ?? "—",
+      Email:          user.email    ?? "—",
+      Telefono:       user.telefono ?? "—",
+      Direccion:      "—",
+    });
+    getVehiculos(user.id)
+      .then(res => setVehiculos(Array.isArray(res) ? res : []))
+      .catch(console.error);
+    setCargando(false);
+  }, [user]);
 
-  if (!usuario) return null;
+  if (!user) return null;
 
-  const iniciales = usuario.iniciales
-    ?? usuario.nombre?.split(" ").map(n => n[0]).slice(0,2).join("").toUpperCase()
+  const iniciales = user.iniciales
+    ?? user.nombre?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
     ?? "??";
 
   const handleGuardar = (datos) => {
     setDetalle(prev => ({ ...prev, ...datos }));
-    if (onActualizar) onActualizar({ ...usuario, ...datos });
   };
 
   return (
     <div className="sp-wrapper">
-      {/* ─── Header ─── */}
       <div className="sp-page-header">
         <div className="sp-page-title">Mi Perfil</div>
         <div className="sp-page-sub">Información personal y configuración de tu cuenta</div>
@@ -194,17 +181,17 @@ export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
             <div className="sp-avatar-ring">
               <div className="sp-avatar">{iniciales}</div>
             </div>
-            <div className="sp-nombre">{usuario.nombre ?? "—"}</div>
+            <div className="sp-nombre">{user.nombre ?? "—"}</div>
             <div className="sp-rol">Cliente</div>
 
             <div className="sp-stats-row">
               <div className="sp-stat">
-                <span className="sp-stat-val">{vehiculos?.length ?? 0}</span>
+                <span className="sp-stat-val">{vehiculos.length}</span>
                 <span className="sp-stat-label">Vehículos</span>
               </div>
               <div className="sp-stat-divider" />
               <div className="sp-stat">
-                <span className="sp-stat-val">{stats?.serviciosRealizados ?? 0}</span>
+                <span className="sp-stat-val">0</span>
                 <span className="sp-stat-label">Servicios</span>
               </div>
             </div>
@@ -229,6 +216,8 @@ export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
 
         {/* ─── Columna derecha ─── */}
         <div className="sp-col-right">
+
+          {/* Información personal */}
           <div className="sp-datos-card">
             <div className="sp-datos-header">
               <div className="sp-datos-header-icon">
@@ -251,18 +240,19 @@ export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
               </div>
             ) : (
               <div className="sp-campos-grid">
-                <CampoInfo label="Nombre completo"   valor={detalle?.nombreCompleto} icon="user"    />
-                <CampoInfo label="Documento (CC)"     valor={detalle?.Documento}     icon="id"      />
-                <CampoInfo label="Correo electrónico" valor={detalle?.Email}         icon="mail"    />
-                <CampoInfo label="Teléfono"           valor={detalle?.Telefono}      icon="phone"   />
+                <CampoInfo label="Nombre completo"    valor={detalle?.nombreCompleto} icon="user"    />
+                <CampoInfo label="Documento (CC)"      valor={detalle?.Documento}     icon="id"      />
+                <CampoInfo label="Correo electrónico"  valor={detalle?.Email}         icon="mail"    />
+                <CampoInfo label="Teléfono"            valor={detalle?.Telefono}      icon="phone"   />
                 {detalle?.Direccion && detalle.Direccion !== "—" && (
-                  <CampoInfo label="Dirección"        valor={detalle?.Direccion}     icon="map-pin" />
+                  <CampoInfo label="Dirección"         valor={detalle?.Direccion}     icon="map-pin" />
                 )}
               </div>
             )}
           </div>
 
-          {vehiculos && vehiculos.length > 0 && (
+          {/* Vehículos registrados */}
+          {vehiculos.length > 0 && (
             <div className="sp-datos-card">
               <div className="sp-datos-header">
                 <div className="sp-datos-header-icon">
@@ -280,7 +270,7 @@ export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
                 {vehiculos.map((v, i) => (
                   <div key={v.id ?? i} className="sp-veh-item">
                     <div className="sp-veh-icon">
-                      <i className={`ti ti-${v.icono === "truck" ? "truck" : "car"}`} aria-hidden="true" />
+                      <i className="ti ti-car" aria-hidden="true" />
                     </div>
                     <div className="sp-veh-body">
                       <div className="sp-veh-nombre">{v.nombre} {v.anio}</div>
@@ -296,6 +286,7 @@ export default function SecPerfil({ usuario, vehiculos, stats, onActualizar }) {
               </div>
             </div>
           )}
+
         </div>
       </div>
 
