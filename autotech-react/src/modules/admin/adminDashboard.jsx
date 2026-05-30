@@ -23,9 +23,8 @@ const seccionesValidas = [
 ];
 
 const AdminDashboard = () => {
-  const adminId = 1; // Debe venir del contexto de autenticación
+  const adminId = 1;
 
-  // ── Sección activa desde la URL ──
   const location = useLocation();
   const pathParts = location.pathname.split("/");
   const rawSection = pathParts[pathParts.length - 1] || "inicio";
@@ -33,7 +32,6 @@ const AdminDashboard = () => {
     ? rawSection
     : "inicio";
 
-  // Datos
   const [perfil, setPerfil] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [vehiculos, setVehiculos] = useState([]);
@@ -426,11 +424,6 @@ const AdminDashboard = () => {
         );
     }
   };
-
-  // ── Ya NO hay barra de tabs ──
-  // El título de la sección se muestra en el topbar del layout,
-  // basado en la ruta o puedes manejarlo con un contexto.
-  // Si quieres mostrar el título adicionalmente, puedes hacerlo aquí.
 
   return <>{renderSection()}</>;
 };

@@ -10,3 +10,4 @@ export const getAdminServicios = (id) => get(`${r(id)}/servicios`);
 export const getAdminOrdenes = (id) => get(`${r(id)}/ordenes`);
 export const getAdminFacturacion = (id) => get(`${r(id)}/facturacturacion`);
 export const getAdminEstadisticas = (id) => get(`${r(id)}/estadisticas`);
+export const createCliente = (id, data) => post(`${r(id)}/clientes`, data);
