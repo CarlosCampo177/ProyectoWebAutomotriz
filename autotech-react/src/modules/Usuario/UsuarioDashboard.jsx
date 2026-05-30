@@ -8,7 +8,7 @@ import {
 
 import SecConsultaIA from "./sections/SecConsultaIA";
 import Sidebar from "./components/Sidebar";
-import SecInicio    from "./sections/SecInicio";
+import SecInicio    from "./sections/SecInicioU";
 import SecVehiculos from "./sections/SecVehiculosU";
 import SecCitas     from "./sections/SecCitasU";
 import SecHistorial from "./sections/SecHistorial";
