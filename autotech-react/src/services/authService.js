@@ -1,9 +1,7 @@
-import { post } from './apiClient'
+import apiClient from './apiClient'
 
-export async function loginRequest(identifier, password) {
-  return post('Auth/login', { identifier, password })
-}
+export const loginRequest = (identifier, password) => 
+  apiClient.post('Auth/login', { identifier, password })
 
-export async function registerRequest(formData) {
-  return post('Auth/register', formData)
-}
+export const registerRequest = (formData) => 
+  apiClient.post('Auth/register', formData)

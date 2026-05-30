@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";  // ← agrega useEffect
+import { useState, useEffect } from "react";  
 import * as Icon from "../icons/Icons";
-import { get } from "../../../services/apiClient";  // ← nuevo
+import apiClient from "../../../services/apiClient";  // 1. Corregida la importación por defecto
 import "./ModalAgendarCita.css";
 
 const MESES = ["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"];
@@ -26,7 +26,7 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
   const [guardando, setGuardando] = useState(false);
   const [servicios, setServicios] = useState([]);
   const [form, setForm] = useState({
-    servicio:      "",
+    servicio:       "",
     vehiculoId:    "",
     mecanicoId:    "",
     mecanicoNombre:"",
@@ -37,11 +37,13 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
   });
   const [errors, setErrors] = useState({});
 
-  // ← nuevo: cargar servicios desde la API
   useEffect(() => {
-    get('Servicios')
-      .then(data => setServicios(data))
-      .catch(() => setServicios([]))
+    apiClient.get('Servicios')
+      .then(data => setServicios(data || []))
+      .catch((err) => {
+        console.error("Error al cargar servicios:", err);
+        setServicios([]);
+      })
   }, [])
 
   const mesNum    = parseInt(form.mes);
@@ -115,7 +117,6 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
       {step === 1 && (
         <div className="mac-fields">
 
-          {/* Servicios desde la API ← cambia esto */}
           <FieldGroup label="Servicio requerido *" error={errors.servicio}>
             <select
               className="mac-select"
@@ -123,15 +124,15 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
               onChange={e => set("servicio", e.target.value)}
             >
               <option value="">Selecciona un servicio</option>
+              {/* Se asume que el backend mapea idServicio o id según tu estructura */}
               {servicios.map(s => (
-                <option key={s.idServicio} value={s.nombre}>
+                <option key={s.idServicio || s.id} value={s.nombre}>
                   {s.nombre}
                 </option>
               ))}
             </select>
           </FieldGroup>
 
-          {/* Vehículos — igual que antes */}
           <FieldGroup label="Vehículo *" error={errors.vehiculoId}>
             <select
               className="mac-select"
@@ -147,7 +148,6 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
             </select>
           </FieldGroup>
 
-          {/* Mecánicos — igual que antes */}
           <FieldGroup label="Mecánico *" error={errors.mecanicoId}>
             <select
               className="mac-select"
@@ -220,6 +220,7 @@ export default function ModalAgendarCita({ vehiculos, mecanicos, citas, onClose,
                 return (
                   <button
                     key={h}
+                    type="button"
                     disabled={ocupada}
                     onClick={() => !ocupada && set("hora", h)}
                     className={`mac-hora-btn${seleccionada ? " selected" : ""}${ocupada ? " ocupada" : ""}`}

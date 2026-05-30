@@ -6,6 +6,7 @@ import {
   postVehiculo, postCita
 } from "../../services/clienteService";
 
+import SecConsultaIA from "./sections/SecConsultaIA";
 import Sidebar from "./components/Sidebar";
 import SecInicio    from "./sections/SecInicio";
 import SecVehiculos from "./sections/SecVehiculos";
@@ -132,12 +133,13 @@ export default function UsuarioDashboard() {
         <Sidebar seccion={seccion} setSeccion={setSeccion} usuario={user} />
         <div className="main-content">
           <div className="page-content">
-            {seccion === "inicio"    && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={user} />}
-            {seccion === "vehiculos" && <SecVehiculos vehiculos={vehiculos} onAgregar={() => setPanelVehiculo(true)} />}
-            {seccion === "citas"     && <SecCitas     citas={citas} onAgendar={() => setPanelCita(true)} />}
-            {seccion === "historial" && <SecHistorial historial={historial} />}
-            {seccion === "facturas"  && <SecFacturas  facturas={facturas} />}
-            {seccion === "perfil" && (<SecPerfil usuario={user} vehiculos={vehiculos} stats={stats} />)}
+            {seccion === "inicio"     && <SecInicio    vehiculos={vehiculos} citas={citas} setSeccion={setSeccion} usuario={user} />}
+            {seccion === "vehiculos"  && <SecVehiculos vehiculos={vehiculos} onAgregar={() => setPanelVehiculo(true)} />}
+            {seccion === "citas"      && <SecCitas     citas={citas} onAgendar={() => setPanelCita(true)} />}
+            {seccion === "historial"  && <SecHistorial historial={historial} />}
+            {seccion === "facturas"   && <SecFacturas  facturas={facturas} />}
+            {seccion === "perfil"     && <SecPerfil    usuario={user} vehiculos={vehiculos} stats={stats} />}
+            {seccion === "consultaIA" && <SecConsultaIA />}
           </div>
         </div>
       </div>

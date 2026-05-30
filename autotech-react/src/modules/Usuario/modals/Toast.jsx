@@ -1,12 +1,3 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — TOAST
-   modals/Toast.jsx
-
-   Notificación no bloqueante.
-   Reemplaza el ModalExito centrado.
-   Aparece en la esquina inferior derecha y
-   desaparece automáticamente.
-══════════════════════════════════════════ */
 import { useEffect } from "react";
 import * as Icon from "../icons/Icons";
 import "./Toast.css";
