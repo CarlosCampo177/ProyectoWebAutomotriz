@@ -45,7 +45,7 @@ function AppRouter() {
       <Route path="/page/login"    element={<Login />}    />
 
       {/* ── Admin ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['Admin']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['admin']} />}>
         <Route path="/admin" element={<DashboardLayout />}>
           <Route path="inicio"       element={<AdminInicio />}  />
           <Route path="clientes"     element={<Clientes/>} />
@@ -60,7 +60,7 @@ function AppRouter() {
       </Route>
 
       {/* ── Mecánico ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['Mecanico']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['mecanico']} />}>
         <Route path="/mecanico" element={<DashboardLayout />}>
           <Route index                element={<SecInicio />}        />
           <Route path="ordenes"       element={<SecOrdenes />}       />
@@ -70,7 +70,7 @@ function AppRouter() {
       </Route>
 
       {/* ── Usuario/Cliente ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['Usuario']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['cliente']} />}>
         <Route path="/usuario" element={<DashboardLayout />}>
           <Route index                element={<SecInicioUsuario />} />
           <Route path="citas"         element={<SecCitas />}         />
