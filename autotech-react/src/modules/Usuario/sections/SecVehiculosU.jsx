@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from '../../../context/AuthContext';
 import { getVehiculos } from '../../../services/clienteService';
 import apiClient from '../../../services/apiClient';
+import { marcaService } from '../../../services/adminService';
 import "./SecVehiculosU.css";
 
 const colorMap = {
@@ -10,6 +11,10 @@ const colorMap = {
   green:  { bg: "#dcfce7", accent: "#15803d", dot: "#22c55e" },
   red:    { bg: "#fee2e2", accent: "#b91c1c", dot: "#ef4444" },
   purple: { bg: "#ede9fe", accent: "#7c3aed", dot: "#a78bfa" },
+  yellow: { bg: "#fef9c3", accent: "#a16207", dot: "#ca8a04" },
+  gray:   { bg: "#f3f4f6", accent: "#374151", dot: "#6b7280" },
+  black:  { bg: "#f9fafb", accent: "#111827", dot: "#374151" },
+  white:  { bg: "#f8fafc", accent: "#64748b", dot: "#cbd5e1" },
 };
 
 const colorWrapOpciones = [
@@ -20,12 +25,34 @@ const colorWrapOpciones = [
   { label: "Morado",  value: "purple" },
 ];
 
-const tipoVehiculoOpciones = [
-  { label: "Auto",         value: "car"   },
-  { label: "Camioneta/SUV",value: "truck" },
-  { label: "Moto",         value: "moto"  },
-  { label: "Van/Bus",      value: "van"   },
+// Tipos hardcodeados — igual que en la lógica del admin
+const TIPOS = [
+  { idTipo: 'car',   nombre: 'Auto'         },
+  { idTipo: 'truck', nombre: 'Camioneta/SUV' },
+  { idTipo: 'moto',  nombre: 'Moto'          },
+  { idTipo: 'van',   nombre: 'Van/Bus'       },
 ];
+
+const TIPOS_ICONO = {
+  car:   'bi-car-front',
+  truck: 'bi-truck',
+  moto:  'bi-bicycle',
+  van:   'bi-bus-front',
+};
+
+const COMBUSTIBLES = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido', 'Gas'];
+
+const EMPTY_FORM = {
+  idTipo:      '',
+  idMarca:     '',
+  idModelo:    '',
+  placa:       '',
+  anio:        new Date().getFullYear(),
+  kilometraje: 0,
+  combustible: 'Gasolina',
+  color:       '',
+  colorWrap:   'blue',
+};
 
 function BadgeEstado({ estado }) {
   return (
@@ -49,6 +76,7 @@ function AlertaKm({ km }) {
 function PanelDetalle({ vehiculo, onClose }) {
   if (!vehiculo) return null;
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
+  const icono = TIPOS_ICONO[vehiculo.tipoVehiculo] || 'bi-car-front';
 
   return (
     <>
@@ -56,7 +84,7 @@ function PanelDetalle({ vehiculo, onClose }) {
       <aside className="svu-panel">
         <div className="svu-panel-head" style={{ borderColor: c.dot }}>
           <div className="svu-panel-icon" style={{ background: c.bg, color: c.accent }}>
-            <i className="bi bi-car-front" style={{ fontSize: "1.3rem" }} />
+            <i className={`bi ${icono}`} style={{ fontSize: "1.3rem" }} />
           </div>
           <div className="svu-panel-head-info">
             <div className="svu-panel-nombre">{vehiculo.nombre}</div>
@@ -116,59 +144,79 @@ function PanelDetalle({ vehiculo, onClose }) {
 }
 
 function ModalAgregar({ idCliente, onClose, onAgregado }) {
-  const [marcas,   setMarcas]   = useState([]);
-  const [modelos,  setModelos]  = useState([]);
-  const [guardando, setGuardando] = useState(false);
-  const [error,    setError]    = useState("");
+  const [marcas,     setMarcas]     = useState([]);
+  const [modelos,    setModelos]    = useState([]);
+  const [loadMarcas, setLoadMarcas] = useState(false);
+  const [loadMod,    setLoadMod]    = useState(false);
+  const [guardando,  setGuardando]  = useState(false);
+  const [error,      setError]      = useState("");
 
-  const [form, setForm] = useState({
-    IdMarca:      "",
-    NombreModelo: "",
-    Placa:        "",
-    Anio:         new Date().getFullYear(),
-    Kilometraje:  0,
-    Combustible:  "Gasolina",
-    Color:        "",
-    TipoVehiculo: "car",
-    ColorWrap:    "blue",
-  });
-
+  const [form, setForm] = useState(EMPTY_FORM);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Cargar marcas al abrir
-  useEffect(() => {
-    apiClient.get("Marcas")
-      .then(res => setMarcas(Array.isArray(res) ? res : []))
-      .catch(console.error);
-  }, []);
+  // Paso 1: elige tipo → carga todas las marcas (sin filtro por tipo,
+  // ya que la BD no tiene IdTipo en Marcas)
+  const handleTipoChange = async (idTipo) => {
+    setForm(f => ({ ...f, idTipo, idMarca: '', idModelo: '' }));
+    setMarcas([]);
+    setModelos([]);
+    if (!idTipo) return;
+    try {
+      setLoadMarcas(true);
+      // Intenta filtrar por tipo si el endpoint existe, si no trae todas
+      let data;
+      try {
+        data = await marcaService.getMarcasPorTipo(idTipo);
+      } catch {
+        data = await apiClient.get('Marcas');
+      }
+      setMarcas(Array.isArray(data) ? data : []);
+    } catch {
+      setMarcas([]);
+    } finally {
+      setLoadMarcas(false);
+    }
+  };
 
-  // Cargar modelos al cambiar marca
-  useEffect(() => {
-    if (!form.IdMarca) { setModelos([]); return; }
-    apiClient.get(`Marcas/${form.IdMarca}/modelos`)
-      .then(res => setModelos(Array.isArray(res) ? res : []))
-      .catch(console.error);
-  }, [form.IdMarca]);
+  // Paso 2: elige marca → carga modelos filtrados
+  const handleMarcaChange = async (idMarca) => {
+    setForm(f => ({ ...f, idMarca, idModelo: '' }));
+    setModelos([]);
+    if (!idMarca) return;
+    try {
+      setLoadMod(true);
+      // Intenta filtrar por marca+tipo, si no trae los de la marca
+      let data;
+      try {
+        data = await marcaService.getModelosPorMarcaYTipo(idMarca, form.idTipo);
+      } catch {
+        data = await apiClient.get(`Marcas/${idMarca}/modelos`);
+      }
+      setModelos(Array.isArray(data) ? data : []);
+    } catch {
+      setModelos([]);
+    } finally {
+      setLoadMod(false);
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!form.IdMarca || !form.NombreModelo || !form.Placa || !form.Color) {
-      setError("Completa todos los campos obligatorios.");
+    if (!form.idModelo || !form.placa.trim() || !form.color.trim()) {
+      setError("Completa todos los campos obligatorios (*).");
       return;
     }
     setGuardando(true);
     setError("");
     try {
       const nuevo = await apiClient.post("Vehiculo", {
-        Placa:        form.Placa.toUpperCase().trim(),
-        Anio:         Number(form.Anio),
-        Color:        form.Color.trim(),
-        Kilometraje:  Number(form.Kilometraje),
-        Combustible:  form.Combustible,
-        ColorWrap:    form.ColorWrap,
-        NombreModelo: form.NombreModelo.trim(),
-        TipoVehiculo: form.TipoVehiculo,
-        IdMarca:      Number(form.IdMarca),
-        IdCliente:    idCliente,
+        Placa:       form.placa.toUpperCase().trim(),
+        Anio:        Number(form.anio),
+        Color:       form.color.trim(),
+        Kilometraje: Number(form.kilometraje),
+        Combustible: form.combustible,
+        ColorWrap:   form.colorWrap,
+        IdModelo:    Number(form.idModelo),
+        IdCliente:   idCliente,
       });
       onAgregado(nuevo);
       onClose();
@@ -180,50 +228,74 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
   };
 
   return (
-    <>
-      <div className="svu-overlay" onClick={onClose} />
-      <aside className="svu-panel svu-panel--form">
-        <div className="svu-panel-head">
-          <div className="svu-panel-head-info">
-            <div className="svu-panel-nombre">Agregar Vehículo</div>
-            <div className="svu-panel-placa">Registra un nuevo vehículo en tu cuenta</div>
+    <div className="svu-modal-overlay" onClick={onClose}>
+      <div className="svu-modal-card" onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div className="svu-modal-header">
+          <div className="svu-modal-header-icon">
+            <i className="bi bi-car-front-fill" />
           </div>
-          <button className="svu-panel-close" onClick={onClose}>
+          <div>
+            <h2 className="svu-modal-title">Agregar Vehículo</h2>
+            <p className="svu-modal-subtitle">Registra un nuevo vehículo en tu cuenta</p>
+          </div>
+          <button className="svu-modal-close" onClick={onClose}>
             <i className="bi bi-x-lg" />
           </button>
         </div>
 
-        <div className="svu-panel-body">
+        <div className="svu-modal-body">
 
-          {/* Marca */}
-          <div className="svu-field">
-            <label>Marca <span className="svu-req">*</span></label>
-            <select value={form.IdMarca} onChange={e => { set("IdMarca", e.target.value); set("NombreModelo", ""); }}>
-              <option value="">Selecciona marca</option>
-              {marcas.map(m => (
-                <option key={m.idMarca} value={m.idMarca}>{m.nombreMarca}</option>
-              ))}
-            </select>
+          {/* Sección: Identificación */}
+          <div className="svu-modal-section-label">
+            <i className="bi bi-tag-fill" /> Identificación
           </div>
-
-          {/* Modelo */}
-          <div className="svu-field">
-            <label>Modelo <span className="svu-req">*</span></label>
-            {modelos.length > 0 ? (
-              <select value={form.NombreModelo} onChange={e => set("NombreModelo", e.target.value)}>
-                <option value="">Selecciona modelo</option>
-                {modelos.map(m => (
-                  <option key={m.id} value={m.nombre}>{m.nombre}</option>
+          <div className="svu-modal-grid-3">
+            {/* PASO 1: Tipo */}
+            <div className="svu-field">
+              <label>Tipo <span className="svu-req">*</span></label>
+              <select value={form.idTipo} onChange={e => handleTipoChange(e.target.value)}>
+                <option value="">— Tipo —</option>
+                {TIPOS.map(t => (
+                  <option key={t.idTipo} value={t.idTipo}>{t.nombre}</option>
                 ))}
               </select>
-            ) : (
-              <input
-                type="text"
-                placeholder="Ej: Corolla"
-                value={form.NombreModelo}
-                onChange={e => set("NombreModelo", e.target.value)}
-              />
-            )}
+            </div>
+
+            {/* PASO 2: Marca */}
+            <div className="svu-field">
+              <label>Marca <span className="svu-req">*</span></label>
+              <select
+                value={form.idMarca}
+                onChange={e => handleMarcaChange(e.target.value)}
+                disabled={!form.idTipo || loadMarcas}
+              >
+                <option value="">
+                  {loadMarcas ? 'Cargando...' : !form.idTipo ? '— Elige tipo —' : '— Marca —'}
+                </option>
+                {marcas.map(m => (
+                  <option key={m.idMarca} value={String(m.idMarca)}>{m.nombreMarca}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* PASO 3: Modelo */}
+            <div className="svu-field">
+              <label>Modelo <span className="svu-req">*</span></label>
+              <select
+                value={form.idModelo}
+                onChange={e => set('idModelo', e.target.value)}
+                disabled={!form.idMarca || loadMod}
+              >
+                <option value="">
+                  {loadMod ? 'Cargando...' : !form.idMarca ? '— Elige marca —' : '— Modelo —'}
+                </option>
+                {modelos.map(m => (
+                  <option key={m.id} value={String(m.id)}>{m.nombre}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Placa y Año */}
@@ -232,9 +304,10 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
               <label>Placa <span className="svu-req">*</span></label>
               <input
                 type="text"
-                placeholder="ABC-123"
-                value={form.Placa}
-                onChange={e => set("Placa", e.target.value)}
+                placeholder="Ej: ABC-123"
+                value={form.placa}
+                onChange={e => set('placa', e.target.value.toUpperCase())}
+                className="svu-input-mono"
               />
             </div>
             <div className="svu-field">
@@ -243,58 +316,48 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
                 type="number"
                 min="1990"
                 max={new Date().getFullYear()}
-                value={form.Anio}
-                onChange={e => set("Anio", e.target.value)}
+                value={form.anio}
+                onChange={e => set('anio', e.target.value)}
               />
             </div>
           </div>
 
-          {/* Kilometraje y Combustible */}
+          {/* Sección: Datos técnicos */}
+          <div className="svu-modal-section-label">
+            <i className="bi bi-gear-fill" /> Datos técnicos
+          </div>
           <div className="svu-field-row">
             <div className="svu-field">
-              <label>Kilometraje <span className="svu-req">*</span></label>
+              <label>Color <span className="svu-req">*</span></label>
+              <input
+                type="text"
+                placeholder="Ej: Blanco perla"
+                value={form.color}
+                onChange={e => set('color', e.target.value)}
+              />
+            </div>
+            <div className="svu-field">
+              <label>Kilometraje</label>
               <input
                 type="number"
                 min="0"
-                placeholder="45000"
-                value={form.Kilometraje}
-                onChange={e => set("Kilometraje", e.target.value)}
+                placeholder="0"
+                value={form.kilometraje}
+                onChange={e => set('kilometraje', e.target.value)}
               />
             </div>
-            <div className="svu-field">
-              <label>Combustible</label>
-              <select value={form.Combustible} onChange={e => set("Combustible", e.target.value)}>
-                <option>Gasolina</option>
-                <option>Diésel</option>
-                <option>Eléctrico</option>
-                <option>Híbrido</option>
-                <option>Gas</option>
-              </select>
-            </div>
           </div>
 
-          {/* Color */}
           <div className="svu-field">
-            <label>Color <span className="svu-req">*</span></label>
-            <input
-              type="text"
-              placeholder="Ej: Blanco"
-              value={form.Color}
-              onChange={e => set("Color", e.target.value)}
-            />
-          </div>
-
-          {/* Tipo de vehículo */}
-          <div className="svu-field">
-            <label>Tipo de vehículo</label>
-            <div className="svu-btn-group">
-              {tipoVehiculoOpciones.map(t => (
+            <label>Combustible</label>
+            <div className="svu-chip-group">
+              {COMBUSTIBLES.map(c => (
                 <button
-                  key={t.value}
-                  className={`svu-tipo-btn${form.TipoVehiculo === t.value ? " active" : ""}`}
-                  onClick={() => set("TipoVehiculo", t.value)}
+                  key={c}
+                  className={`svu-chip${form.combustible === c ? ' active' : ''}`}
+                  onClick={() => set('combustible', c)}
                 >
-                  {t.label}
+                  {c}
                 </button>
               ))}
             </div>
@@ -303,36 +366,46 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
           {/* Color de tarjeta */}
           <div className="svu-field">
             <label>Color de tarjeta</label>
-            <div className="svu-btn-group">
-              {colorWrapOpciones.map(c => (
+            <div className="svu-color-dots">
+              {colorWrapOpciones.map(op => (
                 <button
-                  key={c.value}
-                  className={`svu-tipo-btn${form.ColorWrap === c.value ? " active" : ""}`}
-                  style={form.ColorWrap === c.value ? { background: colorMap[c.value].dot, color: "#fff", borderColor: colorMap[c.value].dot } : {}}
-                  onClick={() => set("ColorWrap", c.value)}
-                >
-                  {c.label}
-                </button>
+                  key={op.value}
+                  className={`svu-color-dot${form.colorWrap === op.value ? ' active' : ''}`}
+                  style={{ '--dot-color': colorMap[op.value].dot }}
+                  title={op.label}
+                  onClick={() => set('colorWrap', op.value)}
+                />
               ))}
             </div>
           </div>
 
-          {error && <div className="svu-error">{error}</div>}
+          {error && (
+            <div className="svu-error">
+              <i className="bi bi-exclamation-triangle-fill me-2" />{error}
+            </div>
+          )}
         </div>
 
-        <div className="svu-panel-actions">
-          <button className="svu-panel-btn-secondary" onClick={onClose}>Cancelar</button>
-          <button className="svu-panel-btn-primary" onClick={handleSubmit} disabled={guardando}>
-            {guardando ? "Guardando..." : "Agregar vehículo"}
+        {/* Footer */}
+        <div className="svu-modal-footer">
+          <button className="svu-modal-btn-cancel" onClick={onClose} disabled={guardando}>
+            Cancelar
+          </button>
+          <button className="svu-modal-btn-confirm" onClick={handleSubmit} disabled={guardando}>
+            {guardando
+              ? <><i className="bi bi-arrow-repeat svu-spin me-2" />Guardando...</>
+              : <><i className="bi bi-plus-lg me-2" />Agregar vehículo</>
+            }
           </button>
         </div>
-      </aside>
-    </>
+      </div>
+    </div>
   );
 }
 
 function CardVehiculo({ vehiculo, onSelect, isActive }) {
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
+  const icono = TIPOS_ICONO[vehiculo.tipoVehiculo] || 'bi-car-front';
   return (
     <div
       className={`svu-card${isActive ? " active" : ""}`}
@@ -343,7 +416,7 @@ function CardVehiculo({ vehiculo, onSelect, isActive }) {
       <div className="svu-card-inner">
         <div className="svu-card-top">
           <div className="svu-card-icon">
-            <i className="bi bi-car-front" style={{ fontSize: "1.2rem" }} />
+            <i className={`bi ${icono}`} style={{ fontSize: "1.2rem" }} />
           </div>
           <BadgeEstado estado={vehiculo.estado} />
         </div>
@@ -396,7 +469,6 @@ export default function SecVehiculos() {
   }, [user]);
 
   const handleAgregado = (nuevo) => {
-    // Mapear la respuesta del POST al formato que usa el componente
     setVehiculos(prev => [...prev, {
       id:             nuevo.id,
       nombre:         `${nuevo.marca} ${nuevo.modelo}`,
@@ -406,6 +478,7 @@ export default function SecVehiculos() {
       color:          nuevo.color,
       combustible:    nuevo.combustible,
       colorWrap:      nuevo.colorWrap,
+      tipoVehiculo:   nuevo.tipoVehiculo,
       ultimoServicio: "Sin registro",
       estado:         nuevo.estado,
     }]);
