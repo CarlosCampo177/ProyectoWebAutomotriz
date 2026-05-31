@@ -15,15 +15,12 @@ const COLORES_WRAP = [
   { value: 'orange', label: 'Naranja',  hex: '#ea580c' },
 ];
 
-const TIPOS = [
-  { val: 'car',   label: 'Auto',      icon: 'bi-car-front' },
-  { val: 'truck', label: 'Camioneta', icon: 'bi-truck'     },
-  { val: 'moto',  label: 'Moto',      icon: 'bi-bicycle'   },
-  { val: 'van',   label: 'Van',       icon: 'bi-bus-front' },
-];
-
-const tipoIcon = (tipo) =>
-  TIPOS.find(t => t.val === tipo)?.icon || 'bi-car-front';
+const TIPOS_ICONO = {
+  car:   'bi-car-front',
+  truck: 'bi-truck',
+  moto:  'bi-bicycle',
+  van:   'bi-bus-front',
+};
 
 const EMPTY_FORM = {
   placa: '',
@@ -31,33 +28,32 @@ const EMPTY_FORM = {
   color: '',
   kilometraje: 0,
   combustible: 'Gasolina',
-  tipoVehiculo: 'car',       // ← reemplaza icono
   colorWrap: 'blue',
+  idTipo: '',     // ← nuevo
   idMarca: '',
-  modeloTexto: '',
+  idModelo: '',   // ← ahora es ID directo
   idCliente: '',
 };
 
 export default function Vehiculos() {
-  const [vehiculos,         setVehiculos]         = useState([]);
-  const [marcas,            setMarcas]            = useState([]);
-  const [modelos,           setModelos]           = useState([]);
-  const [clientes,          setClientes]          = useState([]);
-  const [form,              setForm]              = useState(EMPTY_FORM);
-  const [editingId,         setEditingId]         = useState(null);
-  const [showModal,         setShowModal]         = useState(false);
-  const [showMarca,         setShowMarca]         = useState(false);
-  const [nuevaMarca,        setNuevaMarca]        = useState('');
-  const [loading,           setLoading]           = useState(true);
-  const [loadMod,           setLoadMod]           = useState(false);
-  const [saving,            setSaving]            = useState(false);
-  const [error,             setError]             = useState('');
-  const [busqueda,          setBusqueda]          = useState('');
-  const [detalle,           setDetalle]           = useState(null);
-  const [tipoAutoDetectado, setTipoAutoDetectado] = useState(false); // ← nuevo
+  const [vehiculos,  setVehiculos]  = useState([]);
+  const [tipos,      setTipos]      = useState([]);
+  const [marcas,     setMarcas]     = useState([]);
+  const [modelos,    setModelos]    = useState([]);
+  const [clientes,   setClientes]   = useState([]);
+  const [form,       setForm]       = useState(EMPTY_FORM);
+  const [editingId,  setEditingId]  = useState(null);
+  const [showModal,  setShowModal]  = useState(false);
+  const [loading,    setLoading]    = useState(true);
+  const [loadMarcas, setLoadMarcas] = useState(false);
+  const [loadMod,    setLoadMod]    = useState(false);
+  const [saving,     setSaving]     = useState(false);
+  const [error,      setError]      = useState('');
+  const [busqueda,   setBusqueda]   = useState('');
+  const [detalle,    setDetalle]    = useState(null);
 
   useEffect(() => {
-    Promise.all([cargarVehiculos(), cargarMarcas(), cargarClientes()]);
+    Promise.all([cargarVehiculos(), cargarTipos(), cargarClientes()]);
   }, []);
 
   const cargarVehiculos = async () => {
@@ -72,12 +68,13 @@ export default function Vehiculos() {
     }
   };
 
-  const cargarMarcas = async () => {
+  // Carga los tipos desde el nuevo endpoint
+  const cargarTipos = async () => {
     try {
-      const data = await marcaService.getAll();
-      setMarcas((data || []).map(m => ({ id: String(m.idMarca), nombre: m.nombreMarca })));
+      const data = await marcaService.getTipos(); // ← nuevo método en adminService
+      setTipos(data || []);
     } catch {
-      setMarcas([]);
+      setTipos([]);
     }
   };
 
@@ -90,21 +87,32 @@ export default function Vehiculos() {
     }
   };
 
-  /* ── Cambio de marca → carga modelos ── */
-  const handleMarcaChange = async (idMarca) => {
-    setForm(f => ({ ...f, idMarca, modeloTexto: '' }));
+  // Paso 1: elige tipo → carga marcas filtradas
+  const handleTipoChange = async (idTipo) => {
+    setForm(f => ({ ...f, idTipo, idMarca: '', idModelo: '' }));
+    setMarcas([]);
     setModelos([]);
-    setTipoAutoDetectado(false);
-    if (!idMarca) return;
+    if (!idTipo) return;
+    try {
+      setLoadMarcas(true);
+      const data = await marcaService.getMarcasPorTipo(idTipo); // ← nuevo método
+      setMarcas(data || []);
+    } catch {
+      setMarcas([]);
+    } finally {
+      setLoadMarcas(false);
+    }
+  };
+
+  // Paso 2: elige marca → carga modelos filtrados por marca Y tipo
+  const handleMarcaChange = async (idMarca) => {
+    setForm(f => ({ ...f, idMarca, idModelo: '' }));
+    setModelos([]);
+    if (!idMarca || !form.idTipo) return;
     try {
       setLoadMod(true);
-      const data = await marcaService.getModelos(idMarca);
-      // Los modelos ahora incluyen tipoVehiculo
-      setModelos((data || []).map(mod => ({
-        id:           String(mod.id),
-        nombre:       mod.nombre,
-        tipoVehiculo: mod.tipoVehiculo || 'car', // ← nuevo
-      })));
+      const data = await marcaService.getModelosPorMarcaYTipo(idMarca, form.idTipo); // ← nuevo método
+      setModelos(data || []);
     } catch {
       setModelos([]);
     } finally {
@@ -112,61 +120,43 @@ export default function Vehiculos() {
     }
   };
 
-  /* ── Cambio de modelo → detecta tipo automáticamente ── */
-  const handleModeloChange = (texto) => {
-    f('modeloTexto', texto);
-    const match = modelos.find(
-      m => m.nombre.toLowerCase() === texto.toLowerCase()
-    );
-    if (match) {
-      f('tipoVehiculo', match.tipoVehiculo);
-      setTipoAutoDetectado(true);
-    } else {
-      setTipoAutoDetectado(false);
-    }
-  };
-
-  /* ── Modales ── */
   const abrirCrear = () => {
     setForm(EMPTY_FORM);
+    setMarcas([]);
     setModelos([]);
     setEditingId(null);
     setError('');
-    setTipoAutoDetectado(false);
     setShowModal(true);
   };
 
   const abrirEditar = async (v) => {
     setForm({
-      placa:        v.placa,
-      anio:         v.anio,
-      color:        v.color,
-      kilometraje:  v.kilometraje,
-      combustible:  v.combustible,
-      tipoVehiculo: v.tipoVehiculo || 'car', // ← reemplaza icono
-      colorWrap:    v.colorWrap || 'blue',
-      idMarca:      String(v.idMarca),
-      modeloTexto:  String(v.modelo),
-      idCliente:    String(v.idCliente),
+      placa:       v.placa,
+      anio:        v.anio,
+      color:       v.color,
+      kilometraje: v.kilometraje,
+      combustible: v.combustible,
+      colorWrap:   v.colorWrap || 'blue',
+      idTipo:      String(v.idTipo),
+      idMarca:     String(v.idMarca),
+      idModelo:    String(v.idModelo),
+      idCliente:   String(v.idCliente),
     });
+    // Carga las marcas y modelos del vehículo que se va a editar
     try {
+      setLoadMarcas(true);
+      const dataMarcas = await marcaService.getMarcasPorTipo(v.idTipo);
+      setMarcas(dataMarcas || []);
+      setLoadMarcas(false);
+
       setLoadMod(true);
-      const data = await marcaService.getModelos(v.idMarca);
-      const lista = (data || []).map(mod => ({
-        id:           String(mod.id),
-        nombre:       mod.nombre,
-        tipoVehiculo: mod.tipoVehiculo || 'car',
-      }));
-      setModelos(lista);
-      // Si el modelo ya existe en BD → tipo auto detectado
-      const match = lista.find(
-        m => m.nombre.toLowerCase() === v.modelo.toLowerCase()
-      );
-      setTipoAutoDetectado(!!match);
+      const dataModelos = await marcaService.getModelosPorMarcaYTipo(v.idMarca, v.idTipo);
+      setModelos(dataModelos || []);
     } catch {
+      setMarcas([]);
       setModelos([]);
-      setTipoAutoDetectado(false);
     } finally {
+      setLoadMarcas(false);
       setLoadMod(false);
     }
     setEditingId(v.id);
@@ -177,7 +167,7 @@ export default function Vehiculos() {
   const cerrarModal = () => { setShowModal(false); setError(''); };
 
   const guardar = async () => {
-    if (!form.placa.trim() || !form.modeloTexto.trim() || !form.idCliente || !form.color.trim() || !form.idMarca) {
+    if (!form.placa.trim() || !form.idModelo || !form.idCliente || !form.color.trim()) {
       setError('Todos los campos con asterisco (*) son requeridos.');
       return;
     }
@@ -185,16 +175,14 @@ export default function Vehiculos() {
       setSaving(true);
       setError('');
       const payload = {
-        placa:        form.placa.trim().toUpperCase(),
-        anio:         Number(form.anio),
-        color:        form.color.trim(),
-        kilometraje:  Number(form.kilometraje),
-        combustible:  form.combustible,
-        tipoVehiculo: form.tipoVehiculo, // ← reemplaza icono
-        colorWrap:    form.colorWrap,
-        nombreModelo: form.modeloTexto.trim(),
-        idMarca:      Number(form.idMarca),
-        idCliente:    Number(form.idCliente),
+        placa:       form.placa.trim().toUpperCase(),
+        anio:        Number(form.anio),
+        color:       form.color.trim(),
+        kilometraje: Number(form.kilometraje),
+        combustible: form.combustible,
+        colorWrap:   form.colorWrap,
+        idModelo:    Number(form.idModelo), // ← ID directo
+        idCliente:   Number(form.idCliente),
       };
       if (editingId) {
         await vehiculoService.actualizar(editingId, payload);
@@ -205,42 +193,31 @@ export default function Vehiculos() {
       if (detalle) setDetalle(null);
       cargarVehiculos();
     } catch (err) {
-      setError(err.response?.data || err.data || 'Error al guardar. Verifica los datos.');
+      setError(err.response?.data || err.data || 'Error al guardar.');
     } finally {
       setSaving(false);
     }
   };
 
   const eliminar = async (id) => {
-    if (!window.confirm('¿Eliminar este vehículo? Esta acción no se puede deshacer.')) return;
+    if (!window.confirm('¿Eliminar este vehículo?')) return;
     try {
       await vehiculoService.eliminar(id);
       if (detalle?.id === id) setDetalle(null);
       cargarVehiculos();
     } catch (err) {
-      alert(err.response?.data || err.data || 'No se pudo eliminar el vehículo.');
-    }
-  };
-
-  const guardarMarcaRapida = async () => {
-    if (!nuevaMarca.trim()) return;
-    try {
-      await marcaService.crear({ nombreMarca: nuevaMarca.trim() });
-      await cargarMarcas();
-      setNuevaMarca('');
-      setShowMarca(false);
-    } catch (err) {
-      alert(err.response?.data || err.data || 'Error al crear marca.');
+      alert(err.response?.data || err.data || 'No se pudo eliminar.');
     }
   };
 
   const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
   const colorInfo = (val) => COLORES_WRAP.find(c => c.value === val) || COLORES_WRAP[0];
+  const tipoIcon  = (icono) => TIPOS_ICONO[icono] || 'bi-car-front';
 
   const filtrados = vehiculos.filter(v =>
-    (v.placa    || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-    (v.cliente  || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-    (v.marca    || '').toLowerCase().includes(busqueda.toLowerCase())
+    (v.placa   || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+    (v.cliente || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+    (v.marca   || '').toLowerCase().includes(busqueda.toLowerCase())
   );
 
   return (
@@ -302,7 +279,7 @@ export default function Vehiculos() {
                   <tr>
                     <td colSpan={9} className="empty-row">
                       <i className="bi bi-inbox me-2" />
-                      {busqueda ? 'Sin resultados para la búsqueda.' : 'No hay vehículos registrados.'}
+                      {busqueda ? 'Sin resultados.' : 'No hay vehículos registrados.'}
                     </td>
                   </tr>
                 ) : filtrados.map((v, i) => (
@@ -319,9 +296,9 @@ export default function Vehiculos() {
                       </span>
                     </td>
                     <td>
-                      {/* ← ícono viene del tipoVehiculo del modelo */}
                       <div className="mec-cell">
-                        <i className={`bi ${tipoIcon(v.tipoVehiculo)}`} style={{ fontSize: '1.1rem', color: 'var(--accent)' }} />
+                        <i className={`bi ${tipoIcon(v.tipoVehiculo)}`}
+                           style={{ fontSize: '1.1rem', color: 'var(--accent)' }} />
                         <div>
                           <div className="veh-nombre">{v.marca} {v.modelo}</div>
                           <div className="veh-sub">{v.color}</div>
@@ -338,10 +315,10 @@ export default function Vehiculos() {
                       </span>
                     </td>
                     <td className="actions-cell" onClick={e => e.stopPropagation()}>
-                      <button className="btn-icon edit" type="button" onClick={() => abrirEditar(v)} title="Editar">
+                      <button className="btn-icon edit" type="button" onClick={() => abrirEditar(v)}>
                         <i className="bi bi-pencil" />
                       </button>
-                      <button className="btn-icon delete" type="button" onClick={() => eliminar(v.id)} title="Eliminar">
+                      <button className="btn-icon delete" type="button" onClick={() => eliminar(v.id)}>
                         <i className="bi bi-trash" />
                       </button>
                     </td>
@@ -353,7 +330,7 @@ export default function Vehiculos() {
         )}
       </div>
 
-      {/* ── PANEL LATERAL DETALLE ── */}
+      {/* ── PANEL LATERAL ── */}
       {detalle && (
         <aside className="veh-detalle">
           <div className="veh-detalle-header">
@@ -375,10 +352,9 @@ export default function Vehiculos() {
             <div className="veh-info-grid">
               <div className="veh-info-item">
                 <span className="veh-info-label">Tipo</span>
-                {/* ← muestra el tipo con ícono */}
                 <span className="veh-info-val">
                   <i className={`bi ${tipoIcon(detalle.tipoVehiculo)} me-1`} />
-                  {TIPOS.find(t => t.val === detalle.tipoVehiculo)?.label || 'Auto'}
+                  {detalle.tipoNombre}
                 </span>
               </div>
               <div className="veh-info-item">
@@ -451,40 +427,56 @@ export default function Vehiculos() {
                 </div>
               </div>
 
-              {/* Identificación */}
+              {/* Tipo → Marca → Modelo encadenados */}
               <div className="veh-form-section">
                 <div className="veh-form-section-label"><i className="bi bi-tag" /> Identificación</div>
                 <div className="form-grid-2">
+
+                  {/* PASO 1: Tipo */}
                   <div className="form-group">
-                    <label>Marca *</label>
-                    <div className="input-with-btn">
-                      <select value={form.idMarca} onChange={e => handleMarcaChange(e.target.value)}>
-                        <option value="">— Selecciona marca —</option>
-                        {marcas.map(m => (
-                          <option key={m.id} value={m.id}>{m.nombre}</option>
-                        ))}
-                      </select>
-                      <button className="btn-icon edit" title="Nueva marca" type="button" onClick={() => setShowMarca(true)}>
-                        <i className="bi bi-plus-lg" />
-                      </button>
-                    </div>
+                    <label>Tipo de vehículo *</label>
+                    <select value={form.idTipo} onChange={e => handleTipoChange(e.target.value)}>
+                      <option value="">— Selecciona tipo —</option>
+                      {tipos.map(t => (
+                        <option key={t.idTipo} value={String(t.idTipo)}>
+                          {t.nombre}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
+                  {/* PASO 2: Marca — deshabilitado hasta elegir tipo */}
+                  <div className="form-group">
+                    <label>Marca *</label>
+                    <select
+                      value={form.idMarca}
+                      onChange={e => handleMarcaChange(e.target.value)}
+                      disabled={!form.idTipo || loadMarcas}
+                    >
+                      <option value="">
+                        {loadMarcas ? 'Cargando...' : !form.idTipo ? '— Elige tipo primero —' : '— Selecciona marca —'}
+                      </option>
+                      {marcas.map(m => (
+                        <option key={m.idMarca} value={String(m.idMarca)}>{m.nombreMarca}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* PASO 3: Modelo — deshabilitado hasta elegir marca */}
                   <div className="form-group">
                     <label>Modelo *</label>
-                    <input
-                      type="text"
-                      list="lista-modelos-sugeridos"
-                      placeholder={loadMod ? 'Cargando modelos...' : !form.idMarca ? '— Elige marca primero —' : 'Escribe o selecciona modelo'}
-                      value={form.modeloTexto}
-                      onChange={e => handleModeloChange(e.target.value)} // ← cambiado
+                    <select
+                      value={form.idModelo}
+                      onChange={e => f('idModelo', e.target.value)}
                       disabled={!form.idMarca || loadMod}
-                    />
-                    <datalist id="lista-modelos-sugeridos">
+                    >
+                      <option value="">
+                        {loadMod ? 'Cargando...' : !form.idMarca ? '— Elige marca primero —' : '— Selecciona modelo —'}
+                      </option>
                       {modelos.map(m => (
-                        <option key={m.id} value={m.nombre} />
+                        <option key={m.id} value={String(m.id)}>{m.nombre}</option>
                       ))}
-                    </datalist>
+                    </select>
                   </div>
 
                   <div className="form-group">
@@ -534,77 +526,18 @@ export default function Vehiculos() {
                   </div>
                 </div>
               </div>
-
-              {/* Tipo — solo si el modelo es nuevo */}
-              {!tipoAutoDetectado && (
-                <div className="veh-form-section">
-                  <div className="veh-form-section-label">
-                    <i className="bi bi-collection" /> Tipo de vehículo
-                    <span style={{ fontSize: '.75rem', color: 'var(--text-3)', fontWeight: 400, marginLeft: '.5rem' }}>
-                      (modelo nuevo — se guardará para la próxima vez)
-                    </span>
-                  </div>
-                  <div className="veh-tipo-row">
-                    {TIPOS.map(opt => (
-                      <button key={opt.val} type="button"
-                        className={`veh-tipo-btn ${form.tipoVehiculo === opt.val ? 'active' : ''}`}
-                        onClick={() => f('tipoVehiculo', opt.val)}>
-                        <i className={`bi ${opt.icon}`} />
-                        <span>{opt.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Si el tipo fue auto detectado, muéstralo como solo lectura */}
-              {tipoAutoDetectado && (
-                <div className="veh-form-section">
-                  <div className="veh-form-section-label"><i className="bi bi-collection" /> Tipo de vehículo</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem', color: 'var(--text-2)', fontSize: '.88rem' }}>
-                    <i className={`bi ${tipoIcon(form.tipoVehiculo)}`} style={{ color: 'var(--accent)', fontSize: '1.2rem' }} />
-                    <span>{TIPOS.find(t => t.val === form.tipoVehiculo)?.label}</span>
-                    <span style={{ fontSize: '.75rem', color: 'var(--text-3)' }}>— asignado automáticamente por el modelo</span>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="modal-footer">
-              <button className="btn-secondary" type="button" onClick={cerrarModal} disabled={saving}>Cancelar</button>
+              <button className="btn-secondary" type="button" onClick={cerrarModal} disabled={saving}>
+                Cancelar
+              </button>
               <button className="btn-primary" type="button" onClick={guardar} disabled={saving}>
                 {saving
                   ? <><i className="bi bi-arrow-repeat spin me-1" /> Guardando...</>
-                  : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} /> {editingId ? 'Guardar cambios' : 'Registrar vehículo'}</>
+                  : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} />
+                    {editingId ? 'Guardar cambios' : 'Registrar vehículo'}</>
                 }
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══ MINI-MODAL MARCA ══ */}
-      {showMarca && (
-        <div className="modal-overlay" onClick={() => setShowMarca(false)}>
-          <div className="modal-card modal-sm" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Nueva Marca</h2>
-              <button className="modal-close" type="button" onClick={() => setShowMarca(false)}>
-                <i className="bi bi-x-lg" />
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="form-group">
-                <label>Nombre</label>
-                <input type="text" placeholder="Ej: Toyota" value={nuevaMarca}
-                  onChange={e => setNuevaMarca(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && guardarMarcaRapida()} autoFocus />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" type="button" onClick={() => setShowMarca(false)}>Cancelar</button>
-              <button className="btn-primary" type="button" onClick={guardarMarcaRapida}>
-                <i className="bi bi-check-lg me-1" /> Crear
               </button>
             </div>
           </div>

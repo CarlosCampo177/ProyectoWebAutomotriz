@@ -91,18 +91,21 @@ body {
 }
 
 .at-titulo {
-  font-family: "Syne", "Montserrat", sans-serif;
-  font-size: 56px;
-  font-weight: 900;
-  line-height: 1.1;
+  font-family: "Space Grotesk", "Montserrat", sans-serif; 
+  font-size: 70px;       
+  font-weight: 700;    
+  line-height: 1.2;       
   margin: 0;
+  letter-spacing: -1px;   
 }
 
 .at-texto {
-  font-size: 14px;
-  color: #c0c0c0;
-  margin-top: 16px;
-  max-width: 380px;
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
+  font-size: 15px;    
+  color: #e2e8f0;        
+  margin-top: 24px;
+  line-height: 1.6;      
+  max-width: 420px;       
 }
 
 .at-btn-leer {
@@ -154,9 +157,10 @@ body {
 
 /* ===== LABEL ===== */
 .at-label {
-  font-family: "DM Sans", sans-serif;
-  font-size: 11px;
-  letter-spacing: 3px;
+  font-family: "Inter", sans-serif; 
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
   text-transform: uppercase;
   color: #3a9fd6;
   margin-bottom: 16px;
@@ -164,6 +168,7 @@ body {
 
 /* ===== QUÉ ES ===== */
 .at-what {
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
   padding: 90px 40px;
   text-align: center;
   background: #060f1a;
@@ -182,8 +187,8 @@ body {
 }
 
 .at-what h2 {
-  font-family: "Syne", sans-serif;
-  font-size: clamp(28px, 4vw, 42px);
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
+  font-size: clamp(32px, 4vw, 52px);
   font-weight: 800;
   color: #f0f4f8;
   line-height: 1.15;
@@ -215,8 +220,8 @@ body {
 }
 
 .at-features-header h2 {
-  font-family: "Syne", sans-serif;
-  font-size: clamp(24px, 3.5vw, 36px);
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
+  font-size: clamp(32px, 3.5vw, 44px);
   font-weight: 800;
   color: #f0f4f8;
   margin-bottom: 10px;
@@ -313,8 +318,8 @@ body {
 }
 
 .at-planes-header h2 {
-  font-family: "Syne", sans-serif;
-  font-size: clamp(24px, 3.5vw, 36px);
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
+  font-size: clamp(32px, 3.5vw, 44px);
   font-weight: 800;
   color: #f0f4f8;
   margin-bottom: 10px;
@@ -386,7 +391,7 @@ body {
 }
 
 .at-plan-nombre {
-  font-family: "Syne", sans-serif;
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 2px;
@@ -401,7 +406,7 @@ body {
 }
 
 .at-plan-monto {
-  font-family: "Syne", sans-serif;
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
   font-size: 42px;
   font-weight: 800;
   color: #f0f4f8;
@@ -510,8 +515,8 @@ body {
 }
 
 .at-cta-new h2 {
-  font-family: "Syne", sans-serif;
-  font-size: clamp(26px, 4vw, 44px);
+  font-family: "Plus Jakarta Sans", "Roboto", sans-serif;
+  font-size: clamp(40px, 4vw, 60px);
   font-weight: 800;
   color: #f0f4f8;
   margin-bottom: 16px;

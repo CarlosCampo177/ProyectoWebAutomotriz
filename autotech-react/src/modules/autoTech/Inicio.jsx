@@ -239,7 +239,7 @@ export default function Inicio() {
         </a>
         <p className="at-cta-note fade-in">
           <i className="bi bi-shield-lock-fill"></i>
-          Sin tarjeta de crédito · Cancela cuando quieras
+          Crea tu cuenta · Cancela cuando quieras
         </p>
       </section>
 

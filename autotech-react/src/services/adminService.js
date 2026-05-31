@@ -4,15 +4,19 @@ import apiClient from './apiClient'
    MARCAS Y MODELOS
 ══════════════════════════════════ */
 export const marcaService = {
-  getAll:         ()              => apiClient.get('Marcas'),
-  getModelos:     (idMarca)       => apiClient.get(`Marcas/${idMarca}/modelos`),
-  getTodosModelos:()              => apiClient.get('Marcas/modelos-todos'),
-  crear:          (data)          => apiClient.post('Marcas', data),
-  actualizar:     (id, data)      => apiClient.put(`Marcas/${id}`, data),
-  eliminar:       (id)            => apiClient.delete(`Marcas/${id}`),
-  crearModelo:    (idMarca, data) => apiClient.post(`Marcas/${idMarca}/modelos`, data),
-  actualizarModelo:(id, data)     => apiClient.put(`Marcas/modelos/${id}`, data),
-  eliminarModelo: (id)            => apiClient.delete(`Marcas/modelos/${id}`),
+  getAll:                  ()              => apiClient.get('Marcas'),
+  getModelos:              (idMarca)       => apiClient.get(`Marcas/${idMarca}/modelos`),
+  getTodosModelos:         ()              => apiClient.get('Marcas/modelos-todos'),
+  crear:                   (data)          => apiClient.post('Marcas', data),
+  actualizar:              (id, data)      => apiClient.put(`Marcas/${id}`, data),
+  eliminar:                (id)            => apiClient.delete(`Marcas/${id}`),
+  crearModelo:             (idMarca, data) => apiClient.post(`Marcas/${idMarca}/modelos`, data),
+  actualizarModelo:        (id, data)      => apiClient.put(`Marcas/modelos/${id}`, data),
+  eliminarModelo:          (id)            => apiClient.delete(`Marcas/modelos/${id}`),
+
+  getTipos:                ()              => apiClient.get('TiposVehiculo'),
+  getMarcasPorTipo:        (idTipo)        => apiClient.get(`Marcas/porTipo/${idTipo}`),
+  getModelosPorMarcaYTipo: (idMarca, idTipo) => apiClient.get(`Marcas/${idMarca}/modelos/porTipo/${idTipo}`),
 }
 
 /* ══════════════════════════════════
@@ -65,10 +69,13 @@ export const servicioService = {
    PRODUCTOS
 ══════════════════════════════════ */
 export const productoService = {
-  getAll:     ()         => apiClient.get('Productos'),
-  crear:      (data)     => apiClient.post('Productos', data),
-  actualizar: (id, data) => apiClient.put(`Productos/${id}`, data),
-  eliminar:   (id)       => apiClient.delete(`Productos/${id}`),
+  getAll:         ()              => apiClient.get('Productos'),
+  getActivos:     ()              => apiClient.get('Productos/activos'),
+  getHistorial:   (id)            => apiClient.get(`Productos/${id}/historial`),
+  crear:          (data)          => apiClient.post('Productos', data),
+  actualizar:     (id, data)      => apiClient.put(`Productos/${id}`, data),
+  cambiarEstado:  (id)            => apiClient.patch(`Productos/${id}/estado`),
+  actualizarStock:(id, data)      => apiClient.patch(`Productos/${id}/stock`, data),
 }
 
 /* ══════════════════════════════════
