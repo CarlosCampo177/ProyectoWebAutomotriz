@@ -22,9 +22,9 @@ export default function Login() {
       const userData = await loginRequest(identifier, password);
       login(userData);
 
-      if (userData.rol === "admin")    navigate("/admin/inicio");
-      if (userData.rol === "mecanico") navigate("/mecanico");
-      if (userData.rol === "cliente")  navigate("/usuario");
+      if (userData.rol === "Admin")    navigate("/admin/inicio");
+      if (userData.rol === "Mecanico") navigate("/mecanico");
+      if (userData.rol === "Usuario")  navigate("/usuario");
 
     } catch {
       setError("Credenciales incorrectas");

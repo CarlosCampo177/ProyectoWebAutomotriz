@@ -1,22 +1,6 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — SECCIÓN HISTORIAL
-   sections/SecHistorial.jsx
-══════════════════════════════════════════ */
+import { useState, useEffect } from "react";
+import { useAuth } from '../../../context/AuthContext';
 import "./SecHistorial.css";
-
-/* ── NOTA API ──────────────────────────────
-   Props recibidas desde UsuarioApp:
-     historial → GET /api/usuarios/:id/historial
-     Estructura esperada por item:
-       {
-         id, servicio, dia, mes, vehiculo,
-         mecanico, monto, fecha (ISO string)
-       }
-
-   Paginación futura:
-     GET /api/usuarios/:id/historial?page=1&limit=10
-     Agregar botón "Cargar más" o paginación.
-────────────────────────────────────────── */
 
 function FechaCol({ dia, mes }) {
   return (
@@ -27,12 +11,21 @@ function FechaCol({ dia, mes }) {
   );
 }
 
-export default function SecHistorial({ historial }) {
-  /* ── NOTA API ──────────────────────────────
-     Estado de carga:
-     if (loading) return <div className="sh-loading">Cargando historial...</div>
-     if (error)   return <div className="sh-error">No se pudo cargar el historial.</div>
-  ────────────────────────────────────────── */
+export default function SecHistorial() {
+  const { user }                    = useAuth();
+  const [historial, setHistorial]   = useState([]);
+  const [loading, setLoading]       = useState(true);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/Cliente/${user.id}/historial`)
+      .then(r => r.json())
+      .then(setHistorial)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  if (loading) return <p style={{ color: "#888" }}>Cargando historial...</p>;
 
   return (
     <div>
@@ -41,12 +34,12 @@ export default function SecHistorial({ historial }) {
         <div className="sh-subtitle">Todos los servicios realizados a tus vehículos</div>
       </div>
 
-      {(!historial || historial.length === 0) && (
+      {historial.length === 0 && (
         <div className="sh-empty">No hay servicios registrados en el historial.</div>
       )}
 
       <div className="sh-list">
-        {(historial ?? []).map((h, i) => (
+        {historial.map((h, i) => (
           <div key={h.id ?? i} className="sh-item">
             <FechaCol dia={h.dia} mes={h.mes} />
             <div className="sh-item-body">
@@ -54,7 +47,6 @@ export default function SecHistorial({ historial }) {
               <div className="sh-item-meta">
                 <span>{h.vehiculo}</span>
                 <span>{h.mecanico}</span>
-                {/* ── NOTA API → h.monto viene del campo `total` o `monto` de la factura */}
                 <span>${h.monto?.toLocaleString("es-CO")}</span>
               </div>
             </div>

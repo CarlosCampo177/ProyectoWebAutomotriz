@@ -1,43 +1,31 @@
-/* ══════════════════════════════════════════
-   AUTOTECH — SECCIÓN FACTURAS
-   sections/SecFacturas.jsx
-══════════════════════════════════════════ */
-import * as Icon from "../icons/Icons";
+import { useState, useEffect } from "react";
+import { useAuth } from '../../../context/AuthContext';
 import "./SecFacturas.css";
 
-/* ── NOTA API ──────────────────────────────
-   Props recibidas desde UsuarioApp:
-     facturas → GET /api/usuarios/:id/facturas
-     Estructura esperada por item:
-       {
-         id, numero, servicio, vehiculo,
-         fecha, total, estado ("pagada" | "pendiente")
-       }
+export default function SecFacturas() {
+  const { user }                    = useAuth();
+  const [facturas, setFacturas]     = useState([]);
+  const [loading, setLoading]       = useState(true);
 
-   Para descargar PDF de factura (botón futuro):
-     GET /api/facturas/:id/pdf
-     → devuelve blob o URL firmada para descarga.
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch(`/api/Cliente/${user.id}/facturas`)
+      .then(r => r.json())
+      .then(setFacturas)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [user]);
 
-   Para pagar factura pendiente (botón futuro):
-     POST /api/pagos  body: { facturaId }
-     → integración con pasarela de pago.
-────────────────────────────────────────── */
-
-export default function SecFacturas({ facturas }) {
-  /* ── NOTA API ──────────────────────────────
-     Los totales se calculan localmente.
-     Con API también pueden venir de:
-       GET /api/usuarios/:id/facturas/resumen
-       { totalPagado, totalPendiente, cantidad }
-  ────────────────────────────────────────── */
-  const totalPagado    = (facturas ?? []).reduce((s, f) => s + (f.estado === "pagada"  ? f.total : 0), 0);
-  const totalPendiente = (facturas ?? []).reduce((s, f) => s + (f.estado !== "pagada"  ? f.total : 0), 0);
+  const totalPagado    = facturas.reduce((s, f) => s + (f.estado === "pagada" ? f.total : 0), 0);
+  const totalPendiente = facturas.reduce((s, f) => s + (f.estado !== "pagada" ? f.total : 0), 0);
 
   const resumen = [
-    { Icono: Icon.DollarSign, bg: "#e8f5e9", color: "#2e7d32", label: "Total pagado",  val: `$${totalPagado.toLocaleString("es-CO")}` },
-    { Icono: Icon.Clock,      bg: "#fff3e0", color: "#e65100", label: "Pendiente",      val: `$${totalPendiente.toLocaleString("es-CO")}` },
-    { Icono: Icon.Receipt,    bg: "#e8f0fe", color: "#1a6bdc", label: "Total facturas", val: (facturas ?? []).length },
+    { icon: "bi-currency-dollar", bg: "#e8f5e9", color: "#2e7d32", label: "Total pagado",  val: `$${totalPagado.toLocaleString("es-CO")}` },
+    { icon: "bi-clock",           bg: "#fff3e0", color: "#e65100", label: "Pendiente",      val: `$${totalPendiente.toLocaleString("es-CO")}` },
+    { icon: "bi-receipt",         bg: "#e8f0fe", color: "#1a6bdc", label: "Total facturas", val: facturas.length },
   ];
+
+  if (loading) return <p style={{ color: "#888" }}>Cargando facturas...</p>;
 
   return (
     <div>
@@ -46,12 +34,11 @@ export default function SecFacturas({ facturas }) {
         <div className="sf-subtitle">Registro de pagos y servicios facturados</div>
       </div>
 
-      {/* Cards resumen */}
       <div className="sf-resumen">
         {resumen.map((r, i) => (
           <div key={i} className="sf-card">
             <div className="sf-card-icon" style={{ background: r.bg, color: r.color }}>
-              <r.Icono />
+              <i className={`bi ${r.icon}`} style={{ fontSize: "1.3rem" }} />
             </div>
             <div>
               <div className="sf-card-label">{r.label}</div>
@@ -61,8 +48,7 @@ export default function SecFacturas({ facturas }) {
         ))}
       </div>
 
-      {/* Tabla */}
-      {(!facturas || facturas.length === 0) ? (
+      {facturas.length === 0 ? (
         <div className="sf-empty">No tienes facturas registradas.</div>
       ) : (
         <div className="sf-table-wrap">
@@ -79,7 +65,6 @@ export default function SecFacturas({ facturas }) {
                 <tr key={f.id ?? i}>
                   <td className="sf-numero">{f.numero}</td>
                   <td>{f.servicio}</td>
-                  {/* ── NOTA API → f.vehiculo puede ser vehiculo.nombre del join */}
                   <td>{f.vehiculo}</td>
                   <td>{f.fecha}</td>
                   <td>${f.total?.toLocaleString("es-CO")}</td>

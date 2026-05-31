@@ -25,8 +25,15 @@ import SecVehiculos     from '../modules/Mecanico/sections/SecVehiculos'
 import SecObservaciones from '../modules/Mecanico/sections/SecObservaciones'
 import RutasProtegidas from './RutasProtegidas'
 
+
 // Usuario
-import UsuarioOk from '../modules/Usuario/UsuarioDashboard'
+import SecInicioUsuario from '../modules/Usuario/sections/SecInicioU'
+import SecCitas         from '../modules/Usuario/sections/SecCitasU'
+import SecConsultaIA   from '../modules/Usuario/sections/SecConsultaIA'
+import SecFacturas     from '../modules/Usuario/sections/SecFacturas'
+import SecHistorial    from '../modules/Usuario/sections/SecHistorial'
+import SecMVehiculos     from '../modules/Usuario/sections/SecVehiculosU'
+import SecPerfil       from '../modules/Usuario/sections/SecPerfil'
 
 function AppRouter() {
   return (
@@ -38,7 +45,7 @@ function AppRouter() {
       <Route path="/page/login"    element={<Login />}    />
 
       {/* ── Admin ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['admin']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['Admin']} />}>
         <Route path="/admin" element={<DashboardLayout />}>
           <Route path="inicio"       element={<AdminInicio />}  />
           <Route path="clientes"     element={<Clientes/>} />
@@ -53,7 +60,7 @@ function AppRouter() {
       </Route>
 
       {/* ── Mecánico ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['mecanico']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['Mecanico']} />}>
         <Route path="/mecanico" element={<DashboardLayout />}>
           <Route index                element={<SecInicio />}        />
           <Route path="ordenes"       element={<SecOrdenes />}       />
@@ -63,9 +70,15 @@ function AppRouter() {
       </Route>
 
       {/* ── Usuario/Cliente ── */}
-      <Route element={<RutasProtegidas rolesPermitidos={['cliente']} />}>
+      <Route element={<RutasProtegidas rolesPermitidos={['Usuario']} />}>
         <Route path="/usuario" element={<DashboardLayout />}>
-          <Route index element={<UsuarioOk />} />
+          <Route index                element={<SecInicioUsuario />} />
+          <Route path="citas"         element={<SecCitas />}         />
+          <Route path="vehiculos"      element={<SecMVehiculos />}     />
+          <Route path="facturas"      element={<SecFacturas />}      />
+          <Route path="historial"     element={<SecHistorial />}     />
+          <Route path="perfil"        element={<SecPerfil/>}       />
+
         </Route>
       </Route>
 

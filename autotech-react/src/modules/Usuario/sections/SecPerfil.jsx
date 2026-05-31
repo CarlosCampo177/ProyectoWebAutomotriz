@@ -2,80 +2,205 @@
    AUTOTECH — SECCIÓN PERFIL
    sections/SecPerfil.jsx
 ══════════════════════════════════════════ */
-import * as Icon from "../icons/Icons";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { getVehiculos } from "../../../services/clienteService";
 import "./SecPerfil.css";
 
-/* ── NOTA API ──────────────────────────────
-   Para editar el perfil (botón futuro):
-     PUT /api/usuarios/:id
-     Body: { nombre, correo, telefono, ciudad }
-     Actualizar el estado local con la respuesta.
-
-   Para cambiar contraseña (botón futuro):
-     POST /api/auth/cambiar-password
-     Body: { passwordActual, passwordNuevo }
-────────────────────────────────────────── */
-
-function CampoInfo({ label, valor, icono: Icono }) {
+function CampoInfo({ label, valor, icon }) {
   return (
     <div className="sp-campo">
       <label>{label}</label>
       <div className="sp-campo-valor">
-        {Icono && (
-          <div className="sp-campo-icon">
-            <Icono />
-          </div>
-        )}
+        {icon && <i className={`ti ti-${icon}`} aria-hidden="true" />}
         <span>{valor || "—"}</span>
       </div>
     </div>
   );
 }
 
-export default function SecPerfil({ usuario, vehiculos, stats }) {
-  if (!usuario) return null;
+function PanelEditar({ detalle, onClose, onGuardar }) {
+  const [form, setForm] = useState({
+    Telefono:  detalle?.Telefono  ?? "",
+    Email:     detalle?.Email     ?? "",
+    Direccion: detalle?.Direccion ?? "",
+  });
+  const [guardando, setGuardando] = useState(false);
 
-  const primerNombre = usuario.nombre?.split(" ")[0] ?? "Usuario";
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleGuardar = async () => {
+    setGuardando(true);
+    try {
+      await new Promise(r => setTimeout(r, 600));
+      onGuardar(form);
+      onClose();
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="sp-overlay" onClick={onClose} />
+      <aside className="sp-panel">
+        <div className="sp-panel-head">
+          <div className="sp-panel-head-info">
+            <div className="sp-panel-titulo">Editar Perfil</div>
+            <div className="sp-panel-sub">Actualiza tu información de contacto</div>
+          </div>
+          <button className="sp-panel-close" onClick={onClose}>
+            <i className="ti ti-x" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="sp-panel-body">
+          <div className="sp-panel-section-label">Datos personales</div>
+
+          <div className="sp-panel-field">
+            <label>Nombre completo</label>
+            <div className="sp-panel-input-wrap readonly">
+              <i className="ti ti-user" aria-hidden="true" />
+              <span>{detalle?.nombreCompleto ?? "—"}</span>
+            </div>
+            <span className="sp-panel-hint">El nombre no es editable</span>
+          </div>
+
+          <div className="sp-panel-field">
+            <label>Documento</label>
+            <div className="sp-panel-input-wrap readonly">
+              <i className="ti ti-id" aria-hidden="true" />
+              <span>{detalle?.Documento ?? "—"}</span>
+            </div>
+            <span className="sp-panel-hint">El documento no es editable</span>
+          </div>
+
+          <div className="sp-panel-section-label">Información de contacto</div>
+
+          <div className="sp-panel-field">
+            <label>Correo electrónico</label>
+            <div className="sp-panel-input-wrap">
+              <i className="ti ti-mail" aria-hidden="true" />
+              <input
+                type="email"
+                value={form.Email}
+                onChange={e => set("Email", e.target.value)}
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+          </div>
+
+          <div className="sp-panel-field">
+            <label>Teléfono</label>
+            <div className="sp-panel-input-wrap">
+              <i className="ti ti-phone" aria-hidden="true" />
+              <input
+                type="tel"
+                value={form.Telefono}
+                onChange={e => set("Telefono", e.target.value)}
+                placeholder="300 000 0000"
+              />
+            </div>
+          </div>
+
+          <div className="sp-panel-field">
+            <label>Dirección</label>
+            <div className="sp-panel-input-wrap">
+              <i className="ti ti-map-pin" aria-hidden="true" />
+              <input
+                type="text"
+                value={form.Direccion}
+                onChange={e => set("Direccion", e.target.value)}
+                placeholder="Calle 123 # 45-67"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="sp-panel-actions">
+          <button className="sp-panel-btn-secondary" onClick={onClose}>
+            Cancelar
+          </button>
+          <button
+            className="sp-panel-btn-primary"
+            onClick={handleGuardar}
+            disabled={guardando}
+          >
+            {guardando ? "Guardando..." : "Guardar cambios"}
+          </button>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+export default function SecPerfil() {
+  const { user } = useAuth();
+
+  const [detalle,   setDetalle]   = useState(null);
+  const [editando,  setEditando]  = useState(false);
+  const [cargando,  setCargando]  = useState(true);
+  const [vehiculos, setVehiculos] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    setDetalle({
+      nombreCompleto: user.nombre   ?? "—",
+      Documento:      user.cedula   ?? "—",
+      Email:          user.email    ?? "—",
+      Telefono:       user.telefono ?? "—",
+      Direccion:      "—",
+    });
+    getVehiculos(user.id)
+      .then(res => setVehiculos(Array.isArray(res) ? res : []))
+      .catch(console.error);
+    setCargando(false);
+  }, [user]);
+
+  if (!user) return null;
+
+  const iniciales = user.iniciales
+    ?? user.nombre?.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
+    ?? "??";
+
+  const handleGuardar = (datos) => {
+    setDetalle(prev => ({ ...prev, ...datos }));
+  };
 
   return (
     <div className="sp-wrapper">
-      {/* ─── Header ─── */}
       <div className="sp-page-header">
         <div className="sp-page-title">Mi Perfil</div>
-        <div className="sp-page-sub">
-          Información personal y configuración de tu cuenta
-        </div>
+        <div className="sp-page-sub">Información personal y configuración de tu cuenta</div>
       </div>
 
       <div className="sp-layout">
-        {/* ─── Columna izquierda: avatar + resumen ─── */}
+        {/* ─── Columna izquierda ─── */}
         <div className="sp-col-left">
-          {/* Avatar card */}
           <div className="sp-avatar-card">
-            <div className="sp-avatar">{usuario.iniciales ?? "??"}</div>
-            <div className="sp-nombre">{usuario.nombre ?? "Cargando..."}</div>
+            <div className="sp-avatar-ring">
+              <div className="sp-avatar">{iniciales}</div>
+            </div>
+            <div className="sp-nombre">{user.nombre ?? "—"}</div>
             <div className="sp-rol">Cliente</div>
 
             <div className="sp-stats-row">
               <div className="sp-stat">
-                <span className="sp-stat-val">{vehiculos?.length ?? 0}</span>
+                <span className="sp-stat-val">{vehiculos.length}</span>
                 <span className="sp-stat-label">Vehículos</span>
               </div>
               <div className="sp-stat-divider" />
               <div className="sp-stat">
-                <span className="sp-stat-val">
-                  {stats?.serviciosRealizados ?? 0}
-                </span>
+                <span className="sp-stat-val">0</span>
                 <span className="sp-stat-label">Servicios</span>
               </div>
             </div>
           </div>
 
-          {/* Tarjeta de seguridad */}
           <div className="sp-security-card">
             <div className="sp-sec-header">
               <div className="sp-sec-icon">
-                <Icon.Check />
+                <i className="ti ti-shield-check" aria-hidden="true" />
               </div>
               <span>Cuenta verificada</span>
             </div>
@@ -83,69 +208,60 @@ export default function SecPerfil({ usuario, vehiculos, stats }) {
               Tu cuenta está activa y verificada. Puedes agendar citas y
               gestionar tus vehículos.
             </p>
-            {/* Botón futuro → cambiar contraseña */}
             <button className="sp-btn-outline" disabled title="Próximamente">
               Cambiar contraseña
             </button>
           </div>
         </div>
 
-        {/* ─── Columna derecha: datos ─── */}
+        {/* ─── Columna derecha ─── */}
         <div className="sp-col-right">
+
           {/* Información personal */}
           <div className="sp-datos-card">
             <div className="sp-datos-header">
               <div className="sp-datos-header-icon">
-                <Icon.User />
+                <i className="ti ti-user" aria-hidden="true" />
               </div>
               <div>
                 <div className="sp-datos-title">Información Personal</div>
-                <div className="sp-datos-sub">
-                  Datos registrados en tu cuenta
-                </div>
+                <div className="sp-datos-sub">Datos registrados en tu cuenta</div>
               </div>
-              {/* Botón futuro → editar perfil */}
-              <button className="sp-btn-edit" disabled title="Próximamente">
+              <button className="sp-btn-edit" onClick={() => setEditando(true)}>
+                <i className="ti ti-pencil" aria-hidden="true" />
                 Editar
               </button>
             </div>
 
-            <div className="sp-campos-grid">
-              <CampoInfo
-                label="Nombre completo"
-                valor={usuario.nombre}
-                icono={Icon.User}
-              />
-              <CampoInfo
-                label="Cédula / CC"
-                valor={usuario.cedula}
-                icono={Icon.IdCard}
-              />
-              <CampoInfo
-                label="Correo electrónico"
-                valor={usuario.email}
-                icono={Icon.Receipt}
-              />
-              <CampoInfo
-                label="Teléfono"
-                valor={usuario.telefono}
-                icono={Icon.Clock}
-              />
-            </div>
+            {cargando ? (
+              <div className="sp-cargando">
+                <i className="ti ti-loader-2 sp-spin" aria-hidden="true" />
+                Cargando información...
+              </div>
+            ) : (
+              <div className="sp-campos-grid">
+                <CampoInfo label="Nombre completo"    valor={detalle?.nombreCompleto} icon="user"    />
+                <CampoInfo label="Documento (CC)"      valor={detalle?.Documento}     icon="id"      />
+                <CampoInfo label="Correo electrónico"  valor={detalle?.Email}         icon="mail"    />
+                <CampoInfo label="Teléfono"            valor={detalle?.Telefono}      icon="phone"   />
+                {detalle?.Direccion && detalle.Direccion !== "—" && (
+                  <CampoInfo label="Dirección"         valor={detalle?.Direccion}     icon="map-pin" />
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Mis vehículos resumen */}
-          {vehiculos && vehiculos.length > 0 && (
+          {/* Vehículos registrados */}
+          {vehiculos.length > 0 && (
             <div className="sp-datos-card">
               <div className="sp-datos-header">
                 <div className="sp-datos-header-icon">
-                  <Icon.Car />
+                  <i className="ti ti-car" aria-hidden="true" />
                 </div>
                 <div>
                   <div className="sp-datos-title">Vehículos Registrados</div>
                   <div className="sp-datos-sub">
-                    {vehiculos.length} vehículo
-                    {vehiculos.length !== 1 ? "s" : ""} en tu cuenta
+                    {vehiculos.length} vehículo{vehiculos.length !== 1 ? "s" : ""} en tu cuenta
                   </div>
                 </div>
               </div>
@@ -154,12 +270,10 @@ export default function SecPerfil({ usuario, vehiculos, stats }) {
                 {vehiculos.map((v, i) => (
                   <div key={v.id ?? i} className="sp-veh-item">
                     <div className="sp-veh-icon">
-                      {v.icono === "truck" ? <Icon.Truck /> : <Icon.Car />}
+                      <i className="ti ti-car" aria-hidden="true" />
                     </div>
                     <div className="sp-veh-body">
-                      <div className="sp-veh-nombre">
-                        {v.nombre} {v.anio}
-                      </div>
+                      <div className="sp-veh-nombre">{v.nombre} {v.anio}</div>
                       <div className="sp-veh-meta">
                         {v.placa} · {v.km?.toLocaleString("es-CO")} km
                       </div>
@@ -172,8 +286,17 @@ export default function SecPerfil({ usuario, vehiculos, stats }) {
               </div>
             </div>
           )}
+
         </div>
       </div>
+
+      {editando && (
+        <PanelEditar
+          detalle={detalle}
+          onClose={() => setEditando(false)}
+          onGuardar={handleGuardar}
+        />
+      )}
     </div>
   );
 }

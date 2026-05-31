@@ -50,7 +50,10 @@ export function AuthProvider({ children }) {
         nombre:    userData.nombre,
         email:     userData.email,
         rol:       userData.rol,
-        iniciales: userData.iniciales
+        iniciales: userData.iniciales,
+        cedula:    userData.cedula,
+        telefono:  userData.telefono,
+        direccion: userData.direccion,
       };
 
       localStorage.setItem('user_data', JSON.stringify(infoUsuario));
