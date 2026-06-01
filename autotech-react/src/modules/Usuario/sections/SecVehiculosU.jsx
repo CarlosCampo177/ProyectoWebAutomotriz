@@ -25,19 +25,13 @@ const colorWrapOpciones = [
   { label: "Morado",  value: "purple" },
 ];
 
-// Tipos hardcodeados — igual que en la lógica del admin
-const TIPOS = [
-  { idTipo: 'car',   nombre: 'Auto'         },
-  { idTipo: 'truck', nombre: 'Camioneta/SUV' },
-  { idTipo: 'moto',  nombre: 'Moto'          },
-  { idTipo: 'van',   nombre: 'Van/Bus'       },
-];
-
-const TIPOS_ICONO = {
-  car:   'bi-car-front',
-  truck: 'bi-truck',
-  moto:  'bi-bicycle',
-  van:   'bi-bus-front',
+// Iconos por idTipo numérico (se mapea después de cargar tipos desde la BD)
+const TIPO_ICONO_DEFAULT = 'bi-car-front';
+const TIPOS_ICONO_MAP = {
+  1: 'bi-car-front',
+  2: 'bi-truck',
+  3: 'bi-bicycle',
+  4: 'bi-bus-front',
 };
 
 const COMBUSTIBLES = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido', 'Gas'];
@@ -76,7 +70,7 @@ function AlertaKm({ km }) {
 function PanelDetalle({ vehiculo, onClose }) {
   if (!vehiculo) return null;
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
-  const icono = TIPOS_ICONO[vehiculo.tipoVehiculo] || 'bi-car-front';
+  const icono = TIPOS_ICONO_MAP[vehiculo.idTipo] || TIPOS_ICONO_MAP[vehiculo.tipoVehiculo] || TIPO_ICONO_DEFAULT;
 
   return (
     <>
@@ -144,8 +138,10 @@ function PanelDetalle({ vehiculo, onClose }) {
 }
 
 function ModalAgregar({ idCliente, onClose, onAgregado }) {
+  const [tipos,      setTipos]      = useState([]);
   const [marcas,     setMarcas]     = useState([]);
   const [modelos,    setModelos]    = useState([]);
+  const [loadTipos,  setLoadTipos]  = useState(false);
   const [loadMarcas, setLoadMarcas] = useState(false);
   const [loadMod,    setLoadMod]    = useState(false);
   const [guardando,  setGuardando]  = useState(false);
@@ -154,8 +150,16 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Paso 1: elige tipo → carga todas las marcas (sin filtro por tipo,
-  // ya que la BD no tiene IdTipo en Marcas)
+  // Carga tipos desde la BD al montar el modal
+  useEffect(() => {
+    setLoadTipos(true);
+    marcaService.getTipos()
+      .then(data => setTipos(Array.isArray(data) ? data : []))
+      .catch(() => setTipos([]))
+      .finally(() => setLoadTipos(false));
+  }, []);
+
+  // Paso 1: elige tipo → carga marcas filtradas por tipo
   const handleTipoChange = async (idTipo) => {
     setForm(f => ({ ...f, idTipo, idMarca: '', idModelo: '' }));
     setMarcas([]);
@@ -163,13 +167,7 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
     if (!idTipo) return;
     try {
       setLoadMarcas(true);
-      // Intenta filtrar por tipo si el endpoint existe, si no trae todas
-      let data;
-      try {
-        data = await marcaService.getMarcasPorTipo(idTipo);
-      } catch {
-        data = await apiClient.get('Marcas');
-      }
+      const data = await marcaService.getMarcasPorTipo(idTipo);
       setMarcas(Array.isArray(data) ? data : []);
     } catch {
       setMarcas([]);
@@ -178,20 +176,14 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
     }
   };
 
-  // Paso 2: elige marca → carga modelos filtrados
+  // Paso 2: elige marca → carga modelos filtrados por marca Y tipo
   const handleMarcaChange = async (idMarca) => {
     setForm(f => ({ ...f, idMarca, idModelo: '' }));
     setModelos([]);
     if (!idMarca) return;
     try {
       setLoadMod(true);
-      // Intenta filtrar por marca+tipo, si no trae los de la marca
-      let data;
-      try {
-        data = await marcaService.getModelosPorMarcaYTipo(idMarca, form.idTipo);
-      } catch {
-        data = await apiClient.get(`Marcas/${idMarca}/modelos`);
-      }
+      const data = await marcaService.getModelosPorMarcaYTipo(idMarca, form.idTipo);
       setModelos(Array.isArray(data) ? data : []);
     } catch {
       setModelos([]);
@@ -252,13 +244,16 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
             <i className="bi bi-tag-fill" /> Identificación
           </div>
           <div className="svu-modal-grid-3">
+
             {/* PASO 1: Tipo */}
             <div className="svu-field">
               <label>Tipo <span className="svu-req">*</span></label>
-              <select value={form.idTipo} onChange={e => handleTipoChange(e.target.value)}>
-                <option value="">— Tipo —</option>
-                {TIPOS.map(t => (
-                  <option key={t.idTipo} value={t.idTipo}>{t.nombre}</option>
+              <select value={form.idTipo} onChange={e => handleTipoChange(e.target.value)} disabled={loadTipos}>
+                <option value="">{loadTipos ? 'Cargando...' : '— Tipo —'}</option>
+                {tipos.map(t => (
+                  <option key={t.idTipo} value={String(t.idTipo)}>
+                    {t.nombreTipo ?? t.nombre}
+                  </option>
                 ))}
               </select>
             </div>
@@ -405,7 +400,7 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
 
 function CardVehiculo({ vehiculo, onSelect, isActive }) {
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
-  const icono = TIPOS_ICONO[vehiculo.tipoVehiculo] || 'bi-car-front';
+  const icono = TIPOS_ICONO_MAP[vehiculo.idTipo] || TIPOS_ICONO_MAP[vehiculo.tipoVehiculo] || TIPO_ICONO_DEFAULT;
   return (
     <div
       className={`svu-card${isActive ? " active" : ""}`}
@@ -478,6 +473,7 @@ export default function SecVehiculos() {
       color:          nuevo.color,
       combustible:    nuevo.combustible,
       colorWrap:      nuevo.colorWrap,
+      idTipo:         nuevo.idTipo,
       tipoVehiculo:   nuevo.tipoVehiculo,
       ultimoServicio: "Sin registro",
       estado:         nuevo.estado,
