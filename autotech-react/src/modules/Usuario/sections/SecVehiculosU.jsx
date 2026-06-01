@@ -25,13 +25,22 @@ const colorWrapOpciones = [
   { label: "Morado",  value: "purple" },
 ];
 
-// Iconos por idTipo numérico (se mapea después de cargar tipos desde la BD)
 const TIPO_ICONO_DEFAULT = 'bi-car-front';
 const TIPOS_ICONO_MAP = {
   1: 'bi-car-front',
   2: 'bi-truck',
-  3: 'bi-bicycle',
+  3: 'bi-scooter',
   4: 'bi-bus-front',
+  car: 'bi-car-front',
+  truck: 'bi-truck',
+  moto: 'bi-scooter',
+  motorcycle: 'bi-scooter',
+  van: 'bi-bus-front',
+};
+
+const getTipoIcono = (vehiculo = {}) => {
+  const tipoKey = String(vehiculo.tipoVehiculo ?? "").trim().toLowerCase();
+  return TIPOS_ICONO_MAP[vehiculo.idTipo] || TIPOS_ICONO_MAP[tipoKey] || TIPO_ICONO_DEFAULT;
 };
 
 const COMBUSTIBLES = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido', 'Gas'];
@@ -70,7 +79,7 @@ function AlertaKm({ km }) {
 function PanelDetalle({ vehiculo, onClose }) {
   if (!vehiculo) return null;
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
-  const icono = TIPOS_ICONO_MAP[vehiculo.idTipo] || TIPOS_ICONO_MAP[vehiculo.tipoVehiculo] || TIPO_ICONO_DEFAULT;
+  const icono = getTipoIcono(vehiculo);
 
   return (
     <>
@@ -137,7 +146,7 @@ function PanelDetalle({ vehiculo, onClose }) {
   );
 }
 
-function ModalAgregar({ idCliente, onClose, onAgregado }) {
+function ModalAgregar({ idUsuario, onClose, onAgregado }) {
   const [tipos,      setTipos]      = useState([]);
   const [marcas,     setMarcas]     = useState([]);
   const [modelos,    setModelos]    = useState([]);
@@ -150,7 +159,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Carga tipos desde la BD al montar el modal
   useEffect(() => {
     setLoadTipos(true);
     marcaService.getTipos()
@@ -159,7 +167,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
       .finally(() => setLoadTipos(false));
   }, []);
 
-  // Paso 1: elige tipo → carga marcas filtradas por tipo
   const handleTipoChange = async (idTipo) => {
     setForm(f => ({ ...f, idTipo, idMarca: '', idModelo: '' }));
     setMarcas([]);
@@ -176,7 +183,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
     }
   };
 
-  // Paso 2: elige marca → carga modelos filtrados por marca Y tipo
   const handleMarcaChange = async (idMarca) => {
     setForm(f => ({ ...f, idMarca, idModelo: '' }));
     setModelos([]);
@@ -200,7 +206,7 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
     setGuardando(true);
     setError("");
     try {
-      const nuevo = await apiClient.post("Vehiculo", {
+      const nuevo = await apiClient.post(`Cliente/${idUsuario}/vehiculos`, {
         Placa:       form.placa.toUpperCase().trim(),
         Anio:        Number(form.anio),
         Color:       form.color.trim(),
@@ -208,12 +214,18 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
         Combustible: form.combustible,
         ColorWrap:   form.colorWrap,
         IdModelo:    Number(form.idModelo),
-        IdCliente:   idCliente,
       });
       onAgregado(nuevo);
       onClose();
     } catch (err) {
-      setError(err?.data?.message ?? err?.data ?? "Error al agregar el vehículo.");
+      const data = err?.data;
+      const mensaje =
+        typeof data === "string"
+          ? data
+          : data?.message
+          ?? data?.title
+          ?? "Error al agregar el vehículo.";
+      setError(typeof mensaje === "string" ? mensaje : "Error al agregar el vehículo.");
     } finally {
       setGuardando(false);
     }
@@ -223,7 +235,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
     <div className="svu-modal-overlay" onClick={onClose}>
       <div className="svu-modal-card" onClick={e => e.stopPropagation()}>
 
-        {/* Header */}
         <div className="svu-modal-header">
           <div className="svu-modal-header-icon">
             <i className="bi bi-car-front-fill" />
@@ -239,13 +250,11 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
 
         <div className="svu-modal-body">
 
-          {/* Sección: Identificación */}
           <div className="svu-modal-section-label">
             <i className="bi bi-tag-fill" /> Identificación
           </div>
           <div className="svu-modal-grid-3">
 
-            {/* PASO 1: Tipo */}
             <div className="svu-field">
               <label>Tipo <span className="svu-req">*</span></label>
               <select value={form.idTipo} onChange={e => handleTipoChange(e.target.value)} disabled={loadTipos}>
@@ -258,7 +267,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
               </select>
             </div>
 
-            {/* PASO 2: Marca */}
             <div className="svu-field">
               <label>Marca <span className="svu-req">*</span></label>
               <select
@@ -275,7 +283,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
               </select>
             </div>
 
-            {/* PASO 3: Modelo */}
             <div className="svu-field">
               <label>Modelo <span className="svu-req">*</span></label>
               <select
@@ -293,7 +300,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
             </div>
           </div>
 
-          {/* Placa y Año */}
           <div className="svu-field-row">
             <div className="svu-field">
               <label>Placa <span className="svu-req">*</span></label>
@@ -317,7 +323,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
             </div>
           </div>
 
-          {/* Sección: Datos técnicos */}
           <div className="svu-modal-section-label">
             <i className="bi bi-gear-fill" /> Datos técnicos
           </div>
@@ -358,7 +363,6 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
             </div>
           </div>
 
-          {/* Color de tarjeta */}
           <div className="svu-field">
             <label>Color de tarjeta</label>
             <div className="svu-color-dots">
@@ -374,14 +378,14 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
             </div>
           </div>
 
-          {error && (
+          {/* ✅ Render seguro: solo muestra el error si es un string */}
+          {error && typeof error === "string" && (
             <div className="svu-error">
               <i className="bi bi-exclamation-triangle-fill me-2" />{error}
             </div>
           )}
         </div>
 
-        {/* Footer */}
         <div className="svu-modal-footer">
           <button className="svu-modal-btn-cancel" onClick={onClose} disabled={guardando}>
             Cancelar
@@ -400,7 +404,7 @@ function ModalAgregar({ idCliente, onClose, onAgregado }) {
 
 function CardVehiculo({ vehiculo, onSelect, isActive }) {
   const c = colorMap[vehiculo.colorWrap] || colorMap.blue;
-  const icono = TIPOS_ICONO_MAP[vehiculo.idTipo] || TIPOS_ICONO_MAP[vehiculo.tipoVehiculo] || TIPO_ICONO_DEFAULT;
+  const icono = getTipoIcono(vehiculo);
   return (
     <div
       className={`svu-card${isActive ? " active" : ""}`}
@@ -456,27 +460,35 @@ export default function SecVehiculos() {
   const [modalAgregar, setModalAgregar] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false); // ✅ evita loading infinito si no hay usuario
+      return;
+    }
     getVehiculos(user.id)
       .then(res => setVehiculos(Array.isArray(res) ? res : []))
-      .catch(console.error)
+      .catch(err => {
+        console.error(err);
+        setVehiculos([]); // ✅ muestra vacío en lugar de pantalla blanca
+      })
       .finally(() => setLoading(false));
   }, [user]);
 
   const handleAgregado = (nuevo) => {
+    // ✅ Compatibilidad con apiClient que puede devolver { data: {...} } o el objeto directo
+    const v = nuevo?.data ?? nuevo;
     setVehiculos(prev => [...prev, {
-      id:             nuevo.id,
-      nombre:         `${nuevo.marca} ${nuevo.modelo}`,
-      placa:          nuevo.placa,
-      anio:           nuevo.anio,
-      km:             nuevo.kilometraje,
-      color:          nuevo.color,
-      combustible:    nuevo.combustible,
-      colorWrap:      nuevo.colorWrap,
-      idTipo:         nuevo.idTipo,
-      tipoVehiculo:   nuevo.tipoVehiculo,
-      ultimoServicio: "Sin registro",
-      estado:         nuevo.estado,
+      id:             v.id,
+      nombre:         v.nombre ?? `${v.marca ?? ""} ${v.modelo ?? ""}`.trim(),
+      placa:          v.placa,
+      anio:           v.anio,
+      km:             v.km ?? v.kilometraje,
+      color:          v.color,
+      combustible:    v.combustible,
+      colorWrap:      v.colorWrap,
+      idTipo:         v.idTipo,
+      tipoVehiculo:   v.tipoVehiculo,
+      ultimoServicio: v.ultimoServicio ?? "Sin registro",
+      estado:         v.estado ?? "ok",
     }]);
   };
 
@@ -528,7 +540,7 @@ export default function SecVehiculos() {
 
       {modalAgregar && (
         <ModalAgregar
-          idCliente={user.idCliente ?? user.id}
+          idUsuario={user.id}
           onClose={() => setModalAgregar(false)}
           onAgregado={handleAgregado}
         />

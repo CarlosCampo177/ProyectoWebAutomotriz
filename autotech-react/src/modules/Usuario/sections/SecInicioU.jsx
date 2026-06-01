@@ -9,6 +9,52 @@ const MESES_FULL = [
 ];
 const DIAS_SEMANA = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 
+const estadoLabels = {
+  pendiente: "Pendiente",
+  confirmada: "Confirmada",
+  perdida: "Perdida",
+  completada: "Completada",
+  cancelada: "Cancelada",
+};
+
+const MESES_CORTOS = {
+  ENE: 0, JAN: 0,
+  FEB: 1,
+  MAR: 2,
+  ABR: 3, APR: 3,
+  MAY: 4,
+  JUN: 5,
+  JUL: 6,
+  AGO: 7, AUG: 7,
+  SEP: 8,
+  OCT: 9,
+  NOV: 10,
+  DIC: 11, DEC: 11,
+};
+
+const fechaCita = (cita) => {
+  const mes = MESES_CORTOS[String(cita.mes ?? "").toUpperCase()];
+  const dia = Number(cita.dia);
+  if (mes === undefined || Number.isNaN(dia)) return null;
+
+  const [horaStr = "00:00", periodoRaw = ""] = String(cita.hora ?? "").trim().split(" ");
+  let [hora = 0, minuto = 0] = horaStr.split(":").map(Number);
+  const periodo = periodoRaw.toUpperCase();
+
+  if (Number.isNaN(hora)) hora = 0;
+  if (Number.isNaN(minuto)) minuto = 0;
+  if (periodo === "PM" && hora !== 12) hora += 12;
+  if (periodo === "AM" && hora === 12) hora = 0;
+
+  return new Date(new Date().getFullYear(), mes, dia, hora, minuto);
+};
+
+const esCitaPerdida = (cita) => {
+  if (cita.estado !== "pendiente") return false;
+  const fecha = fechaCita(cita);
+  return fecha ? fecha < new Date() : false;
+};
+
 function getGreeting() {
   const h = new Date().getHours();
   return h < 12 ? "Buenos días" : h < 18 ? "Buenas tardes" : "Buenas noches";
@@ -44,7 +90,7 @@ function Modal({ title, onClose, children }) {
 function Badge({ estado }) {
   return (
     <span className={`si-badge si-badge-${estado}`}>
-      {estado.charAt(0).toUpperCase() + estado.slice(1)}
+      {estadoLabels[estado] ?? estado}
     </span>
   );
 }
@@ -114,15 +160,19 @@ export default function SecInicioU() {
     fetchData();
   }, [user]);
 
-  const pendientes  = citas.filter(c => c.estado === "pendiente").length;
-  const completadas = citas.filter(c => c.estado === "completada").length;
-  const proximas    = citas.filter(c => c.estado === "pendiente" || c.estado === "confirmada");
+  const citasConEstado = citas.map(c =>
+    esCitaPerdida(c) ? { ...c, estado: "perdida" } : c
+  );
+  const pendientes  = citasConEstado.filter(c => c.estado === "pendiente").length;
+  const perdidas    = citasConEstado.filter(c => c.estado === "perdida").length;
+  const completadas = citasConEstado.filter(c => c.estado === "completada").length;
+  const proximas    = citasConEstado.filter(c => c.estado === "pendiente" || c.estado === "confirmada");
 
   const stats = [
     { icon: "bi-car-front",      bg: "#e8f0fe", color: "#1a6bdc", label: "Vehículos",           value: vehiculos.length },
     { icon: "bi-calendar-check", bg: "#fff3e0", color: "#e65100", label: "Citas pendientes",     value: pendientes       },
     { icon: "bi-tools",          bg: "#e8f5e9", color: "#2e7d32", label: "Servicios realizados", value: completadas      },
-    { icon: "bi-robot",          bg: "#f3e5f5", color: "#6a1b9a", label: "Consultas IA",         value: 0                },
+    { icon: "bi-calendar-x",     bg: "#fee2e2", color: "#b91c1c", label: "Servicios perdidos",   value: perdidas         },
   ];
 
   const acciones = [

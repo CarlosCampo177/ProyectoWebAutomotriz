@@ -380,6 +380,7 @@
 
 .si-badge-pendiente  { background: #fff3e0; color: #e65100; }
 .si-badge-confirmada { background: #e8f5e9; color: #2e7d32; }
+.si-badge-perdida    { background: #fee2e2; color: #b91c1c; }
 .si-badge-completada { background: #e3f2fd; color: #1565c0; }
 .si-badge-cancelada  { background: #fce4ec; color: #c62828; }
 
