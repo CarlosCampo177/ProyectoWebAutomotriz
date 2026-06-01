@@ -82,12 +82,16 @@ export const productoService = {
    ÓRDENES
 ══════════════════════════════════ */
 export const ordenService = {
-  getAll:          ()         => apiClient.get('Orden'),
-  getById:         (id)       => apiClient.get(`Orden/${id}`),
-  crear:           (data)     => apiClient.post('Orden', data),
-  actualizar:      (id, data) => apiClient.put(`Orden/${id}`, data),
-  cambiarEstado:   (id, data) => apiClient.put(`Orden/${id}/estado`, data),
-  eliminar:        (id)       => apiClient.delete(`Orden/${id}`),
+  getAll:         (params)    => apiClient.get(
+    `OrdenAdmin${params ? '?' + new URLSearchParams(params) : ''}`),
+  getById:        (id)        => apiClient.get(`OrdenAdmin/${id}`),
+  crear:          (data)      => apiClient.post('OrdenAdmin', data),
+  actualizar:     (id, data)  => apiClient.put(`OrdenAdmin/${id}`, data),
+  cambiarEstado:  (id, data)  => apiClient.patch(`OrdenAdmin/${id}/estado`, data),
+  asignarMecanico:(id, data)  => apiClient.patch(`OrdenAdmin/${id}/mecanico`, data),
+  convertir:      (id)        => apiClient.post(`OrdenAdmin/${id}/convertir`, {}),
+  getCalendario: (inicio, fin) =>
+  apiClient.get(`OrdenAdmin/calendario?inicio=${inicio}&fin=${fin}`),
 }
 
 /* ══════════════════════════════════

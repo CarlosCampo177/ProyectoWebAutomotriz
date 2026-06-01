@@ -1,0 +1,282 @@
+/* ── Layout ── */
+.cal-page {
+  padding: 2rem 2.25rem;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--font-body);
+}
+
+/* ── Header ── */
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.cal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+.cal-title i {
+  color: var(--accent);
+}
+.cal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-3);
+  margin: 0;
+}
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cal-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-2);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.cal-nav-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.cal-rango {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-1);
+  min-width: 180px;
+  text-align: center;
+}
+.cal-hoy-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.cal-hoy-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Leyenda ── */
+.cal-leyenda {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.cal-ley-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+.cal-ley-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Grid ── */
+.cal-grid-wrap {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: auto;
+  max-height: calc(100vh - 220px);
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: 70px repeat(7, 1fr);
+  min-width: 800px;
+}
+
+/* ── Columna horas ── */
+.cal-col-horas {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+.cal-hora-label {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 0.75rem;
+  font-size: 0.7rem;
+  color: var(--text-3);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+}
+
+/* ── Columnas días ── */
+.cal-col-dia {
+  border-left: 1px solid var(--border);
+}
+.cal-col-header {
+  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  z-index: 1;
+  gap: 0.15rem;
+}
+.cal-col-header.hoy {
+  background: var(--accent-light);
+}
+.cal-dia-nombre {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.cal-dia-num {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-2);
+}
+.cal-dia-num.hoy {
+  color: var(--accent);
+}
+
+/* ── Slots ── */
+.cal-slot {
+  height: 52px;
+  border-bottom: 1px solid var(--border);
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  transition: background var(--transition);
+}
+.cal-slot:hover {
+  background: var(--surface-2);
+}
+.cal-slot.ocupado {
+  background: transparent;
+}
+
+/* ── Eventos ── */
+.cal-evento {
+  flex: 1;
+  border-radius: 4px;
+  padding: 2px 5px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity var(--transition);
+  opacity: 0.92;
+}
+.cal-evento:hover {
+  opacity: 1;
+  transform: scale(1.01);
+}
+.cal-ev-titulo {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-ev-sub {
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Popover ── */
+.cal-popover-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+}
+.cal-popover {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 280px;
+  z-index: 501;
+  overflow: hidden;
+}
+.cal-pop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem 1rem 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.cal-pop-tipo {
+  font-size: 0.75rem;
+  color: var(--text-3);
+  font-weight: 600;
+}
+.cal-pop-id {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.cal-pop-body {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.cal-pop-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.83rem;
+  color: var(--text-2);
+}
+.cal-pop-row i {
+  color: var(--text-3);
+  width: 14px;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .cal-page {
+    padding: 1.25rem 1rem;
+  }
+  .cal-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
