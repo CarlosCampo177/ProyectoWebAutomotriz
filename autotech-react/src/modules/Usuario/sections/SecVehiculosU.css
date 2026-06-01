@@ -40,11 +40,6 @@
   animation: svu-car-bounce .9s ease-in-out infinite alternate;
 }
 
-.svu-title-icon svg {
-  width: 20px;
-  height: 20px;
-}
-
 @keyframes svu-car-bounce {
   from { transform: translateX(0px); }
   to   { transform: translateX(5px); }
@@ -75,8 +70,6 @@
 .svu-btn-add:hover  { background: #155bb8; }
 .svu-btn-add:active { transform: scale(.98); }
 
-.svu-btn-add svg { width: 16px; height: 16px; }
-
 /* ── Estado vacío ────────────────────────── */
 .svu-empty {
   display: flex;
@@ -103,7 +96,6 @@
   margin-bottom: 4px;
 }
 
-.svu-empty-icon svg { width: 26px; height: 26px; }
 .svu-empty-text  { font-size: .92rem; font-weight: 600; color: #1c2a45; }
 .svu-empty-sub   { font-size: .78rem; color: #8a9bbf; margin-bottom: 8px; }
 
@@ -138,7 +130,6 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-/* Barra lateral de color */
 .svu-card-stripe {
   width: 4px;
   flex-shrink: 0;
@@ -154,7 +145,6 @@
   gap: 6px;
 }
 
-/* Fila top: ícono + badge */
 .svu-card-top {
   display: flex;
   justify-content: space-between;
@@ -173,8 +163,6 @@
   justify-content: center;
 }
 
-.svu-card-icon svg { width: 22px; height: 22px; }
-
 .svu-card-nombre {
   font-size: .95rem;
   font-weight: 700;
@@ -188,11 +176,9 @@
   margin-bottom: 6px;
 }
 
-/* Métricas en fila */
 .svu-card-metrics {
   display: flex;
   align-items: center;
-  gap: 0;
   background: #f5f7fc;
   border-radius: 10px;
   padding: 8px 10px;
@@ -230,7 +216,6 @@
 
 .svu-metric-val.warn { color: #d84315; }
 
-/* Alerta km */
 .svu-alerta {
   display: flex;
   align-items: center;
@@ -244,9 +229,6 @@
   margin-top: 2px;
 }
 
-.svu-alerta svg { width: 13px; height: 13px; flex-shrink: 0; }
-
-/* Footer de la card */
 .svu-card-footer {
   display: flex;
   align-items: center;
@@ -269,7 +251,6 @@
   color: #1c2a45;
 }
 
-/* Flecha */
 .svu-card-arrow {
   display: flex;
   align-items: center;
@@ -283,8 +264,6 @@
   color: var(--accent);
   transform: translateX(2px);
 }
-
-.svu-card-arrow svg { width: 16px; height: 16px; }
 
 /* ── Badge de estado ─────────────────────── */
 .svu-badge {
@@ -311,7 +290,6 @@
    PANEL LATERAL (DETALLE)
 ══════════════════════════════════════════ */
 
-/* Overlay */
 .svu-overlay {
   position: fixed;
   inset: 0;
@@ -325,7 +303,6 @@
   to   { opacity: 1; }
 }
 
-/* Panel */
 .svu-panel {
   position: fixed;
   top: 0;
@@ -337,7 +314,6 @@
   z-index: 201;
   display: flex;
   flex-direction: column;
-  gap: 0;
   box-shadow: -6px 0 32px rgba(26, 107, 220, .1);
   animation: svu-slide-in .22s cubic-bezier(.25, .8, .25, 1);
   overflow-y: auto;
@@ -348,14 +324,12 @@
   to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* Encabezado del panel */
 .svu-panel-head {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 20px 18px 16px;
-  border-bottom: 2px solid;
-  border-color: #1a6bdc;
+  border-bottom: 2px solid #1a6bdc;
 }
 
 .svu-panel-icon {
@@ -367,8 +341,6 @@
   justify-content: center;
   flex-shrink: 0;
 }
-
-.svu-panel-icon svg { width: 24px; height: 24px; }
 
 .svu-panel-head-info { flex: 1; min-width: 0; }
 
@@ -403,9 +375,7 @@
 }
 
 .svu-panel-close:hover { background: #e2e6ef; color: #1c2a45; }
-.svu-panel-close svg { width: 16px; height: 16px; }
 
-/* Estado dentro del panel */
 .svu-panel-estado {
   padding: 14px 18px;
   display: flex;
@@ -414,7 +384,6 @@
   border-bottom: 1px solid #f0f2f7;
 }
 
-/* Label de sección */
 .svu-panel-section-label {
   font-size: .65rem;
   font-weight: 700;
@@ -424,7 +393,6 @@
   padding: 14px 18px 6px;
 }
 
-/* Stats del panel */
 .svu-panel-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -458,7 +426,6 @@
 
 .svu-panel-stat-val.warn { color: #d84315; }
 
-/* Servicio */
 .svu-panel-servicio {
   margin: 0 18px;
   background: #f5f7fc;
@@ -472,19 +439,12 @@
   color: #1c2a45;
 }
 
-.svu-panel-servicio-fecha {
-  font-size: .74rem;
-  color: #8a9bbf;
-  margin-top: 2px;
-}
-
 .svu-panel-servicio-vacio {
   font-size: .82rem;
   color: #b0bcd6;
   font-style: italic;
 }
 
-/* Acciones */
 .svu-panel-actions {
   padding: 18px;
   margin-top: auto;
@@ -512,7 +472,6 @@
 }
 
 .svu-panel-btn-primary:hover { background: #155bb8; }
-.svu-panel-btn-primary svg { width: 16px; height: 16px; }
 
 .svu-panel-btn-secondary {
   background: #f5f7fc;
@@ -532,26 +491,306 @@
 }
 
 .svu-panel-btn-secondary:hover { background: #eef2fb; }
-.svu-panel-btn-secondary svg { width: 16px; height: 16px; }
 
 /* ── Responsive ──────────────────────────── */
 @media (max-width: 680px) {
-  .svu-grid { grid-template-columns: 1fr; }
-  .svu-panel { width: 100%; }
+  .svu-grid   { grid-template-columns: 1fr; }
+  .svu-panel  { width: 100%; }
 }
 
+/* ══════════════════════════════════════════
+   MODAL AGREGAR VEHÍCULO — centrado
+══════════════════════════════════════════ */
 
-/* ── Modal agregar vehículo ── */
-.svu-panel--form .svu-panel-body  { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; overflow-y: auto; }
-.svu-field                        { display: flex; flex-direction: column; gap: .4rem; }
-.svu-field label                  { font-size: .75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; }
+.svu-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 18, 40, .55);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: svu-fade-in .18s ease;
+}
+
+.svu-modal-card {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(10, 18, 40, .22), 0 4px 16px rgba(26, 107, 220, .12);
+  animation: svu-modal-pop .22s cubic-bezier(.34, 1.56, .64, 1);
+  overflow: hidden;
+}
+
+@keyframes svu-modal-pop {
+  from { transform: scale(.94) translateY(12px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+
+.svu-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid #eef0f6;
+  flex-shrink: 0;
+}
+
+.svu-modal-header-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #1a6bdc 0%, #3b8ef5 100%);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(26, 107, 220, .35);
+}
+
+.svu-modal-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f1c38;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+
+.svu-modal-subtitle {
+  font-size: .75rem;
+  color: #8a9bbf;
+  margin: 0;
+}
+
+.svu-modal-close {
+  margin-left: auto;
+  background: #f5f7fc;
+  border: none;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8a9bbf;
+  font-size: .9rem;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+.svu-modal-close:hover { background: #fee2e2; color: #dc2626; }
+
+.svu-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.svu-modal-section-label {
+  font-size: .68rem;
+  font-weight: 700;
+  color: #1a6bdc;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 2px;
+  border-bottom: 1.5px solid #e8f0fd;
+  margin-top: 4px;
+}
+
+.svu-modal-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* ── Fields ──────────────────────────────── */
+.svu-field {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.svu-field label {
+  font-size: .68rem;
+  font-weight: 700;
+  color: #5a6a8a;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
 .svu-field input,
-.svu-field select                 { padding: .55rem .75rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: .9rem; outline: none; transition: border .2s; }
+.svu-field select {
+  padding: .6rem .85rem;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 10px;
+  font-size: .88rem;
+  color: #1c2a45;
+  background: #fafbfd;
+  outline: none;
+  transition: border .2s, box-shadow .2s, background .2s;
+  font-family: inherit;
+}
+
 .svu-field input:focus,
-.svu-field select:focus           { border-color: #1a6bdc; }
-.svu-field-row                    { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-.svu-btn-group                    { display: flex; flex-wrap: wrap; gap: .5rem; }
-.svu-tipo-btn                     { padding: .4rem .9rem; border: 1.5px solid #e5e7eb; border-radius: 20px; font-size: .82rem; background: #fff; cursor: pointer; transition: all .2s; }
-.svu-tipo-btn.active              { background: #1a6bdc; color: #fff; border-color: #1a6bdc; }
-.svu-req                          { color: #ef4444; }
-.svu-error                        { background: #fee2e2; color: #b91c1c; padding: .6rem .9rem; border-radius: 8px; font-size: .85rem; }
+.svu-field select:focus {
+  border-color: #1a6bdc;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(26, 107, 220, .12);
+}
+
+.svu-field input:disabled,
+.svu-field select:disabled {
+  background: #f3f4f8;
+  color: #b0bcd6;
+  cursor: not-allowed;
+}
+
+.svu-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.svu-input-mono {
+  font-family: 'Courier New', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em;
+}
+
+/* Chips combustible */
+.svu-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.svu-chip {
+  padding: .38rem .9rem;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 600;
+  background: #fafbfd;
+  color: #5a6a8a;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+}
+
+.svu-chip:hover { border-color: #1a6bdc; color: #1a6bdc; background: #eef4fd; }
+
+.svu-chip.active {
+  background: #1a6bdc;
+  color: #fff;
+  border-color: #1a6bdc;
+  box-shadow: 0 2px 8px rgba(26, 107, 220, .3);
+}
+
+/* Dots color tarjeta */
+.svu-color-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.svu-color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  background: var(--dot-color);
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+  outline: none;
+  padding: 0;
+}
+
+.svu-color-dot:hover  { transform: scale(1.15); }
+
+.svu-color-dot.active {
+  border-color: #1c2a45;
+  box-shadow: 0 0 0 3px rgba(28, 42, 69, .18);
+  transform: scale(1.18);
+}
+
+/* Error */
+.svu-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: .65rem 1rem;
+  border-radius: 10px;
+  font-size: .82rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+/* Footer modal */
+.svu-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eef0f6;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  background: #fafbfd;
+}
+
+.svu-modal-btn-cancel {
+  padding: .65rem 1.4rem;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 10px;
+  font-size: .86rem;
+  font-weight: 600;
+  background: #fff;
+  color: #5a6a8a;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, border-color .15s;
+}
+.svu-modal-btn-cancel:hover { background: #f5f7fc; border-color: #c5d2ec; }
+
+.svu-modal-btn-confirm {
+  padding: .65rem 1.6rem;
+  border: none;
+  border-radius: 10px;
+  font-size: .86rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1a6bdc 0%, #3b8ef5 100%);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 3px 12px rgba(26, 107, 220, .35);
+  transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.svu-modal-btn-confirm:hover   { opacity: .9; box-shadow: 0 5px 18px rgba(26, 107, 220, .4); }
+.svu-modal-btn-confirm:active  { transform: scale(.98); }
+.svu-modal-btn-confirm:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+@keyframes svu-spin {
+  to { transform: rotate(360deg); }
+}
+.svu-spin { animation: svu-spin .7s linear infinite; display: inline-block; }
+
+@media (max-width: 600px) {
+  .svu-modal-grid-3  { grid-template-columns: 1fr; }
+  .svu-modal-card    { max-height: 95vh; border-radius: 16px 16px 0 0; align-self: flex-end; }
+  .svu-modal-overlay { align-items: flex-end; padding: 0; }
+}

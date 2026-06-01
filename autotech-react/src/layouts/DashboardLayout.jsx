@@ -4,11 +4,20 @@ import { useAuth } from '../context/AuthContext'
 import { menuConfig } from '../router/menuConfig'
 import './DashboardLayout.css'
 
+// Color de acento según el rol del usuario
+const ACCENT_BY_ROL = {
+  admin:    '#d90429',
+  cliente:  '#1a6bdc',
+  mecanico: '#28a745',
+}
+
 export default function DashboardLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const menuItems = menuConfig[user?.rol] ?? [] // ?.El Optional Chaining, El Nullish Coalescing (??)
-                                                
+  const menuItems = menuConfig[user?.rol] ?? []
+
+  const accentColor = ACCENT_BY_ROL[user?.rol] ?? '#d90429'
+
   const handleLogout = () => {
     logout()
     navigate('/page/login')
@@ -18,7 +27,7 @@ export default function DashboardLayout() {
     <div style={{ display: 'flex' }}>
 
       {/* ── SIDEBAR ── */}
-      <div className="sidebar">
+      <div className="sidebar" style={{ '--accent': accentColor }}>
         <div className="sidebar-logo">AUTO<span>TECH</span></div>
 
         <div className="sidebar-user">
