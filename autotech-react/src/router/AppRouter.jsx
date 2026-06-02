@@ -76,6 +76,7 @@ function AppRouter() {
           <Route path="facturas"      element={<SecFacturas />}      />
           <Route path="historial"     element={<SecHistorial />}     />
           <Route path="perfil"        element={<SecPerfil/>}       />
+          <Route path="ia" element={<SecConsultaIA />} />
 
         </Route>
       </Route>
