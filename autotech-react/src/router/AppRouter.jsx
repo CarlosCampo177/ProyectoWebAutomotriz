@@ -22,7 +22,6 @@ import Estadisticas     from '../modules/admin/Estadisticas/Estadisticas'
 import SecInicio        from '../modules/Mecanico/sections/SecInicio'
 import SecOrdenes       from '../modules/Mecanico/sections/SecOrdenes'
 import SecVehiculos     from '../modules/Mecanico/sections/SecVehiculos'
-import SecObservaciones from '../modules/Mecanico/sections/SecObservaciones'
 import RutasProtegidas from './RutasProtegidas'
 
 
