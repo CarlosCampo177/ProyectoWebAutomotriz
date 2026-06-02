@@ -65,7 +65,6 @@ function AppRouter() {
           <Route index                element={<SecInicio />}        />
           <Route path="ordenes"       element={<SecOrdenes />}       />
           <Route path="vehiculos"     element={<SecVehiculos />}     />
-          <Route path="observaciones" element={<SecObservaciones />} />
         </Route>
       </Route>
 
