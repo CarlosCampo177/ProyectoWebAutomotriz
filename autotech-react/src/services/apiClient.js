@@ -1,15 +1,12 @@
 const BASE_URL = "https://localhost:7192/api";
 
 async function request(endpoint, options = {}) {
-  // 1. Intentar buscar el token guardado en el navegador
   const token = localStorage.getItem("token");
 
-  // 2. Preparar las cabeceras estándar
   const headers = {
     "Content-Type": "application/json",
   };
 
-  // 3. ¡EL TRUCO CLAVE! Si el token existe, meterlo en la cabecera de Autorización
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -19,10 +16,8 @@ async function request(endpoint, options = {}) {
     ...options,
   });
 
-  // Para respuestas sin cuerpo (como los HTTP 204 de tus PUT o DELETE)
   if (response.status === 204) return null;
 
-  //  SEGURIDAD INVERSA: Si el backend responde 401 (Token inválido o expirado)
   if (response.status === 401) {
     localStorage.removeItem("token");
     localStorage.removeItem("user_data"); // ← también limpia el usuario

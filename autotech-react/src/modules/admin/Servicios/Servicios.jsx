@@ -416,7 +416,7 @@ export default function Servicios() {
                 <span className="srv-badge-cat"
                   style={{ background: catColor(form.categoria).bg,
                            color: catColor(form.categoria).color }}>
-                  {form.form.categoria}
+                  {form.categoria}
                 </span>
                 <span className="srv-preview-label">
                   Vista previa de categoría

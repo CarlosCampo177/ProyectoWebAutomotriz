@@ -152,7 +152,7 @@
   color: #fff;
 }
 
-/* ── Panel lateral ── */
+/* ── Panel lateral fijo (Detalle) ── */
 .cli-detalle {
   width: 280px;
   flex-shrink: 0;
@@ -291,6 +291,74 @@
   color: #fff;
 }
 
+/* ══════════════════════════════════════════
+   NUEVO: CONTENEDOR LATERAL (MODAL DRAWER)
+══════════════════════════════════════════ */
+.cli-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(28, 42, 69, 0.4); /* Fondo oscuro usando tu paleta */
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end; /* Lo empuja a la derecha */
+  animation: cliFadeIn 0.25s ease;
+}
+
+.cli-modal-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 440px; /* Tamaño ideal para un formulario lateral */
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: cliSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Encabezado del Modal Lateral ── */
+.cli-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cli-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.cli-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.cli-modal-close:hover {
+  color: var(--danger);
+}
+
+/* ── Cuerpo del Modal Lateral ── */
+.cli-modal-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
 /* ── Modal form sections ── */
 .cli-form-section {
   margin-bottom: 1.25rem;
@@ -307,6 +375,25 @@
   gap: 0.35rem;
 }
 
+/* ── Animaciones del Drawer ── */
+@keyframes cliFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cliSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .cli-page {
@@ -321,4 +408,25 @@
     flex-direction: column;
     align-items: stretch;
   }
+  /* En móviles, el modal se adapta al ancho completo */
+  .cli-modal-lateral {
+    max-width: 100%;
+  }
+}
+
+/* ── Validación por campo ── */
+.input-error {
+  border-color: var(--danger) !important;
+  background: #fff5f5;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  outline: none;
+}
+.field-error-msg {
+  display: block;
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
 }

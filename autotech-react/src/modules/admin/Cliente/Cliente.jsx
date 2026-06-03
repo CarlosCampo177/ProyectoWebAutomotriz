@@ -1,79 +1,144 @@
-import { useState, useEffect } from 'react';
-import './Cliente.css';
-import { clienteAdminService } from '../../../services/adminService';
+import { useState, useEffect } from "react";
+import "./Cliente.css";
+import { clienteAdminService } from "../../../services/adminService";
 
 const EMPTY_FORM = {
-  primerNombre: '', segundoNombre: '',
-  primerApellido: '', segundoApellido: '',
-  documento: '', username: '',
-  email: '', telefono: '',
-  direccion: '', password: '',
+  primerNombre: "",
+  segundoNombre: "",
+  primerApellido: "",
+  segundoApellido: "",
+  documento: "",
+  username: "",
+  email: "",
+  telefono: "",
+  direccion: "",
+  password: "",
 };
 
 export default function Clientes() {
-  const [clientes,   setClientes]   = useState([]);
-  const [form,       setForm]       = useState(EMPTY_FORM);
-  const [editingId,  setEditingId]  = useState(null);
-  const [showModal,  setShowModal]  = useState(false);
-  const [detalle,    setDetalle]    = useState(null);
-  const [loading,    setLoading]    = useState(true);
-  const [saving,     setSaving]     = useState(false);
-  const [error,      setError]      = useState('');
-  const [busqueda,   setBusqueda]   = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [clientes, setClientes] = useState([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [detalle, setDetalle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    cargar();
+  }, []);
 
   const cargar = async () => {
     try {
       setLoading(true);
       const data = await clienteAdminService.getAll();
       setClientes(data || []);
-    } catch { setClientes([]); }
-    finally  { setLoading(false); }
+    } catch {
+      setClientes([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ── Modal ── */
   const abrirCrear = () => {
     setForm(EMPTY_FORM);
     setEditingId(null);
-    setError('');
+    setError("");
     setShowModal(true);
   };
 
   const abrirEditar = (c) => {
     setForm({
-      primerNombre:   c.primerNombre   || '',
-      segundoNombre:  c.segundoNombre  || '',
-      primerApellido: c.primerApellido || '',
-      segundoApellido:c.segundoApellido|| '',
-      documento:      c.documento      || '',
-      username:       c.username       || '',
-      email:          c.email          || '',
-      telefono:       c.telefono       || '',
-      direccion:      c.direccion      || '',
-      password:       '',
+      primerNombre: c.primerNombre || "",
+      segundoNombre: c.segundoNombre || "",
+      primerApellido: c.primerApellido || "",
+      segundoApellido: c.segundoApellido || "",
+      documento: c.documento || "",
+      username: c.username || "",
+      email: c.email || "",
+      telefono: c.telefono || "",
+      direccion: c.direccion || "",
+      password: "",
     });
     setEditingId(c.id);
-    setError('');
+    setError("");
     setShowModal(true);
   };
 
-  const cerrarModal = () => { setShowModal(false); setError(''); };
+  const cerrarModal = () => {
+    setShowModal(false);
+    setError("");
+    setFieldErrors({});
+  };
+
+  const validar = () => {
+    const errs = {};
+    const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    const soloNums = /^\d+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const userRegex = /^[a-zA-Z0-9_]+$/;
+
+    if (!form.primerNombre.trim())
+      errs.primerNombre = "El primer nombre es requerido.";
+    else if (!soloLetras.test(form.primerNombre))
+      errs.primerNombre = "Solo se permiten letras.";
+
+    if (form.segundoNombre && !soloLetras.test(form.segundoNombre))
+      errs.segundoNombre = "Solo se permiten letras.";
+
+    if (!form.primerApellido.trim())
+      errs.primerApellido = "El primer apellido es requerido.";
+    else if (!soloLetras.test(form.primerApellido))
+      errs.primerApellido = "Solo se permiten letras.";
+
+    if (form.segundoApellido && !soloLetras.test(form.segundoApellido))
+      errs.segundoApellido = "Solo se permiten letras.";
+
+    if (!form.documento.trim()) errs.documento = "El documento es requerido.";
+    else if (!soloNums.test(form.documento))
+      errs.documento = "Solo se permiten números.";
+    else if (form.documento.length < 8 || form.documento.length > 10)
+      errs.documento = "El documento debe tener entre 8 y 10 dígitos.";
+
+    if (!form.username.trim()) errs.username = "El username es requerido.";
+    else if (!userRegex.test(form.username))
+      errs.username = "Solo letras, números y guion bajo (_). Sin espacios.";
+
+    if (!editingId && !form.password.trim())
+      errs.password = "La contraseña es requerida al crear un cliente.";
+    else if (form.password && form.password.length < 6)
+      errs.password = "La contraseña debe tener al menos 6 caracteres.";
+
+    if (!form.email.trim()) errs.email = "El email es requerido.";
+    else if (!emailRegex.test(form.email))
+      errs.email = "Ingresa un email válido. Ej: usuario@correo.com";
+
+    if (form.telefono) {
+      if (!soloNums.test(form.telefono))
+        errs.telefono = "Solo se permiten números.";
+      else if (form.telefono.length !== 10)
+        errs.telefono = "El teléfono debe tener 10 dígitos.";
+    }
+
+    return errs;
+  };
 
   const guardar = async () => {
-    if (!form.primerNombre.trim() || !form.primerApellido.trim() ||
-        !form.email.trim() || !form.documento.trim() || !form.username.trim()) {
-      setError('Nombre, apellido, documento, username y email son requeridos.');
-      return;
-    }
-    if (!editingId && !form.password.trim()) {
-      setError('La contraseña es requerida al crear un cliente.');
+    const errs = validar();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError("Corrige los errores registrar al cliente.");
       return;
     }
     try {
       setSaving(true);
-      setError('');
+      setError("");
+      setFieldErrors({});
       if (editingId) {
         await clienteAdminService.actualizar(editingId, form);
       } else {
@@ -83,7 +148,7 @@ export default function Clientes() {
       setDetalle(null);
       cargar();
     } catch (err) {
-      setError(err.data || 'Error al guardar.');
+      setError(err.data || "Error al guardar.");
     } finally {
       setSaving(false);
     }
@@ -95,44 +160,47 @@ export default function Clientes() {
       await clienteAdminService.cambiarEstado(c.id);
       cargar();
       if (detalle?.id === c.id)
-        setDetalle(prev => ({
+        setDetalle((prev) => ({
           ...prev,
-          estado: prev.estado === 'activo' ? 'inactivo' : 'activo'
+          estado: prev.estado === "activo" ? "inactivo" : "activo",
         }));
     } catch {
-      alert('No se pudo cambiar el estado.');
+      alert("No se pudo cambiar el estado.");
     }
   };
 
-  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  const f = (key, val) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setFieldErrors((p) => ({ ...p, [key]: "" }));
+  };
 
   /* ── Filtros ── */
-  const filtrados = clientes.filter(c => {
+  const filtrados = clientes.filter((c) => {
     const q = busqueda.toLowerCase();
     const matchBusqueda =
-      (c.nombre    || '').toLowerCase().includes(q) ||
-      (c.email     || '').toLowerCase().includes(q) ||
-      (c.telefono  || '').toLowerCase().includes(q) ||
-      (c.documento || '').toLowerCase().includes(q);
-    const matchEstado =
-      filtroEstado === 'todos' ||
-      c.estado === filtroEstado;
+      (c.nombre || "").toLowerCase().includes(q) ||
+      (c.email || "").toLowerCase().includes(q) ||
+      (c.telefono || "").toLowerCase().includes(q) ||
+      (c.documento || "").toLowerCase().includes(q);
+    const matchEstado = filtroEstado === "todos" || c.estado === filtroEstado;
     return matchBusqueda && matchEstado;
   });
 
   const iniciales = (nombre) =>
-    (nombre || 'C').split(' ').slice(0, 2)
-      .map(n => n[0]).join('').toUpperCase();
+    (nombre || "C")
+      .split(" ")
+      .slice(0, 2)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
 
   /* ════════════════════════════════════
-     RENDER
-  ════════════════════════════════════ */
+      RENDER
+   ════════════════════════════════════ */
   return (
-    <div className={`cli-page ${detalle ? 'cli-has-detalle' : ''}`}>
-
+    <div className={`cli-page ${detalle ? "cli-has-detalle" : ""}`}>
       {/* ── COLUMNA PRINCIPAL ── */}
       <div className="cli-main">
-
         {/* HEADER */}
         <div className="page-header">
           <div>
@@ -155,20 +223,20 @@ export default function Clientes() {
             <input
               placeholder="Buscar por nombre, correo, teléfono o documento..."
               value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
+              onChange={(e) => setBusqueda(e.target.value)}
             />
             {busqueda && (
-              <button className="cli-clear" onClick={() => setBusqueda('')}>
+              <button className="cli-clear" onClick={() => setBusqueda("")}>
                 <i className="bi bi-x" />
               </button>
             )}
           </div>
 
           <div className="cli-filtros">
-            {['todos', 'activo', 'inactivo'].map(f => (
+            {["todos", "activo", "inactivo"].map((f) => (
               <button
                 key={f}
-                className={`cli-filtro-btn ${filtroEstado === f ? 'active' : ''}`}
+                className={`cli-filtro-btn ${filtroEstado === f ? "active" : ""}`}
                 onClick={() => setFiltroEstado(f)}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -177,7 +245,7 @@ export default function Clientes() {
           </div>
 
           <span className="cli-count">
-            {filtrados.length} cliente{filtrados.length !== 1 ? 's' : ''}
+            {filtrados.length} cliente{filtrados.length !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -206,75 +274,95 @@ export default function Clientes() {
                   <tr>
                     <td colSpan={8} className="empty-row">
                       <i className="bi bi-inbox me-2" />
-                      {busqueda ? 'Sin resultados.' : 'No hay clientes registrados.'}
+                      {busqueda
+                        ? "Sin resultados."
+                        : "No hay clientes registrados."}
                     </td>
                   </tr>
-                ) : filtrados.map((c, i) => (
-                  <tr
-                    key={c.id}
-                    className={detalle?.id === c.id ? 'cli-row-active' : ''}
-                    onClick={() => setDetalle(detalle?.id === c.id ? null : c)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <td className="cli-td-num">{i + 1}</td>
-                    <td>
-                      <div className="cli-cell">
-                        <div
-                          className="cli-avatar"
-                          style={{ opacity: c.estado === 'inactivo' ? 0.4 : 1 }}
+                ) : (
+                  filtrados.map((c, i) => (
+                    <tr
+                      key={c.id}
+                      className={detalle?.id === c.id ? "cli-row-active" : ""}
+                      onClick={() =>
+                        setDetalle(detalle?.id === c.id ? null : c)
+                      }
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td className="cli-td-num">{i + 1}</td>
+                      <td>
+                        <div className="cli-cell">
+                          <div
+                            className="cli-avatar"
+                            style={{
+                              opacity: c.estado === "inactivo" ? 0.4 : 1,
+                            }}
+                          >
+                            {iniciales(c.nombre)}
+                          </div>
+                          <div>
+                            <div className="cli-nombre">{c.nombre}</div>
+                            <div className="cli-username">@{c.username}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="cli-doc">{c.documento}</td>
+                      <td>
+                        <div className="cli-nombre">{c.email}</div>
+                        <div className="cli-username">{c.telefono}</div>
+                      </td>
+                      <td>
+                        <span className="cli-badge-num">
+                          <i className="bi bi-car-front me-1" />
+                          {c.totalVehiculos}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="cli-badge-num">
+                          <i className="bi bi-clipboard-check me-1" />
+                          {c.totalOrdenes}
+                        </span>
+                      </td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <button
+                          className={`cli-estado-btn ${c.estado}`}
+                          onClick={(e) => cambiarEstado(c, e)}
+                          title={
+                            c.estado === "activo" ? "Desactivar" : "Activar"
+                          }
                         >
-                          {iniciales(c.nombre)}
-                        </div>
-                        <div>
-                          <div className="cli-nombre">{c.nombre}</div>
-                          <div className="cli-username">@{c.username}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="cli-doc">{c.documento}</td>
-                    <td>
-                      <div className="cli-nombre">{c.email}</div>
-                      <div className="cli-username">{c.telefono}</div>
-                    </td>
-                    <td>
-                      <span className="cli-badge-num">
-                        <i className="bi bi-car-front me-1" />
-                        {c.totalVehiculos}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="cli-badge-num">
-                        <i className="bi bi-clipboard-check me-1" />
-                        {c.totalOrdenes}
-                      </span>
-                    </td>
-                    <td onClick={e => e.stopPropagation()}>
-                      <button
-                        className={`cli-estado-btn ${c.estado}`}
-                        onClick={e => cambiarEstado(c, e)}
-                        title={c.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                          <i
+                            className={`bi ${
+                              c.estado === "activo"
+                                ? "bi-toggle-on"
+                                : "bi-toggle-off"
+                            }`}
+                          />
+                          {c.estado === "activo" ? "Activo" : "Inactivo"}
+                        </button>
+                      </td>
+                      <td
+                        className="actions-cell"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <i className={`bi ${c.estado === 'activo'
-                          ? 'bi-toggle-on' : 'bi-toggle-off'}`}
-                        />
-                        {c.estado === 'activo' ? 'Activo' : 'Inactivo'}
-                      </button>
-                    </td>
-                    <td className="actions-cell" onClick={e => e.stopPropagation()}>
-                      <button className="btn-icon edit"
-                        onClick={() => abrirEditar(c)} title="Editar">
-                        <i className="bi bi-pencil" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        <button
+                          className="btn-icon edit"
+                          onClick={() => abrirEditar(c)}
+                          title="Editar"
+                        >
+                          <i className="bi bi-pencil" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
-      {/* ── PANEL LATERAL ── */}
+      {/* ── PANEL LATERAL DE DETALLE (STICKY) ── */}
       {detalle && (
         <aside className="cli-detalle">
           <div className="cli-detalle-header">
@@ -288,10 +376,15 @@ export default function Clientes() {
 
           <div className="cli-detalle-body">
             <h3 className="cli-detalle-nombre">{detalle.nombre}</h3>
-            <span className={`cli-estado-btn ${detalle.estado}`}
-              style={{ fontSize: '.75rem', padding: '.2rem .7rem' }}>
-              <i className={`bi ${detalle.estado === 'activo'
-                ? 'bi-toggle-on' : 'bi-toggle-off'} me-1`} />
+            <span
+              className={`cli-estado-btn ${detalle.estado}`}
+              style={{ fontSize: ".75rem", padding: ".2rem .7rem" }}
+            >
+              <i
+                className={`bi ${
+                  detalle.estado === "activo" ? "bi-toggle-on" : "bi-toggle-off"
+                } me-1`}
+              />
               {detalle.estado}
             </span>
 
@@ -312,11 +405,11 @@ export default function Clientes() {
                 </div>
                 <div className="cli-info-row">
                   <i className="bi bi-telephone" />
-                  <span>{detalle.telefono || 'Sin teléfono'}</span>
+                  <span>{detalle.telefono || "Sin teléfono"}</span>
                 </div>
                 <div className="cli-info-row">
                   <i className="bi bi-geo-alt" />
-                  <span>{detalle.direccion || 'Sin dirección'}</span>
+                  <span>{detalle.direccion || "Sin dirección"}</span>
                 </div>
               </div>
             </div>
@@ -337,146 +430,283 @@ export default function Clientes() {
           </div>
 
           <div className="cli-detalle-footer">
-            <button className="btn-secondary cli-w-full"
-              onClick={() => abrirEditar(detalle)}>
+            <button
+              className="btn-secondary cli-w-full"
+              onClick={() => abrirEditar(detalle)}
+            >
               <i className="bi bi-pencil me-1" /> Editar cliente
             </button>
             <button
               className={`cli-w-full cli-toggle-btn ${detalle.estado}`}
-              onClick={e => cambiarEstado(detalle, e)}
+              onClick={(e) => cambiarEstado(detalle, e)}
             >
-              <i className={`bi ${detalle.estado === 'activo'
-                ? 'bi-toggle-off' : 'bi-toggle-on'} me-1`} />
-              {detalle.estado === 'activo' ? 'Desactivar cliente' : 'Activar cliente'}
+              <i
+                className={`bi ${
+                  detalle.estado === "activo" ? "bi-toggle-off" : "bi-toggle-on"
+                } me-1`}
+              />
+              {detalle.estado === "activo"
+                ? "Desactivar cliente"
+                : "Activar cliente"}
             </button>
           </div>
         </aside>
       )}
 
-      {/* ══ MODAL CLIENTE ══ */}
+      {/* ══ NUEVO MODAL FORMULARIO LATERAL (DRAWER) ══ */}
       {showModal && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-card modal-lg" onClick={e => e.stopPropagation()}>
-
-            <div className="modal-header">
-              <h2>
-                <i className={`bi ${editingId ? 'bi-pencil' : 'bi-person-plus'} me-2`} />
-                {editingId ? 'Editar Cliente' : 'Nuevo Cliente'}
+        <div className="cli-modal-overlay" onClick={cerrarModal}>
+          <div
+            className="cli-modal-lateral"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Encabezado Lateral */}
+            <div className="cli-modal-header">
+              <h2 className="cli-modal-title">
+                <i
+                  className={`bi ${editingId ? "bi-pencil" : "bi-person-plus"} me-2`}
+                />
+                {editingId ? "Editar Cliente" : "Nuevo Cliente"}
               </h2>
-              <button className="modal-close" onClick={cerrarModal}>
+              <button className="cli-modal-close" onClick={cerrarModal}>
                 <i className="bi bi-x-lg" />
               </button>
             </div>
 
-            <div className="modal-body">
+            {/* Cuerpo del Formulario Lateral */}
+            <div className="cli-modal-body">
               {error && (
-                <div className="alert-error">
-                  <i className="bi bi-exclamation-triangle me-1" />{error}
+                <div
+                  className="alert-error"
+                  style={{ marginBottom: "1.25rem" }}
+                >
+                  <i className="bi bi-exclamation-triangle me-1" />
+                  {error}
                 </div>
               )}
 
-              {/* Nombres */}
+              {/* Sección: Datos personales */}
               <div className="cli-form-section">
                 <div className="cli-form-label">
                   <i className="bi bi-person" /> Datos personales
                 </div>
                 <div className="form-grid-2">
+                  {/* Primer nombre */}
                   <div className="form-group">
                     <label>Primer nombre *</label>
-                    <input type="text" placeholder="Ej: Carlos"
+                    <input
+                      type="text"
+                      placeholder="Ej: Carlos"
                       value={form.primerNombre}
-                      onChange={e => f('primerNombre', e.target.value)} />
+                      onChange={(e) => f("primerNombre", e.target.value)}
+                      className={fieldErrors.primerNombre ? "input-error" : ""}
+                    />
+                    {fieldErrors.primerNombre && (
+                      <span className="field-error-msg">
+                        {fieldErrors.primerNombre}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Segundo nombre */}
                   <div className="form-group">
                     <label>Segundo nombre</label>
-                    <input type="text" placeholder="Ej: Andrés"
+                    <input
+                      type="text"
+                      placeholder="Ej: Andrés"
                       value={form.segundoNombre}
-                      onChange={e => f('segundoNombre', e.target.value)} />
+                      onChange={(e) => f("segundoNombre", e.target.value)}
+                      className={fieldErrors.segundoNombre ? "input-error" : ""}
+                    />
+                    {fieldErrors.segundoNombre && (
+                      <span className="field-error-msg">
+                        {fieldErrors.segundoNombre}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Primer apellido */}
                   <div className="form-group">
                     <label>Primer apellido *</label>
-                    <input type="text" placeholder="Ej: Posada"
+                    <input
+                      type="text"
+                      placeholder="Ej: Posada"
                       value={form.primerApellido}
-                      onChange={e => f('primerApellido', e.target.value)} />
+                      onChange={(e) => f("primerApellido", e.target.value)}
+                      className={
+                        fieldErrors.primerApellido ? "input-error" : ""
+                      }
+                    />
+                    {fieldErrors.primerApellido && (
+                      <span className="field-error-msg">
+                        {fieldErrors.primerApellido}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Segundo apellido */}
                   <div className="form-group">
                     <label>Segundo apellido</label>
-                    <input type="text" placeholder="Ej: López"
+                    <input
+                      type="text"
+                      placeholder="Ej: López"
                       value={form.segundoApellido}
-                      onChange={e => f('segundoApellido', e.target.value)} />
+                      onChange={(e) => f("segundoApellido", e.target.value)}
+                      className={
+                        fieldErrors.segundoApellido ? "input-error" : ""
+                      }
+                    />
+                    {fieldErrors.segundoApellido && (
+                      <span className="field-error-msg">
+                        {fieldErrors.segundoApellido}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </div>
 
-              {/* Identificación */}
-              <div className="cli-form-section">
-                <div className="cli-form-label">
-                  <i className="bi bi-person-badge" /> Identificación y acceso
-                </div>
-                <div className="form-grid-2">
+                  {/* Documento */}
                   <div className="form-group">
                     <label>Documento *</label>
-                    <input type="text" placeholder="Ej: 1001234567"
+                    <input
+                      type="text"
+                      placeholder="Ej: 1001234567"
                       value={form.documento}
-                      onChange={e => f('documento', e.target.value)} />
+                      onChange={(e) => f("documento", e.target.value)}
+                      className={fieldErrors.documento ? "input-error" : ""}
+                    />
+                    {fieldErrors.documento && (
+                      <span className="field-error-msg">
+                        {fieldErrors.documento}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Username */}
                   <div className="form-group">
                     <label>Username *</label>
-                    <input type="text" placeholder="Ej: cposada"
+                    <input
+                      type="text"
+                      placeholder="Ej: cposada"
                       autoComplete="one-time-code"
                       value={form.username}
-                      onChange={e => f('username', e.target.value)} />
+                      onChange={(e) => f("username", e.target.value)}
+                      className={fieldErrors.username ? "input-error" : ""}
+                    />
+                    {fieldErrors.username && (
+                      <span className="field-error-msg">
+                        {fieldErrors.username}
+                      </span>
+                    )}
                   </div>
-                  <div className="form-group">
-                    <label>Contraseña {editingId ? '(dejar vacío para no cambiar)' : '*'}</label>
-                    <input type="password"
-                      autoComplete="new-password"
-                      placeholder={editingId ? 'Nueva contraseña (opcional)' : 'Contraseña inicial'}
-                      value={form.password}
-                      onChange={e => f('password', e.target.value)} />
-                  </div>
-                </div>
-              </div>
 
-              {/* Contacto */}
-              <div className="cli-form-section">
-                <div className="cli-form-label">
-                  <i className="bi bi-telephone" /> Contacto
-                </div>
-                <div className="form-grid-2">
+                  {/* Contraseña */}
+                  <div className="form-group form-span-2">
+                    <label>
+                      Contraseña{" "}
+                      {editingId ? "(dejar vacío para no cambiar)" : "*"}
+                    </label>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder={
+                        editingId
+                          ? "Nueva contraseña (opcional)"
+                          : "Contraseña inicial"
+                      }
+                      value={form.password}
+                      onChange={(e) => f("password", e.target.value)}
+                      className={fieldErrors.password ? "input-error" : ""}
+                    />
+                    {fieldErrors.password && (
+                      <span className="field-error-msg">
+                        {fieldErrors.password}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Email */}
                   <div className="form-group">
                     <label>Email *</label>
-                    <input type="email" placeholder="Ej: carlos@email.com"
+                    <input
+                      type="email"
+                      placeholder="Ej: carlos@email.com"
                       value={form.email}
-                      onChange={e => f('email', e.target.value)} />
+                      onChange={(e) => f("email", e.target.value)}
+                      className={fieldErrors.email ? "input-error" : ""}
+                    />
+                    {fieldErrors.email && (
+                      <span className="field-error-msg">
+                        {fieldErrors.email}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Teléfono */}
                   <div className="form-group">
                     <label>Teléfono</label>
-                    <input type="text" placeholder="Ej: 3001234567"
+                    <input
+                      type="text"
+                      placeholder="Ej: 3001234567"
                       value={form.telefono}
-                      onChange={e => f('telefono', e.target.value)} />
+                      onChange={(e) => f("telefono", e.target.value)}
+                      className={fieldErrors.telefono ? "input-error" : ""}
+                    />
+                    {fieldErrors.telefono && (
+                      <span className="field-error-msg">
+                        {fieldErrors.telefono}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group form-span-2">
                     <label>Dirección</label>
-                    <input type="text" placeholder="Ej: Calle 45 # 23-10"
+                    <input
+                      type="text"
+                      placeholder="Ej: Calle 45 # 23-10"
                       value={form.direccion}
-                      onChange={e => f('direccion', e.target.value)} />
+                      onChange={(e) => f("direccion", e.target.value)}
+                    />
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={cerrarModal} disabled={saving}>
-                Cancelar
-              </button>
-              <button className="btn-primary" onClick={guardar} disabled={saving}>
-                {saving
-                  ? <><i className="bi bi-arrow-repeat spin me-1" /> Guardando...</>
-                  : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-person-plus'} me-1`} />
-                      {editingId ? 'Guardar cambios' : 'Registrar cliente'}</>
-                }
-              </button>
+              {/* Acciones del Formulario al fondo del Drawer */}
+              <div
+                className="modal-footer"
+                style={{
+                  marginTop: "2rem",
+                  padding: "1rem 0 0",
+                  borderTop: "1px solid var(--border)",
+                  display: "flex",
+                  gap: "0.75rem",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  className="btn-secondary"
+                  onClick={cerrarModal}
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={guardar}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <i className="bi bi-arrow-repeat spin me-1" />{" "}
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <i
+                        className={`bi ${editingId ? "bi-check-lg" : "bi-person-plus"} me-1`}
+                      />
+                      {editingId ? "Guardar cambios" : "Registrar cliente"}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

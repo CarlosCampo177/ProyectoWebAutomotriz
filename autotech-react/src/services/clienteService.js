@@ -5,7 +5,7 @@ export const getCitas      = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/
 export const getHistorial  = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/historial`)
 export const getFacturas   = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/facturas`)
 export const getStats      = (idUsuario) => apiClient.get(`Cliente/${idUsuario}/stats`)
-export const getMecanicos  = ()          => apiClient.get('Auth/mecanicos')
+export const getMecanicos = () => apiClient.get('Mecanico')
 
 export const postVehiculo  = (idUsuario, data) => apiClient.post(`Cliente/${idUsuario}/vehiculos`, data)
 export const postCita      = (idUsuario, data) => apiClient.post(`Cliente/${idUsuario}/citas`, data)
