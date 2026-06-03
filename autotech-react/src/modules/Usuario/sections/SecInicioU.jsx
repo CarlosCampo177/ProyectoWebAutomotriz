@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../../context/AuthContext';
-import { getVehiculos, getCitas } from '../../../services/clienteService';
+import { getVehiculos, getCitas, getMecanicos, postCita } from '../../../services/clienteService';
+import { ModalAgendarCita } from './SecCitasU';
 import "./SecInicioU.css";
 
 const MESES_FULL = [
@@ -18,34 +20,22 @@ const estadoLabels = {
 };
 
 const MESES_CORTOS = {
-  ENE: 0, JAN: 0,
-  FEB: 1,
-  MAR: 2,
-  ABR: 3, APR: 3,
-  MAY: 4,
-  JUN: 5,
-  JUL: 6,
-  AGO: 7, AUG: 7,
-  SEP: 8,
-  OCT: 9,
-  NOV: 10,
-  DIC: 11, DEC: 11,
+  ENE: 0, JAN: 0, FEB: 1, MAR: 2, ABR: 3, APR: 3,
+  MAY: 4, JUN: 5, JUL: 6, AGO: 7, AUG: 7,
+  SEP: 8, OCT: 9, NOV: 10, DIC: 11, DEC: 11,
 };
 
 const fechaCita = (cita) => {
   const mes = MESES_CORTOS[String(cita.mes ?? "").toUpperCase()];
   const dia = Number(cita.dia);
   if (mes === undefined || Number.isNaN(dia)) return null;
-
   const [horaStr = "00:00", periodoRaw = ""] = String(cita.hora ?? "").trim().split(" ");
   let [hora = 0, minuto = 0] = horaStr.split(":").map(Number);
   const periodo = periodoRaw.toUpperCase();
-
   if (Number.isNaN(hora)) hora = 0;
   if (Number.isNaN(minuto)) minuto = 0;
   if (periodo === "PM" && hora !== 12) hora += 12;
   if (periodo === "AM" && hora === 12) hora = 0;
-
   return new Date(new Date().getFullYear(), mes, dia, hora, minuto);
 };
 
@@ -63,28 +53,6 @@ function getGreeting() {
 function getDateLabel() {
   const d = new Date();
   return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES_FULL[d.getMonth()]} de ${d.getFullYear()}`;
-}
-
-function Modal({ title, onClose, children }) {
-  useEffect(() => {
-    const handler = (e) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  return (
-    <div className="si-modal-overlay" onClick={onClose}>
-      <div className="si-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="si-modal-header">
-          <h3 className="si-modal-title">{title}</h3>
-          <button className="si-modal-close" onClick={onClose}>
-            <i className="bi bi-x-lg" />
-          </button>
-        </div>
-        <div className="si-modal-body">{children}</div>
-      </div>
-    </div>
-  );
 }
 
 function Badge({ estado }) {
@@ -105,7 +73,7 @@ function AlertaKm({ km }) {
   );
 }
 
-function StatCard({ icon, label, value, color, bg, onClick }) {
+function StatCard({ icon, label, value, color, bg }) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -121,7 +89,7 @@ function StatCard({ icon, label, value, color, bg, onClick }) {
   }, [value]);
 
   return (
-    <div className="si-stat-card" onClick={onClick} style={{ cursor: onClick ? "pointer" : "default" }}>
+    <div className="si-stat-card">
       <div className="si-stat-icon" style={{ background: bg, color }}>
         <i className={`bi ${icon}`} style={{ fontSize: "1.2rem" }} />
       </div>
@@ -135,22 +103,26 @@ function StatCard({ icon, label, value, color, bg, onClick }) {
 }
 
 export default function SecInicioU() {
-  const { user } = useAuth();
-  const [modal, setModal]         = useState(null);
-  const [vehiculos, setVehiculos] = useState([]);
-  const [citas, setCitas]         = useState([]);
-  const [loading, setLoading]     = useState(true);
+  const { user }          = useAuth();
+  const navigate          = useNavigate();
+  const [modal, setModal]           = useState(false);
+  const [vehiculos, setVehiculos]   = useState([]);
+  const [mecanicos, setMecanicos]   = useState([]);
+  const [citas, setCitas]           = useState([]);
+  const [loading, setLoading]       = useState(true);
 
   useEffect(() => {
     if (!user?.id) return;
     const fetchData = async () => {
       try {
-        const [resV, resC] = await Promise.all([
+        const [resV, resC, resM] = await Promise.all([
           getVehiculos(user.id),
           getCitas(user.id),
+          getMecanicos(),
         ]);
         setVehiculos(Array.isArray(resV) ? resV : []);
         setCitas(Array.isArray(resC) ? resC : []);
+        setMecanicos(Array.isArray(resM) ? resM : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -168,6 +140,21 @@ export default function SecInicioU() {
   const completadas = citasConEstado.filter(c => c.estado === "completada").length;
   const proximas    = citasConEstado.filter(c => c.estado === "pendiente" || c.estado === "confirmada");
 
+  const handleConfirmarCita = async (form) => {
+    const [, mesNum, diaNum] = form.fecha.split("-").map(Number);
+    await postCita(user.id, {
+      servicio:      form.servicio,
+      vehiculoId:    Number(form.idVehiculo),
+      mecanicoId:    form.mecanicoId ? Number(form.mecanicoId) : 0,
+      dia:           diaNum,
+      mes:           mesNum,
+      hora:          form.hora,
+      observaciones: form.observaciones || "",
+    });
+    const res = await getCitas(user.id);
+    setCitas(Array.isArray(res) ? res : []);
+  };
+
   const stats = [
     { icon: "bi-car-front",      bg: "#e8f0fe", color: "#1a6bdc", label: "Vehículos",           value: vehiculos.length },
     { icon: "bi-calendar-check", bg: "#fff3e0", color: "#e65100", label: "Citas pendientes",     value: pendientes       },
@@ -176,10 +163,10 @@ export default function SecInicioU() {
   ];
 
   const acciones = [
-    { icon: "bi-calendar-plus", label: "Nueva cita",    color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal("nuevaCita") },
-    { icon: "bi-car-front",     label: "Mis vehículos", color: "#2e7d32", bg: "#e8f5e9", action: () => {}                    },
-    { icon: "bi-robot",         label: "Consultar IA",  color: "#6a1b9a", bg: "#f3e5f5", action: () => {}                    },
-    { icon: "bi-clock-history", label: "Ver historial", color: "#e65100", bg: "#fff3e0", action: () => {}                    },
+    { icon: "bi-calendar-plus", label: "Nueva cita",    color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal(true)                    },
+    { icon: "bi-car-front",     label: "Mis vehículos", color: "#2e7d32", bg: "#e8f5e9", action: () => navigate('/usuario/vehiculos')     },
+    { icon: "bi-robot",         label: "Consultar IA",  color: "#6a1b9a", bg: "#f3e5f5", action: () => navigate('/usuario/ia')           },
+    { icon: "bi-clock-history", label: "Ver historial", color: "#e65100", bg: "#fff3e0", action: () => navigate('/usuario/historial')    },
   ];
 
   if (loading) return <div className="si-wrapper"><p style={{ color: "#888" }}>Cargando...</p></div>;
@@ -197,7 +184,7 @@ export default function SecInicioU() {
             <i className="bi bi-person-circle si-hero-icon" />
           </h1>
           <p className="si-hero-desc">Gestiona tus vehículos y citas desde aquí.</p>
-          <button className="si-hero-btn" onClick={() => setModal("nuevaCita")}>
+          <button className="si-hero-btn" onClick={() => setModal(true)}>
             <i className="bi bi-calendar-plus" /> Agendar cita
           </button>
         </div>
@@ -235,13 +222,13 @@ export default function SecInicioU() {
         <div className="si-panel">
           <div className="si-panel-header">
             <span className="si-panel-title"><i className="bi bi-calendar-check" /> Próximas citas</span>
-            <button className="si-ver-mas">Ver todas →</button>
+            <button className="si-ver-mas" onClick={() => navigate('/usuario/citas')}>Ver todas →</button>
           </div>
           {proximas.length === 0 ? (
             <div className="si-empty">
               <i className="bi bi-calendar-x" style={{ fontSize: "2rem", opacity: .4 }} />
               <p>Sin citas próximas</p>
-              <button className="si-empty-btn" onClick={() => setModal("nuevaCita")}>Agendar ahora</button>
+              <button className="si-empty-btn" onClick={() => setModal(true)}>Agendar ahora</button>
             </div>
           ) : (
             proximas.slice(0, 3).map((c, i) => (
@@ -261,7 +248,7 @@ export default function SecInicioU() {
         <div className="si-panel">
           <div className="si-panel-header">
             <span className="si-panel-title"><i className="bi bi-car-front" /> Mis vehículos</span>
-            <button className="si-ver-mas">Ver todos →</button>
+            <button className="si-ver-mas" onClick={() => navigate('/usuario/vehiculos')}>Ver todos →</button>
           </div>
           {vehiculos.length === 0 ? (
             <div className="si-empty">
@@ -284,52 +271,14 @@ export default function SecInicioU() {
         </div>
       </div>
 
-      {/* MODAL NUEVA CITA */}
-      {modal === "nuevaCita" && (
-        <Modal title="Agendar nueva cita" onClose={() => setModal(null)}>
-          <div className="si-form">
-            <div className="si-form-group">
-              <label>Servicio</label>
-              <select>
-                <option>Cambio de aceite</option>
-                <option>Revisión general</option>
-                <option>Frenos</option>
-                <option>Diagnóstico</option>
-              </select>
-            </div>
-            <div className="si-form-group">
-              <label>Vehículo</label>
-              <select>
-                {vehiculos.length === 0
-                  ? <option>Sin vehículos registrados</option>
-                  : vehiculos.map((v, i) => <option key={i}>{v.nombre} — {v.placa}</option>)
-                }
-              </select>
-            </div>
-            <div className="si-form-row">
-              <div className="si-form-group">
-                <label>Fecha</label>
-                <input type="date" min={new Date().toISOString().split("T")[0]} />
-              </div>
-              <div className="si-form-group">
-                <label>Hora</label>
-                <select>
-                  {["08:00","09:00","10:00","11:00","14:00","15:00","16:00"].map(h => (
-                    <option key={h}>{h}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="si-form-group">
-              <label>Observaciones</label>
-              <textarea rows={3} placeholder="Describe el problema o servicio requerido..." />
-            </div>
-            <div className="si-form-actions">
-              <button className="si-btn-secondary" onClick={() => setModal(null)}>Cancelar</button>
-              <button className="si-btn-primary" onClick={() => setModal(null)}>Confirmar cita</button>
-            </div>
-          </div>
-        </Modal>
+      {/* MODAL — usa el mismo de SecCitas */}
+      {modal && (
+        <ModalAgendarCita
+          vehiculos={vehiculos}
+          mecanicos={mecanicos}
+          onClose={() => setModal(false)}
+          onConfirmar={handleConfirmarCita}
+        />
       )}
 
     </div>

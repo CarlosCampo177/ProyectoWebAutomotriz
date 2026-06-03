@@ -14,7 +14,6 @@ export const menuConfig = {
     { label: 'Inicio',               path: '/mecanico',                 icon: 'bi-grid-1x2'        },
     { label: 'Mis órdenes',          path: '/mecanico/ordenes',         icon: 'bi-clipboard-check' },
     { label: 'Vehículos asignados',  path: '/mecanico/vehiculos',       icon: 'bi-car-front'       },
-    { label: 'Observaciones',        path: '/mecanico/observaciones',   icon: 'bi-chat-left-text'  },
   ],
 
   cliente: [

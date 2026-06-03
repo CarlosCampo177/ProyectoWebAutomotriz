@@ -117,9 +117,9 @@
 }
 
 .sc-item[data-estado="confirmada"] { border-left-color: #2e7d32; }
-.sc-item[data-estado="pendiente"] { border-left-color: #e65100; }
+.sc-item[data-estado="pendiente"]  { border-left-color: #e65100; }
 .sc-item[data-estado="completada"] { border-left-color: #1565c0; }
-.sc-item[data-estado="cancelada"] { border-left-color: #c62828; }
+.sc-item[data-estado="cancelada"]  { border-left-color: #c62828; }
 
 /* Fecha */
 .sc-fecha {
@@ -191,7 +191,7 @@
 /* Empty */
 .sc-empty { color: #8a9bbf; font-size: .85rem; padding: 20px; }
 
-/* Panel */
+/* Panel lateral */
 .sc-panel {
   position: sticky;
   top: 18px;
@@ -338,5 +338,283 @@
 
   .sc-panel {
     position: static;
+  }
+}
+
+
+/* ══════════════════════════════════════════
+   MODAL AGENDAR CITA — estilos
+══════════════════════════════════════════ */
+
+/* Overlay */
+.si-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 28, 48, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+/* Card del modal */
+.si-modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(18, 28, 48, 0.18);
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: sc-modal-in .2s ease;
+}
+
+@keyframes sc-modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sc-modal-agenda {
+  max-width: 500px;
+}
+
+/* Header del modal */
+.si-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.sc-modal-header-inner {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.sc-modal-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 11px;
+  background: #eff6ff;
+  color: #1a6bdc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.si-modal-title {
+  font-size: .95rem;
+  font-weight: 800;
+  color: #1c2a45;
+  margin: 0;
+}
+
+.sc-modal-sub {
+  font-size: .76rem;
+  color: #8a9bbf;
+  margin: 3px 0 0;
+}
+
+.si-modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 9px;
+  background: #f0f3fa;
+  color: #8a9bbf;
+  cursor: pointer;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+
+.si-modal-close:hover {
+  background: #e2e8f4;
+  color: #1c2a45;
+}
+
+/* Body del modal */
+.si-modal-body {
+  padding: 20px 22px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Error */
+.sc-modal-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: .55rem .85rem;
+  font-size: .81rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+/* Grupos de form */
+.si-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.si-form-group label {
+  font-size: .78rem;
+  font-weight: 700;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.si-form-group label i {
+  color: #1a6bdc;
+  font-size: .82rem;
+}
+
+.sc-opcional {
+  font-weight: 400;
+  color: #9ca3af;
+  margin-left: .2rem;
+}
+
+.si-form-group select,
+.si-form-group input[type="date"],
+.si-form-group textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e2e6ef;
+  border-radius: 9px;
+  font-size: .84rem;
+  color: #1c2a45;
+  font-family: inherit;
+  background: #fafbfe;
+  transition: border-color .15s, box-shadow .15s;
+  outline: none;
+}
+
+.si-form-group select:focus,
+.si-form-group input[type="date"]:focus,
+.si-form-group textarea:focus {
+  border-color: #1a6bdc;
+  box-shadow: 0 0 0 3px rgba(26,107,220,.1);
+  background: #fff;
+}
+
+.si-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+/* Fila 2 columnas */
+.si-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Aviso informativo */
+.sc-modal-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 9px;
+  padding: .65rem .85rem;
+  font-size: .77rem;
+  color: #0369a1;
+  line-height: 1.4;
+}
+
+.sc-modal-aviso i {
+  margin-top: .05rem;
+  flex-shrink: 0;
+  font-size: .85rem;
+}
+
+/* Footer con acciones */
+.si-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px 20px;
+  border-top: 1px solid #edf1f7;
+  margin-top: 4px;
+}
+
+.si-btn-secondary {
+  padding: 9px 20px;
+  border-radius: 9px;
+  border: 1.5px solid #e2e6ef;
+  background: #fff;
+  color: #5a6a8a;
+  font-size: .84rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.si-btn-secondary:hover:not(:disabled) {
+  background: #f5f7fc;
+  border-color: #c8d3e8;
+}
+
+.si-btn-primary {
+  padding: 9px 22px;
+  border-radius: 9px;
+  border: none;
+  background: #1a6bdc;
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s;
+}
+
+.si-btn-primary:hover:not(:disabled) { background: #155bb8; }
+
+.si-btn-primary:disabled,
+.si-btn-secondary:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* Spin */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin {
+  display: inline-block;
+  animation: spin .65s linear infinite;
+}
+
+/* Responsive modal */
+@media (max-width: 560px) {
+  .si-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .si-modal {
+    border-radius: 14px;
   }
 }

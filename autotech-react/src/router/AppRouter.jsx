@@ -22,7 +22,6 @@ import Estadisticas     from '../modules/admin/Estadisticas/Estadisticas'
 import SecInicio        from '../modules/Mecanico/sections/SecInicio'
 import SecOrdenes       from '../modules/Mecanico/sections/SecOrdenes'
 import SecVehiculos     from '../modules/Mecanico/sections/SecVehiculos'
-import SecObservaciones from '../modules/Mecanico/sections/SecObservaciones'
 import RutasProtegidas from './RutasProtegidas'
 
 
@@ -65,7 +64,6 @@ function AppRouter() {
           <Route index                element={<SecInicio />}        />
           <Route path="ordenes"       element={<SecOrdenes />}       />
           <Route path="vehiculos"     element={<SecVehiculos />}     />
-          <Route path="observaciones" element={<SecObservaciones />} />
         </Route>
       </Route>
 
@@ -78,6 +76,7 @@ function AppRouter() {
           <Route path="facturas"      element={<SecFacturas />}      />
           <Route path="historial"     element={<SecHistorial />}     />
           <Route path="perfil"        element={<SecPerfil/>}       />
+          <Route path="ia" element={<SecConsultaIA />} />
 
         </Route>
       </Route>
