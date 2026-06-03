@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom'
 import Inicio    from '../modules/autoTech/Inicio'
 import Register  from '../modules/autoTech/Register'
 import Login     from '../modules/autoTech/Log'
+import Activar from '../modules/autoTech/Activar';
 
 import DashboardLayout from '../layouts/DashboardLayout'
 
@@ -42,7 +43,8 @@ function AppRouter() {
       <Route path="/"              element={<Inicio />}   />
       <Route path="/page/register" element={<Register />} />
       <Route path="/page/login"    element={<Login />}    />
-
+      <Route path="/page/activar"  element={<Activar />}  />
+      
       {/* ── Admin ── */}
       <Route element={<RutasProtegidas rolesPermitidos={['admin']} />}>
         <Route path="/admin" element={<DashboardLayout />}>

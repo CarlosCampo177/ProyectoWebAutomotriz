@@ -11,8 +11,7 @@ export default function Register() {
     segundoNombre: "",
     primerApellido: "",
     segundoApellido: "",
-    username: "",
-    documento: "",
+    documento: "", // Se eliminó username de aquí
     correo: "",
     telefono: "",
     direccion: "",
@@ -56,8 +55,7 @@ export default function Register() {
         segundoNombre: form.segundoNombre,
         primerApellido: form.primerApellido,
         segundoApellido: form.segundoApellido,
-        username: form.username,
-        documento: form.documento,
+        documento: form.documento, // Se quitó el parámetro username
         email: form.correo,
         telefono: form.telefono,
         direccion: form.direccion,
@@ -114,10 +112,7 @@ export default function Register() {
             <input type="text" name="documento" value={form.documento} onChange={handleChange} placeholder="123456789" required />
           </div>
 
-          <div className="rg-field">
-            <label>Nombre de usuario <span className="rg-req">*</span></label>
-            <input type="text" name="username" value={form.username} onChange={handleChange} placeholder="juan_perez" required />
-          </div>
+          {/* ❌ SE ELIMINÓ POR COMPLETO EL DIV DEL INPUT USERNAME */}
 
           <div className="rg-field">
             <label>Correo electrónico <span className="rg-req">*</span></label>

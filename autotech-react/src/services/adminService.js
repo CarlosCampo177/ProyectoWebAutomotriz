@@ -98,10 +98,14 @@ export const ordenService = {
    FACTURACIÓN
 ══════════════════════════════════ */
 export const facturaService = {
-  getAll:     ()         => apiClient.get('Factura'),
-  getById:    (id)       => apiClient.get(`Factura/${id}`),
-  generar:    (data)     => apiClient.post('Factura', data),
-  eliminar:   (id)       => apiClient.delete(`Factura/${id}`),
+  getAll:             (params) => apiClient.get(
+    `FacturaAdmin${params ? '?' + new URLSearchParams(params) : ''}`),
+  getById:            (id)     => apiClient.get(`FacturaAdmin/${id}`),
+  getOrdenesPendientes:()      => apiClient.get('FacturaAdmin/ordenes-pendientes'),
+  getEstadisticas:    ()       => apiClient.get('FacturaAdmin/estadisticas'),
+  generar:            (idOrden, data) =>
+    apiClient.post(`FacturaAdmin/generar/${idOrden}`, data),
+  marcarPagada:       (id)     => apiClient.patch(`FacturaAdmin/${id}/pagar`, {}),
 }
 
 /* ══════════════════════════════════
