@@ -6,10 +6,14 @@
   min-height: 100vh;
   background: var(--bg);
   font-family: var(--font-body);
+  /* Asegurar que el padding interno siempre se respete */
+  box-sizing: border-box;
+  max-width: 100%;
 }
 .ord-main {
   flex: 1;
   min-width: 0;
+  overflow: hidden; /* Evita que este div empuje al lateral derecho si el contenido es grande */
 }
 
 /* ── Tabs principales ── */
@@ -83,6 +87,10 @@
 }
 
 /* ── Tabla ── */
+.table-card {
+  width: 100%;
+  overflow-x: auto; /* Permite hacer scroll en la tabla en vez de empujar todo el grid */
+}
 .ord-td-id {
   width: 80px;
 }
@@ -173,19 +181,10 @@
   background: #6d28d9 !important;
   color: #fff !important;
 }
-.ord-btn-convertir {
-  background: #dcfce7 !important;
-  color: #15803d !important;
-  border-color: #bbf7d0 !important;
-}
-.ord-btn-convertir:hover {
-  background: #15803d !important;
-  color: #fff !important;
-}
 
-/* ── Panel lateral ── */
+/* ── Panel lateral detalle ── */
 .ord-detalle {
-  width: 300px;
+  width: 340px;
   flex-shrink: 0;
   background: var(--surface);
   border: 1.5px solid var(--border);
@@ -203,44 +202,55 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 1.15rem 1.25rem;
+  padding: 1.15rem 1.35rem;
   border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
   flex-shrink: 0;
 }
 .ord-detalle-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem 1.25rem;
+  padding: 0;
 }
+
+/* Cada sección del detalle */
 .ord-det-section {
-  margin-bottom: 1.1rem;
-  padding-bottom: 1rem;
+  padding: 1rem 1.35rem;
   border-bottom: 1px solid var(--border);
 }
 .ord-det-section:last-child {
   border-bottom: none;
 }
+
+/* Título de sección — más visible con color acento */
 .ord-det-title {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-3);
-  margin: 0 0 0.5rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 .ord-det-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.83rem;
-  color: var(--text-2);
-  margin-bottom: 0.3rem;
+  gap: 0.55rem;
+  font-size: 0.86rem;
+  color: var(--text-1);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
 }
+.ord-det-row:last-child { margin-bottom: 0; }
 .ord-det-row i {
   color: var(--text-3);
-  width: 14px;
+  width: 15px;
   flex-shrink: 0;
+  font-size: 0.9rem;
 }
+
 .ord-det-problema {
   font-size: 0.83rem;
   color: var(--text-2);
@@ -249,6 +259,7 @@
   padding: 0.65rem 0.8rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
+  margin: 0;
 }
 .ord-det-item {
   display: flex;
@@ -306,6 +317,7 @@
   color: var(--text-1);
   font-weight: 600;
 }
+
 .ord-obs-card {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -333,6 +345,7 @@
   line-height: 1.4;
   margin: 0;
 }
+
 .ord-asignar-btn {
   display: flex;
   align-items: center;
@@ -353,9 +366,11 @@
   background: var(--accent);
   color: #fff;
 }
+
 .ord-detalle-footer {
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.35rem;
   border-top: 1px solid var(--border);
+  background: var(--surface-2);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -383,29 +398,7 @@
   color: #fff;
 }
 
-/* ── Modal ── */
-.ord-tipo-toggle {
-  display: flex;
-  background: var(--surface-2);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 0.2rem;
-}
-.ord-tipo-btn {
-  padding: 0.3rem 0.85rem;
-  border-radius: 4px;
-  border: none;
-  background: none;
-  font-size: 0.82rem;
-  font-weight: 500;
-  cursor: pointer;
-  color: var(--text-3);
-  transition: all var(--transition);
-}
-.ord-tipo-btn.active {
-  background: var(--accent);
-  color: #fff;
-}
+/* ── Formulario interno ── */
 .ord-form-section {
   margin-bottom: 1.25rem;
 }
@@ -439,6 +432,55 @@
   box-shadow: 0 0 0 3px var(--accent-light);
 }
 
+/* ── Toggle tipo en header del drawer ── */
+.ord-tipo-toggle {
+  display: flex;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.2rem;
+}
+.ord-tipo-btn {
+  padding: 0.3rem 0.85rem;
+  border-radius: 4px;
+  border: none;
+  background: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-3);
+  transition: all var(--transition);
+}
+.ord-tipo-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Prioridad botones ── */
+.ord-pri-btns {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.ord-pri-btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border-2);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.ord-pri-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.ord-pri-btn.active {
+  font-weight: 700;
+}
+
 /* ── Detalles form ── */
 .ord-empty-det {
   font-size: 0.82rem;
@@ -464,20 +506,20 @@
   background: var(--accent);
   color: #fff;
 }
+
 .ord-det-form-row {
   display: flex;
   gap: 0.4rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
   flex-wrap: nowrap;
 }
 .ord-det-tipo {
   width: 100px;
   flex-shrink: 0;
 }
-.ord-det-item {
-  flex: 1;
-  min-width: 0;
+.ord-det-item-sel {
+  width: 100%;
 }
 .ord-det-cant {
   width: 65px;
@@ -487,8 +529,9 @@
   width: 90px;
   flex-shrink: 0;
 }
+
 .ord-det-tipo,
-.ord-det-item,
+.ord-det-item-sel,
 .ord-det-cant,
 .ord-det-precio {
   font-family: var(--font-body);
@@ -499,13 +542,59 @@
   outline: none;
   background: var(--surface);
   color: var(--text-1);
-  transition: border-color var(--transition);
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+  box-sizing: border-box;
 }
 .ord-det-tipo:focus,
-.ord-det-item:focus,
+.ord-det-item-sel:focus,
 .ord-det-cant:focus,
 .ord-det-precio:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.ord-det-cant:disabled {
+  background: var(--surface-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ── Precio input con prefijo $ ── */
+.prd-precio-input {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+.prd-precio-input:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+.prd-precio-input span {
+  padding: 0.55rem 0.65rem;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-right: 1px solid var(--border-2);
+  flex-shrink: 0;
+}
+.prd-precio-input input {
+  border: none !important;
+  outline: none;
+  box-shadow: none !important;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.9rem;
+  background: var(--surface);
+  color: var(--text-1);
+  width: 100%;
+  font-family: var(--font-body);
 }
 
 /* ── Modal estados grid ── */
@@ -515,7 +604,7 @@
   gap: 0.5rem;
 }
 .ord-estado-option {
-  padding: 0.6rem;
+  padding: 0.65rem;
   border-radius: var(--radius-sm);
   border: 2px solid transparent;
   cursor: pointer;
@@ -524,76 +613,232 @@
   text-align: center;
   transition: all var(--transition);
 }
+.ord-estado-option:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
 .ord-estado-option.selected {
   border-width: 2px;
 }
 
-/* ── Responsive ── */
-@media (max-width: 768px) {
-  .ord-page {
-    flex-direction: column;
-    padding: 1.25rem 1rem;
-  }
-  .ord-detalle {
-    width: 100%;
-    position: static;
-  }
-  .ord-det-form-row {
-    flex-wrap: wrap;
-  }
+/* ══════════════════════════════════════════
+   VALIDACIONES — errores por campo
+══════════════════════════════════════════ */
+.field-error {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--danger);
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error .ord-textarea {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-light);
+}
+.input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px var(--danger-light) !important;
 }
 
-.ord-det-cant:disabled {
-  background: var(--surface-2);
-  color: var(--text-3);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* ══ MODAL ASIGNAR MECÁNICO ══ */
-.mam-card {
-  width: min(860px, 95vw);
-  max-height: 90vh;
+/* ══════════════════════════════════════════
+   DRAWER LATERAL — MODAL CREAR / EDITAR
+══════════════════════════════════════════ */
+.ord-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 21, 35, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
   display: flex;
-  flex-direction: column;
+  justify-content: flex-end;
+  animation: ordFadeIn 0.25s ease;
 }
 
-.mam-body {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 0;
-  flex: 1;
-  overflow: hidden;
-  border-top: 1px solid var(--border);
-}
-
-/* ── Lista mecánicos (izquierda) ── */
-.mam-lista {
-  padding: 1rem;
-  border-right: 1px solid var(--border);
+.ord-modal-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 520px;
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  background: var(--surface-2);
+  animation: ordSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.mam-lista-titulo {
-  font-size: 0.72rem;
+/* ── Encabezado del drawer ── */
+.ord-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+
+.ord-modal-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.ord-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ord-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ord-modal-close:hover {
+  color: var(--danger);
+}
+
+/* ── Cuerpo del drawer ── */
+.ord-modal-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* ── Footer dentro del drawer ── */
+.ord-modal-footer {
+  margin-top: 2rem;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* ── Animaciones ── */
+@keyframes ordFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ordSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ══════════════════════════════════════════
+   DRAWER — ASIGNAR MECÁNICO
+══════════════════════════════════════════ */
+.mam-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 21, 35, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: ordFadeIn 0.25s ease;
+}
+
+.mam-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 460px;
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  animation: ordSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Header */
+.mam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.mam-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+.mam-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Body */
+.mam-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+}
+
+.mam-section-label {
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text-3);
-  margin: 0 0 0.35rem;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Lista mecánicos — scroll horizontal en el drawer */
+.mam-lista-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
 }
 
 .mam-mec-card {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1.5px solid transparent;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
   background: var(--surface);
   cursor: pointer;
   text-align: left;
@@ -601,36 +846,32 @@
   transition: all var(--transition);
 }
 .mam-mec-card:hover {
-  border-color: var(--border-2);
+  border-color: var(--accent);
+  background: var(--surface-2);
 }
 .mam-mec-card.selected {
   border-color: var(--accent);
   background: var(--accent-light);
 }
-
 .mam-avatar {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
   flex-shrink: 0;
 }
-.mam-mec-card.selected .mam-avatar {
-  background: var(--accent);
-}
-
 .mam-mec-info {
   flex: 1;
   min-width: 0;
 }
 .mam-mec-nombre {
-  font-size: 0.83rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: var(--text-1);
   white-space: nowrap;
@@ -638,41 +879,50 @@
   text-overflow: ellipsis;
 }
 .mam-mec-esp {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-3);
+  margin-top: 1px;
+}
+.mam-mec-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+  flex-shrink: 0;
 }
 .mam-mec-activas {
   font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-3);
-  white-space: nowrap;
-  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+}
+.mam-check {
+  color: var(--accent);
+  font-size: 0.85rem;
 }
 
-/* ── Calendario derecha ── */
-.mam-cal {
-  padding: 1rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.mam-cal-empty {
-  flex: 1;
+/* Agenda vacía */
+.mam-cal-empty-drawer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  padding: 1.5rem;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--border-2);
+  border-radius: var(--radius-md);
   color: var(--text-3);
 }
-.mam-cal-empty i {
-  font-size: 2.5rem;
-  opacity: 0.3;
+.mam-cal-empty-drawer i {
+  font-size: 1.8rem;
+  opacity: 0.35;
 }
-.mam-cal-empty p {
-  font-size: 0.85rem;
+.mam-cal-empty-drawer p {
+  font-size: 0.83rem;
+  margin: 0;
   text-align: center;
 }
 
@@ -682,51 +932,51 @@
   gap: 0.5rem;
   color: var(--text-3);
   font-size: 0.85rem;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
 }
 
+/* Grid de agenda */
 .mam-cal-grid {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
 }
-
 .mam-slot {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 68px 1fr;
   align-items: center;
-  gap: 0.5rem;
-  min-height: 32px;
+  gap: 0.65rem;
+  min-height: 30px;
 }
-
 .mam-slot-hora {
   font-size: 0.7rem;
   color: var(--text-3);
   font-weight: 500;
   font-family: var(--font-mono);
   text-align: right;
-  padding-right: 0.5rem;
-  border-right: 2px solid var(--border);
+  padding-right: 0.65rem;
+  border-right: 2px solid var(--border-2);
   align-self: stretch;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-
 .mam-slot-contenido {
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 2px 0;
 }
-
 .mam-slot-libre {
-  font-size: 0.72rem;
+  font-size: 0.71rem;
   color: var(--text-3);
-  opacity: 0.5;
-  padding: 2px 6px;
+  opacity: 0.45;
+  padding: 1px 6px;
 }
-
 .mam-evento {
   font-size: 0.72rem;
   font-weight: 600;
@@ -742,14 +992,265 @@
   color: #6d28d9;
 }
 
+/* ══════════════════════════════════════════
+   DRAWER — CAMBIAR ESTADO
+══════════════════════════════════════════ */
+.est-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 21, 35, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: ordFadeIn 0.25s ease;
+}
+
+.est-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 380px;
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  animation: ordSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.est-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.est-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+.est-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin: 0;
+}
+.est-id {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.est-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Estado actual */
+.est-actual {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.est-actual-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.est-actual-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Flecha */
+.est-arrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
+}
+.est-arrow i {
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+/* Opciones de estado */
+.est-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+}
+.est-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+  width: 100%;
+  transition: all var(--transition);
+}
+.est-opcion:hover {
+  opacity: 0.85;
+  transform: translateX(2px);
+}
+.est-opcion.selected {
+  border-width: 2px;
+}
+.est-opcion i {
+  font-size: 0.95rem;
+}
+
 /* ── Responsive ── */
-@media (max-width: 640px) {
-  .mam-body {
+@media (max-width: 768px) {
+  .ord-page {
+    flex-direction: column;
+    padding: 1.25rem 1rem;
+  }
+  .ord-detalle {
+    width: 100%;
+    position: static;
+  }
+  .ord-det-form-row {
+    flex-wrap: wrap;
+  }
+  .ord-modal-lateral {
+    max-width: 100%;
+  }
+  .mam-lateral {
+    max-width: 100%;
+  }
+  .est-lateral {
+    max-width: 100%;
+  }
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem; /* Este es el margen que separa las columnas */
+  align-items: start;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-1);
+  background: var(--surface);
+  outline: none;
+  transition: all var(--transition);
+  box-sizing: border-box; /* Asegura que el padding no rompa la cuadrícula */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: var(--surface-2);
+  color: var(--text-3);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Reducción a 1 columna en pantallas móviles */
+@media (max-width: 600px) {
+  .form-grid-2 {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  .mam-lista {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    max-height: 180px;
-  }
+}
+/* ══════════════════════════════════════════════════════
+   OVERRIDES: correcciones de conflicto con dashboard layout
+   (.content padding duplicado, overflow:hidden en .ord-main,
+    margin-left:220px del sidebar)
+══════════════════════════════════════════════════════ */
+
+/*
+  1) El .content del dashboard tiene padding:1.5rem que se suma
+     al padding interno del ord-page. Lo cancelamos con márgenes
+     negativos para que el área de trabajo use todo el espacio.
+*/
+.content .ord-page {
+  margin: -1.5rem;
+  padding: 2rem 2.25rem;
+  min-height: calc(100vh - 56px); /* 56px = altura aprox del topbar */
+}
+
+/*
+  2) CRÍTICO: overflow:hidden en .ord-main rompe position:sticky
+     del panel detalle. Lo reemplazamos por clip-path: none y
+     usamos overflow:clip solo en el eje x para que la tabla
+     haga scroll sin afectar al sticky.
+*/
+.ord-main {
+  overflow: visible !important;    /* restaura sticky */
+  overflow-x: clip !important;     /* aun así evita scroll horizontal */
+}
+
+/*
+  3) El panel detalle necesita saber la altura real disponible
+     descontando el topbar (~56px) para no desbordarse.
+*/
+.ord-detalle {
+  top: calc(2rem + 56px);          /* debajo del topbar sticky */
+  max-height: calc(100vh - 56px - 4rem);
+}
+
+/*
+  4) Aseguramos que el .ord-page sea un flex container correcto
+     aunque esté dentro del wrapper .content del dashboard.
+*/
+.content .ord-page {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
 }

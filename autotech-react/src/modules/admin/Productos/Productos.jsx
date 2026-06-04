@@ -49,6 +49,7 @@ export default function Productos() {
   const [loading,      setLoading]      = useState(true);
   const [saving,       setSaving]       = useState(false);
   const [error,        setError]        = useState('');
+  const [fieldErrors,  setFieldErrors]  = useState({});
   const [errorStock,   setErrorStock]   = useState('');
   const [busqueda,     setBusqueda]     = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
@@ -94,6 +95,7 @@ export default function Productos() {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setError('');
+    setFieldErrors({});
     setShowModal(true);
   };
 
@@ -108,21 +110,60 @@ export default function Productos() {
     });
     setEditingId(p.id);
     setError('');
+    setFieldErrors({});
     setShowModal(true);
   };
 
-  const cerrarModal = () => { setShowModal(false); setError(''); };
+  const cerrarModal = () => {
+    setShowModal(false);
+    setError('');
+    setFieldErrors({});
+  };
+
+  /* ── Validación ── */
+  const validar = () => {
+    const errs = {};
+    const soloNums = /^\d+$/;
+
+    if (!form.nombre.trim())
+      errs.nombre = 'El nombre es requerido.';
+    else if (form.nombre.trim().length < 3)
+      errs.nombre = 'El nombre debe tener al menos 3 caracteres.';
+
+    if (form.precio === '' || form.precio === null)
+      errs.precio = 'El precio es requerido.';
+    else if (isNaN(Number(form.precio)) || Number(form.precio) < 0)
+      errs.precio = 'El precio debe ser un número mayor o igual a 0.';
+
+    if (!editingId) {
+      if (form.stock === '' || form.stock === null)
+        errs.stock = 'El stock inicial es requerido.';
+      else if (isNaN(Number(form.stock)) || Number(form.stock) < 0)
+        errs.stock = 'El stock debe ser 0 o mayor.';
+    }
+
+    if (form.stockMinimo === '' || form.stockMinimo === null)
+      errs.stockMinimo = 'El stock mínimo es requerido.';
+    else if (isNaN(Number(form.stockMinimo)) || Number(form.stockMinimo) < 1)
+      errs.stockMinimo = 'El stock mínimo debe ser al menos 1.';
+
+    if (!form.categoria)
+      errs.categoria = 'La categoría es requerida.';
+
+    return errs;
+  };
 
   const guardar = async () => {
-    if (!form.nombre.trim()) {
-      setError('El nombre es requerido.'); return;
-    }
-    if (!form.precio || Number(form.precio) < 0) {
-      setError('El precio debe ser un número válido.'); return;
+    const errs = validar();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError('Corrige los errores para guardar el producto.');
+      return;
     }
     try {
       setSaving(true);
       setError('');
+      setFieldErrors({});
       const payload = {
         nombre:      form.nombre.trim(),
         descripcion: form.descripcion.trim(),
@@ -163,22 +204,17 @@ export default function Productos() {
       const delta = stockForm.tipo === 'entrada'
         ? Number(stockForm.cantidad)
         : -Number(stockForm.cantidad);
-
       const res = await productoService.actualizarStock(stockTarget.id, {
-        cantidad: delta,
-        motivo: stockForm.motivo,
+        cantidad: delta, motivo: stockForm.motivo,
       });
       setShowStock(false);
-      // Actualiza en lista sin recargar todo
       setProductos(prev => prev.map(p =>
         p.id === stockTarget.id
           ? { ...p, stock: res.stock, stockEstado: res.stockEstado }
           : p
       ));
       if (detalle?.id === stockTarget.id)
-        setDetalle(prev => ({
-          ...prev, stock: res.stock, stockEstado: res.stockEstado
-        }));
+        setDetalle(prev => ({ ...prev, stock: res.stock, stockEstado: res.stockEstado }));
     } catch (err) {
       setErrorStock(err.data || 'Error al actualizar stock.');
     }
@@ -191,13 +227,16 @@ export default function Productos() {
       cargar();
       if (detalle?.id === p.id)
         setDetalle(prev => ({
-          ...prev,
-          estado: prev.estado === 'activo' ? 'inactivo' : 'activo'
+          ...prev, estado: prev.estado === 'activo' ? 'inactivo' : 'activo'
         }));
     } catch { alert('No se pudo cambiar el estado.'); }
   };
 
-  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  const f = (key, val) => {
+    setForm(p => ({ ...p, [key]: val }));
+    setFieldErrors(p => ({ ...p, [key]: '' }));
+  };
+
   const catColor = (cat) => CAT_COLOR[cat] || CAT_COLOR['General'];
 
   const categoriasUsadas = ['todas',
@@ -216,10 +255,10 @@ export default function Productos() {
   });
 
   const resumen = {
-    total:   productos.length,
-    activos: productos.filter(p => p.estado === 'activo').length,
-    bajos:   productos.filter(p => p.stockEstado === 'bajo').length,
-    agotados:productos.filter(p => p.stockEstado === 'agotado').length,
+    total:    productos.length,
+    activos:  productos.filter(p => p.estado === 'activo').length,
+    bajos:    productos.filter(p => p.stockEstado === 'bajo').length,
+    agotados: productos.filter(p => p.stockEstado === 'agotado').length,
   };
 
   /* ════════════════════════════════════
@@ -232,12 +271,8 @@ export default function Productos() {
         {/* HEADER */}
         <div className="page-header">
           <div>
-            <h1 className="page-title">
-              <i className="bi bi-shop" /> Productos
-            </h1>
-            <p className="page-subtitle">
-              Gestiona el inventario de productos del taller
-            </p>
+            <h1 className="page-title"><i className="bi bi-shop" /> Productos</h1>
+            <p className="page-subtitle">Gestiona el inventario de productos del taller</p>
           </div>
           <button className="btn-primary" onClick={abrirCrear}>
             <i className="bi bi-plus-lg" /> Nuevo Producto
@@ -254,17 +289,13 @@ export default function Productos() {
             <span className="prd-res-num">{resumen.activos}</span>
             <span className="prd-res-label">Activos</span>
           </div>
-          <div className="prd-res-card bajos"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setFiltroStock(
-              filtroStock === 'bajo' ? 'todos' : 'bajo')}>
+          <div className="prd-res-card bajos" style={{ cursor: 'pointer' }}
+            onClick={() => setFiltroStock(filtroStock === 'bajo' ? 'todos' : 'bajo')}>
             <span className="prd-res-num">{resumen.bajos}</span>
             <span className="prd-res-label">Stock bajo</span>
           </div>
-          <div className="prd-res-card agotados"
-            style={{ cursor: 'pointer' }}
-            onClick={() => setFiltroStock(
-              filtroStock === 'agotado' ? 'todos' : 'agotado')}>
+          <div className="prd-res-card agotados" style={{ cursor: 'pointer' }}
+            onClick={() => setFiltroStock(filtroStock === 'agotado' ? 'todos' : 'agotado')}>
             <span className="prd-res-num">{resumen.agotados}</span>
             <span className="prd-res-label">Agotados</span>
           </div>
@@ -305,9 +336,7 @@ export default function Productos() {
             <button key={cat}
               className={`prd-cat-btn ${filtroCat === cat ? 'active' : ''}`}
               style={filtroCat === cat && cat !== 'todas'
-                ? { background: catColor(cat).bg,
-                    color: catColor(cat).color,
-                    borderColor: catColor(cat).color }
+                ? { background: catColor(cat).bg, color: catColor(cat).color, borderColor: catColor(cat).color }
                 : {}}
               onClick={() => setFiltroCat(cat)}>
               {cat === 'todas' ? 'Todas' : cat}
@@ -332,13 +361,8 @@ export default function Productos() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Producto</th>
-                  <th>Categoría</th>
-                  <th>Precio</th>
-                  <th>Stock</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>#</th><th>Producto</th><th>Categoría</th>
+                  <th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -361,36 +385,29 @@ export default function Productos() {
                     </td>
                     <td>
                       <span className="prd-badge-cat"
-                        style={{ background: catColor(p.categoria).bg,
-                                 color: catColor(p.categoria).color }}>
+                        style={{ background: catColor(p.categoria).bg, color: catColor(p.categoria).color }}>
                         {p.categoria}
                       </span>
                     </td>
-                    <td className="prd-precio">
-                      ${Number(p.precio).toLocaleString('es-CO')}
-                    </td>
+                    <td className="prd-precio">${Number(p.precio).toLocaleString('es-CO')}</td>
                     <td>
                       <div className="prd-stock-cell">
                         <span className="prd-stock-num">{p.stock}</span>
                         <span className="prd-badge-stock"
-                          style={{ background: STOCK_CONFIG[p.stockEstado]?.bg,
-                                   color: STOCK_CONFIG[p.stockEstado]?.color }}>
+                          style={{ background: STOCK_CONFIG[p.stockEstado]?.bg, color: STOCK_CONFIG[p.stockEstado]?.color }}>
                           {STOCK_CONFIG[p.stockEstado]?.label}
                         </span>
                       </div>
                     </td>
                     <td onClick={e => e.stopPropagation()}>
-                      <button
-                        className={`prd-estado-btn ${p.estado}`}
+                      <button className={`prd-estado-btn ${p.estado}`}
                         onClick={e => cambiarEstado(p, e)}>
-                        <i className={`bi ${p.estado === 'activo'
-                          ? 'bi-toggle-on' : 'bi-toggle-off'}`} />
+                        <i className={`bi ${p.estado === 'activo' ? 'bi-toggle-on' : 'bi-toggle-off'}`} />
                         {p.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </button>
                     </td>
                     <td className="actions-cell" onClick={e => e.stopPropagation()}>
-                      <button className="btn-icon edit"
-                        onClick={() => abrirEditar(p)} title="Editar">
+                      <button className="btn-icon edit" onClick={() => abrirEditar(p)} title="Editar">
                         <i className="bi bi-pencil" />
                       </button>
                       <button className="btn-icon prd-stock-btn"
@@ -406,30 +423,25 @@ export default function Productos() {
         )}
       </div>
 
-      {/* ── PANEL LATERAL ── */}
+      {/* ── PANEL LATERAL DETALLE ── */}
       {detalle && (
         <aside className="prd-detalle">
           <div className="prd-detalle-header">
             <div className="prd-detalle-icon"
-              style={{ background: catColor(detalle.categoria).bg,
-                       color: catColor(detalle.categoria).color }}>
+              style={{ background: catColor(detalle.categoria).bg, color: catColor(detalle.categoria).color }}>
               <i className="bi bi-box-seam" />
             </div>
             <button className="modal-close" onClick={() => setDetalle(null)}>
               <i className="bi bi-x-lg" />
             </button>
           </div>
-
           <div className="prd-detalle-info">
             <h3 className="prd-detalle-nombre">{detalle.nombre}</h3>
             <span className="prd-badge-cat"
-              style={{ background: catColor(detalle.categoria).bg,
-                       color: catColor(detalle.categoria).color }}>
+              style={{ background: catColor(detalle.categoria).bg, color: catColor(detalle.categoria).color }}>
               {detalle.categoria}
             </span>
           </div>
-
-          {/* Tabs */}
           <div className="prd-tabs">
             {TABS.map(tab => (
               <button key={tab}
@@ -441,33 +453,22 @@ export default function Productos() {
               </button>
             ))}
           </div>
-
           <div className="prd-tab-content">
-
-            {/* TAB INFO */}
             {tabDetalle === 'detalle' && (
               <div className="prd-tab-body">
                 <div className="prd-precio-card">
                   <span className="prd-precio-label">Precio unitario</span>
-                  <span className="prd-precio-val">
-                    ${Number(detalle.precio).toLocaleString('es-CO')}
-                  </span>
+                  <span className="prd-precio-val">${Number(detalle.precio).toLocaleString('es-CO')}</span>
                 </div>
                 <p className="prd-section-title">Descripción</p>
-                <p className="prd-desc-full">
-                  {detalle.descripcion || 'Sin descripción.'}
-                </p>
-                <p className="prd-section-title" style={{ marginTop: '1rem' }}>
-                  Uso en órdenes
-                </p>
+                <p className="prd-desc-full">{detalle.descripcion || 'Sin descripción.'}</p>
+                <p className="prd-section-title" style={{ marginTop: '1rem' }}>Uso en órdenes</p>
                 <div className="prd-stat">
                   <span className="prd-stat-num">{detalle.vecesUsado}</span>
                   <span className="prd-stat-label">veces utilizado</span>
                 </div>
               </div>
             )}
-
-            {/* TAB STOCK */}
             {tabDetalle === 'stock' && (
               <div className="prd-tab-body">
                 <div className="prd-stock-panel">
@@ -486,23 +487,18 @@ export default function Productos() {
                     <div className="prd-stock-info-item">
                       <span className="prd-info-label">Estado</span>
                       <span className="prd-badge-stock"
-                        style={{ background: STOCK_CONFIG[detalle.stockEstado]?.bg,
-                                 color: STOCK_CONFIG[detalle.stockEstado]?.color }}>
+                        style={{ background: STOCK_CONFIG[detalle.stockEstado]?.bg, color: STOCK_CONFIG[detalle.stockEstado]?.color }}>
                         {STOCK_CONFIG[detalle.stockEstado]?.label}
                       </span>
                     </div>
                   </div>
-                  <button className="btn-primary prd-w-full"
-                    style={{ marginTop: '.75rem' }}
+                  <button className="btn-primary prd-w-full" style={{ marginTop: '.75rem' }}
                     onClick={e => abrirStock(detalle, e)}>
-                    <i className="bi bi-box-arrow-in-down me-1" />
-                    Actualizar stock
+                    <i className="bi bi-box-arrow-in-down me-1" />Actualizar stock
                   </button>
                 </div>
               </div>
             )}
-
-            {/* TAB HISTORIAL */}
             {tabDetalle === 'historial' && (
               <div className="prd-historial">
                 {loadingHist ? (
@@ -517,16 +513,10 @@ export default function Productos() {
                   <div key={i} className="prd-hist-card">
                     <div className="prd-hist-top">
                       <span className="prd-hist-orden">Orden #{h.idOrden}</span>
-                      <span className={`prd-hist-estado ${h.estado}`}>
-                        {h.estado.replace('_', ' ')}
-                      </span>
+                      <span className={`prd-hist-estado ${h.estado}`}>{h.estado.replace('_', ' ')}</span>
                     </div>
-                    <div className="prd-hist-row">
-                      <i className="bi bi-car-front" />{h.vehiculo}
-                    </div>
-                    <div className="prd-hist-row">
-                      <i className="bi bi-person" />{h.cliente}
-                    </div>
+                    <div className="prd-hist-row"><i className="bi bi-car-front" />{h.vehiculo}</div>
+                    <div className="prd-hist-row"><i className="bi bi-person" />{h.cliente}</div>
                     <div className="prd-hist-footer">
                       <span>{h.cantidad} und × ${Number(h.precio).toLocaleString('es-CO')}</span>
                       <span className="prd-hist-fecha">{h.fecha}</span>
@@ -536,186 +526,201 @@ export default function Productos() {
               </div>
             )}
           </div>
-
           <div className="prd-detalle-footer">
-            <button className="btn-secondary prd-w-full"
-              onClick={() => abrirEditar(detalle)}>
+            <button className="btn-secondary prd-w-full" onClick={() => abrirEditar(detalle)}>
               <i className="bi bi-pencil me-1" /> Editar producto
             </button>
-            <button
-              className={`prd-w-full prd-toggle-btn ${detalle.estado}`}
+            <button className={`prd-w-full prd-toggle-btn ${detalle.estado}`}
               onClick={e => cambiarEstado(detalle, e)}>
-              <i className={`bi ${detalle.estado === 'activo'
-                ? 'bi-toggle-off' : 'bi-toggle-on'} me-1`} />
+              <i className={`bi ${detalle.estado === 'activo' ? 'bi-toggle-off' : 'bi-toggle-on'} me-1`} />
               {detalle.estado === 'activo' ? 'Desactivar' : 'Activar'}
             </button>
           </div>
         </aside>
       )}
 
-      {/* ══ MODAL PRODUCTO ══ */}
+      {/* ══ DRAWER LATERAL — NUEVO / EDITAR PRODUCTO ══ */}
       {showModal && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-card modal-md" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>
-                <i className={`bi ${editingId
-                  ? 'bi-pencil' : 'bi-plus-circle'} me-2`} />
+        <div className="prd-modal-overlay" onClick={cerrarModal}>
+          <div className="prd-modal-lateral" onClick={e => e.stopPropagation()}>
+
+            <div className="prd-modal-header">
+              <h2 className="prd-modal-title">
+                <i className={`bi ${editingId ? 'bi-pencil' : 'bi-plus-circle'} me-2`} />
                 {editingId ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
-              <button className="modal-close" onClick={cerrarModal}>
+              <button className="prd-modal-close" onClick={cerrarModal}>
                 <i className="bi bi-x-lg" />
               </button>
             </div>
 
-            <div className="modal-body">
+            <div className="prd-modal-body">
               {error && (
-                <div className="alert-error">
+                <div className="alert-error" style={{ marginBottom: '1.25rem' }}>
                   <i className="bi bi-exclamation-triangle me-1" />{error}
                 </div>
               )}
 
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label>Nombre *</label>
-                <input type="text" placeholder="Ej: Filtro de aceite"
-                  value={form.nombre}
-                  onChange={e => f('nombre', e.target.value)} />
+              {/* Información del producto */}
+              <div className="prd-form-section">
+                <div className="prd-form-label">
+                  <i className="bi bi-box-seam" /> Información del producto
+                </div>
+
+                <div className="form-group">
+                  <label>Nombre *</label>
+                  <input type="text" placeholder="Ej: Filtro de aceite"
+                    value={form.nombre}
+                    onChange={e => f('nombre', e.target.value)}
+                    className={fieldErrors.nombre ? 'input-error' : ''}
+                  />
+                  {fieldErrors.nombre && <span className="field-error-msg">{fieldErrors.nombre}</span>}
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label>Descripción</label>
+                  <textarea rows={2}
+                    placeholder="Describe brevemente el producto..."
+                    value={form.descripcion}
+                    onChange={e => f('descripcion', e.target.value)}
+                    className="prd-textarea"
+                  />
+                </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label>Descripción</label>
-                <textarea rows={2}
-                  placeholder="Describe brevemente el producto..."
-                  value={form.descripcion}
-                  onChange={e => f('descripcion', e.target.value)}
-                  className="prd-textarea" />
-              </div>
-
-              <div className="form-grid-2" style={{ marginBottom: '1rem' }}>
-                <div className="form-group">
-                  <label>Precio *</label>
-                  <div className="prd-precio-input">
-                    <span>$</span>
-                    <input type="number" min="0" placeholder="0"
-                      value={form.precio}
-                      onChange={e => f('precio', e.target.value)} />
-                  </div>
+              {/* Precio y categoría */}
+              <div className="prd-form-section">
+                <div className="prd-form-label">
+                  <i className="bi bi-tag" /> Precio y categoría
                 </div>
-                <div className="form-group">
-                  <label>Categoría</label>
-                  <select value={form.categoria}
-                    onChange={e => f('categoria', e.target.value)}>
-                    {CATEGORIAS.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                {!editingId && (
+                <div className="form-grid-2">
                   <div className="form-group">
-                    <label>Stock inicial</label>
-                    <input type="number" min="0"
-                      value={form.stock}
-                      onChange={e => f('stock', e.target.value)} />
+                    <label>Precio *</label>
+                    <div className={`prd-precio-input ${fieldErrors.precio ? 'input-error-wrap' : ''}`}>
+                      <span>$</span>
+                      <input type="number" min="0" placeholder="0"
+                        value={form.precio}
+                        onChange={e => f('precio', e.target.value)}
+                      />
+                    </div>
+                    {fieldErrors.precio && <span className="field-error-msg">{fieldErrors.precio}</span>}
                   </div>
-                )}
-                <div className="form-group">
-                  <label>Stock mínimo</label>
-                  <input type="number" min="1"
-                    value={form.stockMinimo}
-                    onChange={e => f('stockMinimo', e.target.value)} />
+                  <div className="form-group">
+                    <label>Categoría *</label>
+                    <select value={form.categoria}
+                      onChange={e => f('categoria', e.target.value)}
+                      className={fieldErrors.categoria ? 'input-error' : ''}>
+                      {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    {fieldErrors.categoria && <span className="field-error-msg">{fieldErrors.categoria}</span>}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={cerrarModal}
-                disabled={saving}>Cancelar</button>
-              <button className="btn-primary" onClick={guardar}
-                disabled={saving}>
-                {saving
-                  ? <><i className="bi bi-arrow-repeat spin me-1" />Guardando...</>
-                  : <><i className={`bi ${editingId
-                      ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} />
-                      {editingId ? 'Guardar cambios' : 'Crear producto'}</>
-                }
-              </button>
+              {/* Stock */}
+              <div className="prd-form-section">
+                <div className="prd-form-label">
+                  <i className="bi bi-boxes" /> Control de stock
+                </div>
+                <div className="form-grid-2">
+                  {!editingId && (
+                    <div className="form-group">
+                      <label>Stock inicial *</label>
+                      <input type="number" min="0"
+                        value={form.stock}
+                        onChange={e => f('stock', e.target.value)}
+                        className={fieldErrors.stock ? 'input-error' : ''}
+                      />
+                      {fieldErrors.stock && <span className="field-error-msg">{fieldErrors.stock}</span>}
+                    </div>
+                  )}
+                  <div className="form-group">
+                    <label>Stock mínimo *</label>
+                    <input type="number" min="1"
+                      value={form.stockMinimo}
+                      onChange={e => f('stockMinimo', e.target.value)}
+                      className={fieldErrors.stockMinimo ? 'input-error' : ''}
+                    />
+                    {fieldErrors.stockMinimo && <span className="field-error-msg">{fieldErrors.stockMinimo}</span>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer del drawer */}
+              <div style={{
+                marginTop: '2rem', padding: '1rem 0 0',
+                borderTop: '1px solid var(--border)',
+                display: 'flex', gap: '0.75rem', justifyContent: 'flex-end',
+              }}>
+                <button className="btn-secondary" onClick={cerrarModal} disabled={saving}>Cancelar</button>
+                <button className="btn-primary" onClick={guardar} disabled={saving}>
+                  {saving
+                    ? <><i className="bi bi-arrow-repeat spin me-1" />Guardando...</>
+                    : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} />
+                        {editingId ? 'Guardar cambios' : 'Crear producto'}</>
+                  }
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ══ MODAL STOCK ══ */}
+      {/* ══ MODAL STOCK (centrado, sobre el drawer) ══ */}
       {showStock && (
-        <div className="modal-overlay" onClick={() => setShowStock(false)}>
-          <div className="modal-card modal-sm" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>
-                <i className="bi bi-boxes me-2" />
-                Actualizar Stock
+        <div className="prd-stock-overlay" onClick={() => setShowStock(false)}>
+          <div className="prd-stock-card" onClick={e => e.stopPropagation()}>
+            <div className="prd-modal-header">
+              <h2 className="prd-modal-title">
+                <i className="bi bi-boxes me-2" />Actualizar Stock
               </h2>
-              <button className="modal-close" onClick={() => setShowStock(false)}>
+              <button className="prd-modal-close" onClick={() => setShowStock(false)}>
                 <i className="bi bi-x-lg" />
               </button>
             </div>
-            <div className="modal-body">
+            <div className="prd-modal-body">
               {errorStock && (
-                <div className="alert-error">
+                <div className="alert-error" style={{ marginBottom: '1rem' }}>
                   <i className="bi bi-exclamation-triangle me-1" />{errorStock}
                 </div>
               )}
-
               <div className="prd-stock-actual">
                 <span>Stock actual de <strong>{stockTarget?.nombre}</strong></span>
                 <span className="prd-stock-act-num">{stockTarget?.stock} und</span>
               </div>
-
-              {/* Tipo entrada/salida */}
               <div className="prd-tipo-row" style={{ marginBottom: '1rem' }}>
                 {['entrada', 'salida'].map(tipo => (
                   <button key={tipo} type="button"
                     className={`prd-tipo-btn ${stockForm.tipo === tipo ? 'active' : ''}`}
                     style={stockForm.tipo === tipo ? {
-                      background: tipo === 'entrada' ? '#dcfce7' : '#fee2e2',
-                      color:      tipo === 'entrada' ? '#15803d' : '#b91c1c',
-                      borderColor:tipo === 'entrada' ? '#86efac' : '#fca5a5',
+                      background:  tipo === 'entrada' ? '#dcfce7' : '#fee2e2',
+                      color:       tipo === 'entrada' ? '#15803d' : '#b91c1c',
+                      borderColor: tipo === 'entrada' ? '#86efac' : '#fca5a5',
                     } : {}}
                     onClick={() => setStockForm(p => ({ ...p, tipo }))}>
-                    <i className={`bi ${tipo === 'entrada'
-                      ? 'bi-box-arrow-in-down' : 'bi-box-arrow-up'} me-1`} />
+                    <i className={`bi ${tipo === 'entrada' ? 'bi-box-arrow-in-down' : 'bi-box-arrow-up'} me-1`} />
                     {tipo === 'entrada' ? 'Entrada' : 'Salida'}
                   </button>
                 ))}
               </div>
-
               <div className="form-group" style={{ marginBottom: '.75rem' }}>
                 <label>Cantidad *</label>
                 <input type="number" min="1" placeholder="Ej: 10"
                   value={stockForm.cantidad}
-                  onChange={e => setStockForm(p => ({
-                    ...p, cantidad: e.target.value
-                  }))}
+                  onChange={e => setStockForm(p => ({ ...p, cantidad: e.target.value }))}
                   autoFocus />
               </div>
-
               <div className="form-group">
                 <label>Motivo (opcional)</label>
                 <input type="text"
-                  placeholder={stockForm.tipo === 'entrada'
-                    ? 'Ej: Compra a proveedor'
-                    : 'Ej: Utilizado en orden #123'}
+                  placeholder={stockForm.tipo === 'entrada' ? 'Ej: Compra a proveedor' : 'Ej: Utilizado en orden #123'}
                   value={stockForm.motivo}
-                  onChange={e => setStockForm(p => ({
-                    ...p, motivo: e.target.value
-                  }))} />
+                  onChange={e => setStockForm(p => ({ ...p, motivo: e.target.value }))} />
               </div>
-
-              {/* Preview */}
               {stockForm.cantidad && Number(stockForm.cantidad) > 0 && (
                 <div className="prd-stock-preview">
                   <span>Nuevo stock estimado:</span>
-                  <strong style={{
-                    color: stockForm.tipo === 'entrada' ? '#15803d' : '#b91c1c'
-                  }}>
+                  <strong style={{ color: stockForm.tipo === 'entrada' ? '#15803d' : '#b91c1c' }}>
                     {stockForm.tipo === 'entrada'
                       ? stockTarget?.stock + Number(stockForm.cantidad)
                       : stockTarget?.stock - Number(stockForm.cantidad)
@@ -723,13 +728,16 @@ export default function Productos() {
                   </strong>
                 </div>
               )}
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary"
-                onClick={() => setShowStock(false)}>Cancelar</button>
-              <button className="btn-primary" onClick={guardarStock}>
-                <i className="bi bi-check-lg me-1" /> Confirmar
-              </button>
+              <div style={{
+                marginTop: '1.5rem', padding: '1rem 0 0',
+                borderTop: '1px solid var(--border)',
+                display: 'flex', gap: '0.75rem', justifyContent: 'flex-end',
+              }}>
+                <button className="btn-secondary" onClick={() => setShowStock(false)}>Cancelar</button>
+                <button className="btn-primary" onClick={guardarStock}>
+                  <i className="bi bi-check-lg me-1" /> Confirmar
+                </button>
+              </div>
             </div>
           </div>
         </div>

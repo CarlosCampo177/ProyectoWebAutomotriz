@@ -7,6 +7,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1rem;
+  box-sizing: border-box;
 }
 
 /* ===== CARD ===== */
@@ -17,6 +18,7 @@
   width: 100%;
   max-width: 460px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
 }
 
 /* ===== LOGO ===== */
@@ -48,7 +50,7 @@
   margin-bottom: 1.8rem;
 }
 
-/* ===== ERROR ===== */
+/* ===== ERROR GLOBAL ===== */
 .rg-error {
   background: #fff0f2;
   border: 1px solid #f5c2c7;
@@ -57,6 +59,7 @@
   padding: 0.6rem 1rem;
   font-size: 0.88rem;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 /* ===== FILA DOS COLUMNAS ===== */
@@ -88,8 +91,12 @@
   padding: 0.65rem 1rem;
   font-size: 0.95rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   font-family: "Roboto", sans-serif;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .rg-field input:focus {
@@ -98,11 +105,14 @@
 }
 
 /* ===== CHECKBOX ===== */
+.rg-check-container {
+  margin-bottom: 1rem;
+}
+
 .rg-check {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 1rem;
 }
 
 .rg-check input[type="checkbox"] {
@@ -135,8 +145,14 @@
   transition: background-color 0.2s;
 }
 
-.rg-btn:hover {
+.rg-btn:hover:not(:disabled) {
   background-color: #b00320;
+}
+
+.rg-btn:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
 }
 
 /* ===== DIVIDER ===== */
@@ -180,6 +196,43 @@
   margin-top: 0.5rem;
 }
 
+/* ===================================================
+   ===== NUEVAS CLASES PARA ERRORES ESPECÍFICOS =====
+   =================================================== */
+
+.rg-req {
+  color: #d90429;
+  font-weight: bold;
+}
+
+.rg-opt {
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.rg-field-error {
+  color: #b00320;
+  font-size: 0.78rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
+  display: block;
+}
+
+.input-error {
+  border-color: #f5c2c7 !important;
+  background-color: #fff0f2 !important;
+}
+
+.input-error:focus {
+  border-color: #b00320 !important;
+  box-shadow: 0 0 0 3px rgba(176, 3, 32, 0.12) !important;
+}
+
+.block-error {
+  margin-top: 0.25rem;
+  margin-left: 24px; /* Alineación limpia debajo del texto del checkbox */
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
   .rg-card {
@@ -188,5 +241,6 @@
 
   .rg-row {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 }

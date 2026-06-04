@@ -224,7 +224,7 @@
   color: #fff;
 }
 
-/* ── Panel lateral ── */
+/* ── Panel lateral detalle ── */
 .prd-detalle {
   width: 280px;
   flex-shrink: 0;
@@ -510,7 +510,7 @@
   color: #fff;
 }
 
-/* ── Modal ── */
+/* ── Inputs del formulario ── */
 .prd-textarea {
   font-family: var(--font-body);
   font-size: 0.9rem;
@@ -529,6 +529,7 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
 }
+
 .prd-precio-input {
   display: flex;
   align-items: center;
@@ -540,6 +541,10 @@
 .prd-precio-input:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
+}
+.prd-precio-input.input-error-wrap {
+  border-color: var(--danger) !important;
+  background: #fff5f5;
 }
 .prd-precio-input span {
   padding: 0 0.75rem;
@@ -557,6 +562,23 @@
   font-family: var(--font-mono);
   font-size: 0.9rem;
   background: transparent;
+}
+
+/* ── Validación por campo ── */
+.input-error {
+  border-color: var(--danger) !important;
+  background: #fff5f5;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  outline: none;
+}
+.field-error-msg {
+  display: block;
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
 }
 
 /* ── Modal stock ── */
@@ -610,6 +632,134 @@
   color: var(--text-2);
 }
 
+/* ══════════════════════════════════════════
+   DRAWER LATERAL — MODAL PRODUCTO
+══════════════════════════════════════════ */
+.prd-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 42, 69, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: prdFadeIn 0.25s ease;
+}
+.prd-modal-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 460px;
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: prdSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Modal stock centrado (sobre el drawer) ── */
+.prd-stock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 42, 69, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: prdFadeIn 0.2s ease;
+}
+.prd-stock-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  overflow: hidden;
+  animation: prdScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.prd-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.prd-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+.prd-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.prd-modal-close:hover {
+  color: var(--danger);
+}
+.prd-modal-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* ── Secciones del formulario ── */
+.prd-form-section {
+  margin-bottom: 1.5rem;
+}
+.prd-form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ── Animaciones ── */
+@keyframes prdFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes prdSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes prdScaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .prd-page {
@@ -626,5 +776,11 @@
   }
   .prd-resumen {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .prd-modal-lateral {
+    max-width: 100%;
+  }
+  .prd-stock-card {
+    max-width: 95%;
   }
 }
