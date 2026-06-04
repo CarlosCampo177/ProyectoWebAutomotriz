@@ -5,44 +5,36 @@ import {
   cambiarEstadoOrden,
 } from "../../../services/mecanicoService";
 import {
-  servicioService,
   productoService,
 } from "../../../services/adminService";
 import { estadoConfig, prioridadConfig } from "../mecanicoHelpers.jsx";
 import "./SecOrdenes.css";
 
-/* ══════════════════════════════════════
-   Modal inline — Completar orden
-══════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   Modal inline - Completar orden
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 function ModalCompletar({ orden, onConfirm, onCancel }) {
   const [detalles,    setDetalles]    = useState([
-    { id: Date.now(), tipo: "servicio", idItem: "", cantidad: 1, precio: 0, descripcion: "" },
+    { id: Date.now(), idItem: "", cantidad: 1, precio: 0, descripcion: "" },
   ]);
   const [observacion, setObservacion] = useState("");
   const [enviando,    setEnviando]    = useState(false);
-  const [servicios,   setServicios]   = useState([]);
   const [productos,   setProductos]   = useState([]);
   const [loadingCat,  setLoadingCat]  = useState(true);
 
-  /* Cargar catálogos al montar */
+  /* Cargar catalogos al montar */
   useEffect(() => {
-    Promise.all([
-      servicioService.getActivos(),
-      productoService.getActivos(),
-    ])
-      .then(([svcs, prds]) => {
-        setServicios(svcs || []);
-        setProductos(prds || []);
-      })
+    productoService.getActivos()
+      .then((prds) => setProductos(prds || []))
       .catch(() => {})
       .finally(() => setLoadingCat(false));
   }, []);
 
-  /* ── Detalles ── */
+  /* â”€â”€ Detalles â”€â”€ */
   const addDetalle = () =>
     setDetalles(prev => [
       ...prev,
-      { id: Date.now(), tipo: "servicio", idItem: "", cantidad: 1, precio: 0, descripcion: "" },
+      { id: Date.now(), idItem: "", cantidad: 1, precio: 0, descripcion: "" },
     ]);
 
   const removeDetalle = (id) =>
@@ -52,20 +44,12 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
     setDetalles(prev => prev.map(d => d.id === id ? { ...d, [key]: val } : d));
 
   /* Cuando cambia el item seleccionado, auto-rellena el precio */
-  const handleItemChange = (id, idItem, tipo) => {
-    const lista = tipo === "servicio" ? servicios : productos;
-    const item  = lista.find(x => String(x.id) === String(idItem));
+  const handleItemChange = (id, idItem) => {
+    const item  = productos.find(x => String(x.id) === String(idItem));
     updateDetalle(id, "idItem", idItem);
     if (item) {
-      updateDetalle(id, "precio", tipo === "servicio" ? item.precioBase : item.precio);
+      updateDetalle(id, "precio", item.precio);
     }
-  };
-
-  /* Cuando cambia el tipo, resetea item y precio */
-  const handleTipoChange = (id, tipo) => {
-    updateDetalle(id, "tipo",   tipo);
-    updateDetalle(id, "idItem", "");
-    updateDetalle(id, "precio", 0);
   };
 
   /* Total calculado */
@@ -74,14 +58,13 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
     0,
   );
 
-  /* ── Submit ── */
+  /* â”€â”€ Submit â”€â”€ */
   const handleConfirm = async () => {
     setEnviando(true);
     const detallesLimpios = detalles
       .filter(d => d.idItem !== "")
       .map(d => ({
-        idServicio:  d.tipo === "servicio" ? Number(d.idItem) : null,
-        idProducto:  d.tipo === "producto" ? Number(d.idItem) : null,
+        idProducto:  Number(d.idItem),
         cantidad:    Number(d.cantidad),
         precio:      Number(d.precio),
         descripcion: d.descripcion || "",
@@ -97,7 +80,7 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
     >
       <div className="mc-modal">
 
-        {/* ── Header ── */}
+        {/* â”€â”€ Header â”€â”€ */}
         <div className="mc-header">
           <div className="mc-header-icon">
             <i className="bi bi-check-circle-fill" />
@@ -105,7 +88,7 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
           <div>
             <h3 className="mc-title">Completar orden</h3>
             <p className="mc-subtitle">
-              {orden.servicio}&nbsp;·&nbsp;#{orden.id}
+              {orden.servicio}&nbsp;-&nbsp;#{orden.id}
             </p>
           </div>
           <button className="mc-close" onClick={onCancel}>
@@ -115,12 +98,12 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
 
         <div className="mc-body">
 
-          {/* ── Servicios y productos ── */}
+          {/* â”€â”€ Servicios y productos â”€â”€ */}
           <section className="mc-section">
             <div className="mc-section-head">
               <span className="mc-section-title">
                 <i className="bi bi-list-check" />
-                Servicios y productos utilizados
+                Productos utilizados
               </span>
               <button
                 className="mc-add-btn"
@@ -133,13 +116,12 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
 
             {loadingCat ? (
               <p className="mc-hint">
-                <i className="bi bi-arrow-repeat mc-spin-icon" /> Cargando catálogo...
+                <i className="bi bi-arrow-repeat mc-spin-icon" /> Cargando catalogo...
               </p>
             ) : (
               <>
                 <div className="mc-det-header-row">
-                  <span style={{ width: 90 }}>Tipo</span>
-                  <span style={{ flex: 1 }}>Ítem</span>
+                  <span style={{ flex: 1 }}>Producto</span>
                   <span style={{ width: 60 }}>Cant.</span>
                   <span style={{ width: 90 }}>Precio</span>
                   <span style={{ width: 32 }} />
@@ -150,25 +132,16 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
                     <div key={d.id} className="mc-det-row">
                       <span className="mc-det-num">{idx + 1}</span>
 
-                      {/* Tipo */}
-                      <select
-                        className="mc-select mc-sel-tipo"
-                        value={d.tipo}
-                        onChange={e => handleTipoChange(d.id, e.target.value)}
-                      >
-                        <option value="servicio">Servicio</option>
-                        <option value="producto">Producto</option>
-                      </select>
 
-                      {/* Ítem */}
+                      {/* Item */}
                       <select
                         className="mc-select mc-sel-item"
                         value={d.idItem}
-                        onChange={e => handleItemChange(d.id, e.target.value, d.tipo)}
+                        onChange={e => handleItemChange(d.id, e.target.value)}
                       >
-                        <option value="">— Selecciona —</option>
-                        {(d.tipo === "servicio" ? servicios : productos).map(x => (
-                          <option key={x.id} value={x.id}>{x.nombre}</option>
+                        <option value="">Selecciona</option>
+                        {productos.map(x => (
+                          <option key={x.id} value={x.id}>{x.nombre} - stock {x.stock}</option>
                         ))}
                       </select>
 
@@ -178,7 +151,6 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
                         type="number"
                         min="1"
                         value={d.cantidad}
-                        disabled={d.tipo === "servicio"}
                         onChange={e => updateDetalle(d.id, "cantidad", e.target.value)}
                       />
 
@@ -217,24 +189,24 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
 
                 {detalles.every(d => !d.idItem) && (
                   <p className="mc-hint">
-                    <i className="bi bi-info-circle" /> Sin ítems seleccionados — puedes dejarlo vacío.
+                    <i className="bi bi-info-circle" /> El servicio ya viene de la cita u orden. Agrega solo productos usados.
                   </p>
                 )}
               </>
             )}
           </section>
 
-          {/* ── Observación ── */}
+          {/* â”€â”€ Observacion â”€â”€ */}
           <section className="mc-section">
             <div className="mc-section-head">
               <span className="mc-section-title">
                 <i className="bi bi-chat-square-text" />
-                Observación final del vehículo
+                Observacion final del vehiculo
               </span>
             </div>
             <textarea
               className="mc-textarea"
-              placeholder="Ej: Se reemplazó el alternador. Vehículo en óptimas condiciones. Se recomienda revisión de batería en próxima visita."
+              placeholder="Ej: Se reemplazo el alternador. Vehiculo en optimas condiciones. Se recomienda revision de bateria en proxima visita."
               rows={4}
               value={observacion}
               onChange={e => setObservacion(e.target.value)}
@@ -244,7 +216,7 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
 
         </div>
 
-        {/* ── Footer ── */}
+        {/* â”€â”€ Footer â”€â”€ */}
         <div className="mc-footer">
           <button
             className="mc-btn mc-btn-cancel"
@@ -270,9 +242,9 @@ function ModalCompletar({ orden, onConfirm, onCancel }) {
   );
 }
 
-/* ══════════════════════════════════════
-   SecOrdenes — componente principal
-══════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   SecOrdenes - componente principal
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 export default function SecOrdenes() {
   const { user }  = useAuth();
   const idUsuario = user?.id;
@@ -289,7 +261,7 @@ export default function SecOrdenes() {
     setCargando(true);
     getMecanicoOrdenes(idUsuario)
       .then(data => setOrdenes(data))
-      .catch(e => { console.error(e); setError("No se pudieron cargar las órdenes."); })
+      .catch(e => { console.error(e); setError("No se pudieron cargar las ordenes."); })
       .finally(() => setCargando(false));
   }, [idUsuario]);
 
@@ -299,10 +271,11 @@ export default function SecOrdenes() {
     { key: "en_proceso", label: "En proceso" },
     { key: "perdida",    label: "Perdida"    },
     { key: "completada", label: "Completada" },
+    { key: "facturada",  label: "Facturada"  },
   ];
 
   const esPerdida = (o) => {
-    if (o.estado === "completada") return false;
+    if (o.estado === "completada" || o.estado === "facturada") return false;
     const MESES = { JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5,
                     JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11 };
     const mes = MESES[o.fecha?.mes?.toUpperCase()];
@@ -315,7 +288,7 @@ export default function SecOrdenes() {
     return fechaOrden < new Date();
   };
 
-  const ORDEN_ESTADO = { pendiente: 1, en_proceso: 2, perdida: 3, completada: 4 };
+  const ORDEN_ESTADO = { pendiente: 1, en_proceso: 2, perdida: 3, completada: 4, facturada: 5 };
 
   const lista = (filtro === "todas"
     ? [...ordenes]
@@ -359,22 +332,22 @@ export default function SecOrdenes() {
     }
   };
 
-  if (cargando) return <p className="sec-empty">Cargando órdenes...</p>;
+  if (cargando) return <p className="sec-empty">Cargando ordenes...</p>;
   if (error)    return <p className="sec-empty sec-error">{error}</p>;
 
   return (
     <>
       <div className={`sec-page ${seleccion ? "sec-has-panel" : ""}`}>
 
-        {/* ── COLUMNA PRINCIPAL ── */}
+        {/* â”€â”€ COLUMNA PRINCIPAL â”€â”€ */}
         <div className="sec-main">
           <div className="sec-header">
             <div>
               <h2 className="sec-title">
                 <i className="bi bi-clipboard-check me-2" />
-                Mis órdenes
+                Mis ordenes
               </h2>
-              <p className="sec-sub">Órdenes de trabajo asignadas a ti</p>
+              <p className="sec-sub">Ordenes de trabajo asignadas a ti</p>
             </div>
           </div>
 
@@ -395,7 +368,7 @@ export default function SecOrdenes() {
 
           <div className="sec-lista">
             {lista.length === 0 && (
-              <p className="sec-empty">No hay órdenes con este estado.</p>
+              <p className="sec-empty">No hay ordenes con este estado.</p>
             )}
             {lista.map(o => (
               <div
@@ -413,7 +386,7 @@ export default function SecOrdenes() {
                   <div className="orden-meta">
                     <span><i className="bi bi-tag" /> #{o.id}</span>
                     <span><i className="bi bi-clock" /> {o.hora}</span>
-                    <span><i className="bi bi-car-front" /> {o.vehiculo} — {o.placa}</span>
+                    <span><i className="bi bi-car-front" /> {o.vehiculo} - {o.placa}</span>
                     <span><i className="bi bi-person" /> {o.cliente}</span>
                   </div>
                 </div>
@@ -430,7 +403,7 @@ export default function SecOrdenes() {
           </div>
         </div>
 
-        {/* ── PANEL LATERAL ── */}
+        {/* â”€â”€ PANEL LATERAL â”€â”€ */}
         {seleccion && (
           <aside className="sec-panel">
             <div className="panel-top">
@@ -457,7 +430,7 @@ export default function SecOrdenes() {
               </div>
 
               <div className="panel-section">
-                <p className="panel-section-title">Vehículo</p>
+                <p className="panel-section-title">Vehiculo</p>
                 <div className="panel-row">
                   <i className="bi bi-car-front" />
                   <span>{seleccion.vehiculo}</span>
@@ -511,7 +484,7 @@ export default function SecOrdenes() {
         )}
       </div>
 
-      {/* ── MODAL DE COMPLETAR ── */}
+      {/* â”€â”€ MODAL DE COMPLETAR â”€â”€ */}
       {modalOpen && seleccion && (
         <ModalCompletar
           orden={seleccion}

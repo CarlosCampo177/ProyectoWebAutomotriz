@@ -5,6 +5,8 @@ export const estadoConfig = {
   en_proceso: { bg: "#e8f0fe", color: "#1a6bdc", label: "En proceso" },
   pendiente:  { bg: "#fff3e0", color: "#e65100", label: "Pendiente"  },
   completada: { bg: "#e8f5e9", color: "#2e7d32", label: "Completada" },
+  facturada:  { bg: "#d1fae5", color: "#047857", label: "Facturada"  },
+  cancelada:  { bg: "#fee2e2", color: "#b91c1c", label: "Cancelada"  },
   perdida:    { bg: "#fce4ec", color: "#c62828", label: "Perdida"    }, 
 };
 export const prioridadConfig = {

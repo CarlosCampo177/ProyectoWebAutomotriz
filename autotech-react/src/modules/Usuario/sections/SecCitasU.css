@@ -118,7 +118,9 @@
 
 .sc-item[data-estado="confirmada"] { border-left-color: #2e7d32; }
 .sc-item[data-estado="pendiente"]  { border-left-color: #e65100; }
+.sc-item[data-estado="en_proceso"] { border-left-color: #6d28d9; }
 .sc-item[data-estado="completada"] { border-left-color: #1565c0; }
+.sc-item[data-estado="facturada"]  { border-left-color: #047857; }
 .sc-item[data-estado="cancelada"]  { border-left-color: #c62828; }
 
 /* Fecha */
@@ -184,8 +186,10 @@
 
 .sc-badge-pendiente  { background: #fff3e0; color: #e65100; }
 .sc-badge-confirmada { background: #e8f5e9; color: #2e7d32; }
+.sc-badge-en_proceso { background: #ede9fe; color: #6d28d9; }
 .sc-badge-perdida    { background: #fee2e2; color: #b91c1c; }
 .sc-badge-completada { background: #e3f2fd; color: #1565c0; }
+.sc-badge-facturada  { background: #d1fae5; color: #047857; }
 .sc-badge-cancelada  { background: #fce4ec; color: #c62828; }
 
 /* Empty */
