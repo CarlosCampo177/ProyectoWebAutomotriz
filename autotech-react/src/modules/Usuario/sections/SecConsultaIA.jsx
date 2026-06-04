@@ -23,7 +23,7 @@ const SUGERENCIAS = [
   { texto: "Consumo excesivo de gasolina",             emoji: "⛽" },
 ];
 
-const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
+const API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || "";
 
 export default function SecConsultaIA() {
   const [mensajes, setMensajes]   = useState([]);
@@ -49,18 +49,19 @@ export default function SecConsultaIA() {
     setCargando(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
+          "Authorization": `Bearer ${API_KEY}`,
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "deepseek-chat",
           max_tokens: 1000,
-          system: `Eres AutoTech IA, un asistente experto en diagnóstico de vehículos para el taller AutoTech.
+          messages: [
+            {
+              role: "system",
+              content: `Eres AutoTech IA, un asistente experto en diagnóstico de vehículos para el taller AutoTech.
 Tu trabajo es ayudar a los clientes a identificar qué servicio necesita su vehículo según los síntomas que describen.
 
 Los servicios disponibles en AutoTech son:
@@ -75,17 +76,19 @@ Instrucciones:
 - No inventes servicios que no están en la lista
 - Si el problema es urgente (frenos, temperatura, etc.) indícalo claramente
 - Termina siempre recomendando agendar una cita`,
-          messages: nuevosMensajes.map(m => ({
-            role: m.rol === "usuario" ? "user" : "assistant",
-            content: m.texto,
-          })),
+            },
+            ...nuevosMensajes.map(m => ({
+              role: m.rol === "usuario" ? "user" : "assistant",
+              content: m.texto,
+            })),
+          ],
         }),
       });
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error?.message || `Error ${response.status}`);
 
-      const respuesta = data.content?.[0]?.text || "No pude procesar tu consulta. Intenta de nuevo.";
+      const respuesta = data.choices?.[0]?.message?.content || "No pude procesar tu consulta. Intenta de nuevo.";
       setMensajes(prev => [...prev, { rol: "ia", texto: respuesta }]);
     } catch (e) {
       console.error(e);
