@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '../../../context/AuthContext';
+import { getFacturas } from '../../../services/clienteService';
 import "./SecFacturas.css";
 
 export default function SecFacturas() {
@@ -9,8 +10,7 @@ export default function SecFacturas() {
 
   useEffect(() => {
     if (!user?.id) return;
-    fetch(`/api/Cliente/${user.id}/facturas`)
-      .then(r => r.json())
+    getFacturas(user.id)
       .then(setFacturas)
       .catch(console.error)
       .finally(() => setLoading(false));

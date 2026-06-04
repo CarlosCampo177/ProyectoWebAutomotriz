@@ -25,7 +25,10 @@ async function request(endpoint, options = {}) {
     throw { status: 401, message: "Sesión expirada o no autorizada" };
   }
 
-  const data = await response.json();
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
 
   if (!response.ok) {
     throw { status: response.status, data };

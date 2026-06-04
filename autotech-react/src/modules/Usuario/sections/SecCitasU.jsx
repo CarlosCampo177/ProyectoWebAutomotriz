@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useAuth } from '../../../context/AuthContext';
-import { getCitas, getVehiculos, postCita, getMecanicos } from '../../../services/clienteService';
+import { getCitas, getVehiculos, postCita, getMecanicos, getHorasOcupadas, getServiciosActivos } from '../../../services/clienteService';
 import "./SecCitasU.css";
 
-const filtros = ["todas", "pendiente", "confirmada", "perdida", "completada", "cancelada"];
+const filtros = ["todas", "pendiente", "confirmada", "en_proceso", "perdida", "completada", "facturada", "cancelada"];
 
 const estadoLabels = {
   pendiente: "Pendiente",
   confirmada: "Confirmada",
+  en_proceso: "En proceso",
   perdida: "Perdida",
   completada: "Completada",
+  facturada: "Facturada",
   cancelada: "Cancelada",
 };
 
@@ -145,10 +147,12 @@ const FORM_VACIO = {
   observaciones: "",
 };
 
-export function ModalAgendarCita({ vehiculos = [], mecanicos = [], onClose, onConfirmar }) {
+export function ModalAgendarCita({ vehiculos = [], mecanicos = [], servicios = [], onClose, onConfirmar }) {
   const [form, setForm] = useState(FORM_VACIO);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [horasOcupadas, setHorasOcupadas] = useState([]);
+  const [loadingHoras, setLoadingHoras] = useState(false);
 
   const hoy = new Date().toISOString().split("T")[0];
   const maxFecha = (() => {
@@ -157,7 +161,37 @@ export function ModalAgendarCita({ vehiculos = [], mecanicos = [], onClose, onCo
     return d.toISOString().split("T")[0];
   })();
 
-  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  useEffect(() => {
+    if (!form.fecha || !form.mecanicoId) {
+      setHorasOcupadas([]);
+      return;
+    }
+
+    let activo = true;
+    setLoadingHoras(true);
+    getHorasOcupadas(form.mecanicoId, form.fecha)
+      .then(res => {
+        if (activo) setHorasOcupadas(Array.isArray(res) ? res : []);
+      })
+      .catch(() => {
+        if (activo) setHorasOcupadas([]);
+      })
+      .finally(() => {
+        if (activo) setLoadingHoras(false);
+      });
+
+    return () => { activo = false; };
+  }, [form.fecha, form.mecanicoId]);
+
+  const horasDisponibles = form.mecanicoId
+    ? SLOTS_HORA.filter(s => !horasOcupadas.includes(s.value))
+    : SLOTS_HORA;
+
+  const f = (key, val) => setForm(p => ({
+    ...p,
+    [key]: val,
+    ...((key === "fecha" || key === "mecanicoId") ? { hora: "" } : {}),
+  }));
 
   const handleConfirmar = async () => {
     if (!form.idVehiculo) { setError("Selecciona un vehículo."); return; }
@@ -170,7 +204,7 @@ export function ModalAgendarCita({ vehiculos = [], mecanicos = [], onClose, onCo
       await onConfirmar(form);
       onClose();
     } catch (err) {
-      setError(err?.message || "Error al agendar la cita.");
+      setError(err?.data || err?.message || "Error al agendar la cita.");
     } finally {
       setSaving(false);
     }
@@ -217,8 +251,10 @@ export function ModalAgendarCita({ vehiculos = [], mecanicos = [], onClose, onCo
             <label><i className="bi bi-wrench me-1" />Servicio solicitado</label>
             <select value={form.servicio} onChange={e => f("servicio", e.target.value)}>
               <option value="">— ¿Qué necesitas? —</option>
-              {SERVICIOS_DISPONIBLES.map(s => (
-                <option key={s} value={s}>{s}</option>
+              {servicios.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.nombre} — ${Number(s.precioBase || 0).toLocaleString("es-CO")}
+                </option>
               ))}
             </select>
           </div>
@@ -236,12 +272,17 @@ export function ModalAgendarCita({ vehiculos = [], mecanicos = [], onClose, onCo
             </div>
             <div className="si-form-group">
               <label><i className="bi bi-clock me-1" />Hora</label>
-              <select value={form.hora} onChange={e => f("hora", e.target.value)}>
-                <option value="">— Selecciona —</option>
-                {SLOTS_HORA.map(s => (
+              <select value={form.hora} onChange={e => f("hora", e.target.value)} disabled={loadingHoras}>
+                <option value="">
+                  {loadingHoras ? "Consultando disponibilidad..." : "— Selecciona —"}
+                </option>
+                {horasDisponibles.map(s => (
                   <option key={s.value} value={s.value}>{s.label}</option>
                 ))}
               </select>
+              {form.fecha && form.mecanicoId && !loadingHoras && horasDisponibles.length === 0 && (
+                <small className="sc-opcional">Este mecánico no tiene horarios libres ese día.</small>
+              )}
             </div>
           </div>
 
@@ -303,6 +344,7 @@ export default function SecCitas() {
   const [citas, setCitas]           = useState([]);
   const [vehiculos, setVehiculos]   = useState([]);
   const [mecanicos, setMecanicos]   = useState([]);
+  const [servicios, setServicios]   = useState([]);
   const [loading, setLoading]       = useState(true);
   const [modal, setModal]           = useState(false);
   const [seleccion, setSeleccion]   = useState(null);
@@ -321,6 +363,10 @@ export default function SecCitas() {
     getMecanicos()
       .then(res => setMecanicos(Array.isArray(res) ? res : []))
       .catch(console.error);
+
+    getServiciosActivos()
+      .then(res => setServicios(Array.isArray(res) ? res : []))
+      .catch(console.error);
   }, [user]);
 
   const citasConEstado = citas.map(c =>
@@ -333,10 +379,12 @@ export default function SecCitas() {
 
   const handleConfirmarCita = async (form) => {
     const [, mesNum, diaNum] = form.fecha.split("-").map(Number);
+    const servicio = servicios.find(s => String(s.id) === String(form.servicio));
     await postCita(user.id, {
-      servicio:      form.servicio,
+      servicioId:    Number(form.servicio),
+      servicio:      servicio?.nombre || "",
       vehiculoId:    Number(form.idVehiculo),
-      mecanicoId:    form.mecanicoId ? Number(form.mecanicoId) : 0,
+      mecanicoId:    form.mecanicoId ? Number(form.mecanicoId) : null,
       dia:           diaNum,
       mes:           mesNum,
       hora:          form.hora,
@@ -394,7 +442,7 @@ export default function SecCitas() {
                 <div className="sc-item-meta">
                   <span><i className="bi bi-clock" /> {c.hora}</span>
                   <span><i className="bi bi-car-front" /> {c.vehiculo}</span>
-                  <span><i className="bi bi-person-gear" /> {c.mecanico}</span>
+                  <span><i className="bi bi-person-gear" /> {c.mecanico ?? "Sin asignar"}</span>
                 </div>
                 {c.observaciones && (
                   <div className="sc-item-obs">"{c.observaciones}"</div>
@@ -413,6 +461,7 @@ export default function SecCitas() {
         <ModalAgendarCita
           vehiculos={vehiculos}
           mecanicos={mecanicos}
+          servicios={servicios}
           onClose={() => setModal(false)}
           onConfirmar={handleConfirmarCita}
         />
