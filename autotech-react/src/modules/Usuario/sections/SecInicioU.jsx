@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../../../context/AuthContext';
-import { getVehiculos, getCitas, getMecanicos, postCita } from '../../../services/clienteService';
+import { getVehiculos, getCitas, getMecanicos, postCita, getServiciosActivos } from '../../../services/clienteService';
 import { ModalAgendarCita } from './SecCitasU';
 import "./SecInicioU.css";
 
@@ -108,6 +108,7 @@ export default function SecInicioU() {
   const [modal, setModal]           = useState(false);
   const [vehiculos, setVehiculos]   = useState([]);
   const [mecanicos, setMecanicos]   = useState([]);
+  const [servicios, setServicios]   = useState([]);
   const [citas, setCitas]           = useState([]);
   const [loading, setLoading]       = useState(true);
 
@@ -115,14 +116,16 @@ export default function SecInicioU() {
     if (!user?.id) return;
     const fetchData = async () => {
       try {
-        const [resV, resC, resM] = await Promise.all([
+        const [resV, resC, resM, resS] = await Promise.all([
           getVehiculos(user.id),
           getCitas(user.id),
           getMecanicos(),
+          getServiciosActivos(),
         ]);
         setVehiculos(Array.isArray(resV) ? resV : []);
         setCitas(Array.isArray(resC) ? resC : []);
         setMecanicos(Array.isArray(resM) ? resM : []);
+        setServicios(Array.isArray(resS) ? resS : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -142,10 +145,12 @@ export default function SecInicioU() {
 
   const handleConfirmarCita = async (form) => {
     const [, mesNum, diaNum] = form.fecha.split("-").map(Number);
+    const servicio = servicios.find(s => String(s.id) === String(form.servicio));
     await postCita(user.id, {
-      servicio:      form.servicio,
+      servicioId:    Number(form.servicio),
+      servicio:      servicio?.nombre || "",
       vehiculoId:    Number(form.idVehiculo),
-      mecanicoId:    form.mecanicoId ? Number(form.mecanicoId) : 0,
+      mecanicoId:    form.mecanicoId ? Number(form.mecanicoId) : null,
       dia:           diaNum,
       mes:           mesNum,
       hora:          form.hora,
@@ -163,10 +168,10 @@ export default function SecInicioU() {
   ];
 
   const acciones = [
-    { icon: "bi-calendar-plus", label: "Nueva cita",    color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal(true)                    },
-    { icon: "bi-car-front",     label: "Mis vehículos", color: "#2e7d32", bg: "#e8f5e9", action: () => navigate('/usuario/vehiculos')     },
-    { icon: "bi-robot",         label: "Consultar IA",  color: "#6a1b9a", bg: "#f3e5f5", action: () => navigate('/usuario/ia')           },
-    { icon: "bi-clock-history", label: "Ver historial", color: "#e65100", bg: "#fff3e0", action: () => navigate('/usuario/historial')    },
+    { icon: "bi-calendar-plus", label: "Nueva cita",    color: "#1a6bdc", bg: "#e8f0fe", action: () => setModal(true)                 },
+    { icon: "bi-car-front",     label: "Mis vehículos", color: "#2e7d32", bg: "#e8f5e9", action: () => navigate('/usuario/vehiculos') },
+    { icon: "bi-robot",         label: "Consultar IA",  color: "#6a1b9a", bg: "#f3e5f5", action: () => navigate('/usuario/ia')        },
+    { icon: "bi-clock-history", label: "Ver historial", color: "#e65100", bg: "#fff3e0", action: () => navigate('/usuario/historial') },
   ];
 
   if (loading) return <div className="si-wrapper"><p style={{ color: "#888" }}>Cargando...</p></div>;
@@ -271,11 +276,12 @@ export default function SecInicioU() {
         </div>
       </div>
 
-      {/* MODAL — usa el mismo de SecCitas */}
+      {/* MODAL */}
       {modal && (
         <ModalAgendarCita
           vehiculos={vehiculos}
           mecanicos={mecanicos}
+          servicios={servicios}
           onClose={() => setModal(false)}
           onConfirmar={handleConfirmarCita}
         />
