@@ -112,7 +112,15 @@ export const facturaService = {
    ESTADÍSTICAS (dashboard)
 ══════════════════════════════════ */
 export const estadisticaService = {
-  getResumen: () => apiClient.get('Admin/estadisticas'),
+  getResumen:           () => apiClient.get('Estadisticas/resumen'),
+  getIngresosPorMes:    () => apiClient.get('Estadisticas/ingresos-por-mes'),
+  getOrdenesPorMes:     () => apiClient.get('Estadisticas/ordenes-por-mes'),
+  getOrdenesPorEstado:  () => apiClient.get('Estadisticas/ordenes-por-estado'),
+  getTopServicios:      () => apiClient.get('Estadisticas/top-servicios'),
+  getTopProductos:      () => apiClient.get('Estadisticas/top-productos'),
+  getMecanicosRendimiento:() => apiClient.get('Estadisticas/mecanicos-rendimiento'),
+  getClientesNuevos:    () => apiClient.get('Estadisticas/clientes-nuevos'),
+  getPrioridades:       () => apiClient.get('Estadisticas/prioridades'),
 }
 
 /* ══════════════════════════════════

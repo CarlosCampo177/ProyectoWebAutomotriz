@@ -13,7 +13,6 @@ const EMPTY_FORM = {
   primerApellido: "",
   segundoApellido: "",
   documento: "",
-  username: "",
   email: "",
   telefono: "",
   direccion: "",
@@ -53,6 +52,7 @@ export default function Mecanicos() {
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     cargar();
@@ -125,6 +125,7 @@ export default function Mecanicos() {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setError("");
+    setFieldErrors({});
     setShowModal(true);
   };
 
@@ -135,7 +136,6 @@ export default function Mecanicos() {
       primerApellido: m.primerApellido || "",
       segundoApellido: m.segundoApellido || "",
       documento: m.documento || "",
-      username: m.username || "",
       email: m.email || "",
       telefono: m.telefono || "",
       direccion: m.direccion || "",
@@ -145,35 +145,81 @@ export default function Mecanicos() {
     });
     setEditingId(m.id);
     setError("");
+    setFieldErrors({});
     setShowModal(true);
   };
 
   const cerrarModal = () => {
     setShowModal(false);
     setError("");
+    setFieldErrors({});
+  };
+
+  /* ── Validación ── */
+  const validar = () => {
+    const errs = {};
+    const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    const soloNums = /^\d+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!form.primerNombre.trim())
+      errs.primerNombre = "El primer nombre es requerido.";
+    else if (!soloLetras.test(form.primerNombre))
+      errs.primerNombre = "Solo se permiten letras.";
+
+    if (form.segundoNombre && !soloLetras.test(form.segundoNombre))
+      errs.segundoNombre = "Solo se permiten letras.";
+
+    if (!form.primerApellido.trim())
+      errs.primerApellido = "El primer apellido es requerido.";
+    else if (!soloLetras.test(form.primerApellido))
+      errs.primerApellido = "Solo se permiten letras.";
+
+    if (form.segundoApellido && !soloLetras.test(form.segundoApellido))
+      errs.segundoApellido = "Solo se permiten letras.";
+
+    if (!form.documento.trim()) errs.documento = "El documento es requerido.";
+    else if (!soloNums.test(form.documento))
+      errs.documento = "Solo se permiten números.";
+    else if (form.documento.length < 8 || form.documento.length > 10)
+      errs.documento = "El documento debe tener entre 8 y 10 dígitos.";
+
+    if (!editingId && !form.password.trim())
+      errs.password = "La contraseña es requerida al crear un mecánico.";
+    else if (form.password && form.password.length < 6)
+      errs.password = "La contraseña debe tener al menos 6 caracteres.";
+
+    if (!form.email.trim()) errs.email = "El email es requerido.";
+    else if (!emailRegex.test(form.email))
+      errs.email = "Ingresa un email válido. Ej: usuario@correo.com";
+
+    if (form.telefono) {
+      if (!soloNums.test(form.telefono))
+        errs.telefono = "Solo se permiten números.";
+      else if (form.telefono.length !== 10)
+        errs.telefono = "El teléfono debe tener 10 dígitos.";
+    }
+
+    if (!form.idEspecialidad)
+      errs.idEspecialidad = "La especialidad es requerida.";
+
+    if (form.salarioBase && isNaN(Number(form.salarioBase)))
+      errs.salarioBase = "El salario debe ser un número válido.";
+
+    return errs;
   };
 
   const guardar = async () => {
-    if (
-      !form.primerNombre.trim() ||
-      !form.primerApellido.trim() ||
-      !form.email.trim() ||
-      !form.documento.trim() ||
-      !form.username.trim() ||
-      !form.idEspecialidad
-    ) {
-      setError(
-        "Nombre, apellido, documento, username, email y especialidad son requeridos.",
-      );
-      return;
-    }
-    if (!editingId && !form.password.trim()) {
-      setError("La contraseña es requerida al crear un mecánico.");
+    const errs = validar();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError("Corrige los errores para registrar al mecánico.");
       return;
     }
     try {
       setSaving(true);
       setError("");
+      setFieldErrors({});
       const payload = { ...form, idEspecialidad: Number(form.idEspecialidad) };
       if (editingId) {
         await mecanicoAdminService.actualizar(editingId, payload);
@@ -221,7 +267,10 @@ export default function Mecanicos() {
     }
   };
 
-  const f = (key, val) => setForm((p) => ({ ...p, [key]: val }));
+  const f = (key, val) => {
+    setForm((p) => ({ ...p, [key]: val }));
+    setFieldErrors((p) => ({ ...p, [key]: "" }));
+  };
 
   const iniciales = (nombre) =>
     (nombre || "M")
@@ -347,7 +396,7 @@ export default function Mecanicos() {
                           </div>
                           <div>
                             <div className="mec-nombre">{m.nombre}</div>
-                            <div className="mec-username">@{m.username}</div>
+                            <div className="mec-username">{m.documento}</div>
                           </div>
                         </div>
                       </td>
@@ -387,11 +436,7 @@ export default function Mecanicos() {
                           }
                         >
                           <i
-                            className={`bi ${
-                              m.estado === "activo"
-                                ? "bi-toggle-on"
-                                : "bi-toggle-off"
-                            }`}
+                            className={`bi ${m.estado === "activo" ? "bi-toggle-on" : "bi-toggle-off"}`}
                           />
                           {m.estado === "activo" ? "Activo" : "Inactivo"}
                         </button>
@@ -417,10 +462,9 @@ export default function Mecanicos() {
         )}
       </div>
 
-      {/* ── PANEL LATERAL ── */}
+      {/* ── PANEL LATERAL DETALLE ── */}
       {detalle && (
         <aside className="mec-detalle">
-          {/* Cabecera */}
           <div className="mec-detalle-top">
             <div className="mec-detalle-avatar">
               {iniciales(detalle.nombre)}
@@ -442,18 +486,13 @@ export default function Mecanicos() {
                 style={{ fontSize: ".75rem", padding: ".2rem .6rem" }}
               >
                 <i
-                  className={`bi ${
-                    detalle.estado === "activo"
-                      ? "bi-toggle-on"
-                      : "bi-toggle-off"
-                  } me-1`}
+                  className={`bi ${detalle.estado === "activo" ? "bi-toggle-on" : "bi-toggle-off"} me-1`}
                 />
                 {detalle.estado}
               </span>
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="mec-tabs">
             {TABS_DETALLE.map((tab) => (
               <button
@@ -483,9 +522,7 @@ export default function Mecanicos() {
             ))}
           </div>
 
-          {/* Contenido tab */}
           <div className="mec-tab-content">
-            {/* ── TAB PERFIL ── */}
             {tabDetalle === "perfil" && (
               <div className="mec-perfil">
                 <div className="mec-stats-row">
@@ -506,7 +543,6 @@ export default function Mecanicos() {
                     <span className="mec-stat-label">Total</span>
                   </div>
                 </div>
-
                 <p className="mec-section-title" style={{ marginTop: "1rem" }}>
                   Información
                 </p>
@@ -514,10 +550,6 @@ export default function Mecanicos() {
                   <div className="mec-info-row">
                     <i className="bi bi-person-badge" />
                     <span>{detalle.documento}</span>
-                  </div>
-                  <div className="mec-info-row">
-                    <i className="bi bi-at" />
-                    <span>@{detalle.username}</span>
                   </div>
                   <div className="mec-info-row">
                     <i className="bi bi-envelope" />
@@ -541,7 +573,6 @@ export default function Mecanicos() {
               </div>
             )}
 
-            {/* ── TAB ÓRDENES ── */}
             {tabDetalle === "ordenes" && (
               <div className="mec-ordenes-list">
                 {loadingDetalle ? (
@@ -589,7 +620,6 @@ export default function Mecanicos() {
               </div>
             )}
 
-            {/* ── TAB ESTADÍSTICAS ── */}
             {tabDetalle === "estadisticas" && (
               <div className="mec-stats-panel">
                 {loadingDetalle ? (
@@ -626,7 +656,6 @@ export default function Mecanicos() {
                         <span className="msc-label">Canceladas</span>
                       </div>
                     </div>
-
                     {statsDetalle.serviciosFrecuentes?.length > 0 && (
                       <>
                         <p
@@ -653,7 +682,6 @@ export default function Mecanicos() {
             )}
           </div>
 
-          {/* Footer */}
           <div className="mec-detalle-footer">
             <button
               className="btn-secondary mec-w-full"
@@ -666,9 +694,7 @@ export default function Mecanicos() {
               onClick={(e) => cambiarEstado(detalle, e)}
             >
               <i
-                className={`bi ${
-                  detalle.estado === "activo" ? "bi-toggle-off" : "bi-toggle-on"
-                } me-1`}
+                className={`bi ${detalle.estado === "activo" ? "bi-toggle-off" : "bi-toggle-on"} me-1`}
               />
               {detalle.estado === "activo" ? "Desactivar" : "Activar"}
             </button>
@@ -676,30 +702,33 @@ export default function Mecanicos() {
         </aside>
       )}
 
-      {/* ══ MODAL MECÁNICO ══ */}
+      {/* ══ DRAWER LATERAL — NUEVO / EDITAR MECÁNICO ══ */}
       {showModal && (
-        <div className="modal-overlay" onClick={cerrarModal}>
+        <div className="mec-modal-overlay" onClick={cerrarModal}>
           <div
-            className="modal-card modal-lg"
+            className="mec-modal-lateral"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header">
-              <h2>
+            {/* Encabezado */}
+            <div className="mec-modal-header">
+              <h2 className="mec-modal-title">
                 <i
-                  className={`bi ${
-                    editingId ? "bi-pencil" : "bi-person-plus"
-                  } me-2`}
+                  className={`bi ${editingId ? "bi-pencil" : "bi-person-plus"} me-2`}
                 />
                 {editingId ? "Editar Mecánico" : "Nuevo Mecánico"}
               </h2>
-              <button className="modal-close" onClick={cerrarModal}>
+              <button className="mec-modal-close" onClick={cerrarModal}>
                 <i className="bi bi-x-lg" />
               </button>
             </div>
 
-            <div className="modal-body">
+            {/* Cuerpo */}
+            <div className="mec-modal-body">
               {error && (
-                <div className="alert-error">
+                <div
+                  className="alert-error"
+                  style={{ marginBottom: "1.25rem" }}
+                >
                   <i className="bi bi-exclamation-triangle me-1" />
                   {error}
                 </div>
@@ -718,7 +747,13 @@ export default function Mecanicos() {
                       placeholder="Ej: Juan"
                       value={form.primerNombre}
                       onChange={(e) => f("primerNombre", e.target.value)}
+                      className={fieldErrors.primerNombre ? "input-error" : ""}
                     />
+                    {fieldErrors.primerNombre && (
+                      <span className="field-error-msg">
+                        {fieldErrors.primerNombre}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Segundo nombre</label>
@@ -727,7 +762,13 @@ export default function Mecanicos() {
                       placeholder="Ej: Carlos"
                       value={form.segundoNombre}
                       onChange={(e) => f("segundoNombre", e.target.value)}
+                      className={fieldErrors.segundoNombre ? "input-error" : ""}
                     />
+                    {fieldErrors.segundoNombre && (
+                      <span className="field-error-msg">
+                        {fieldErrors.segundoNombre}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Primer apellido *</label>
@@ -736,7 +777,15 @@ export default function Mecanicos() {
                       placeholder="Ej: García"
                       value={form.primerApellido}
                       onChange={(e) => f("primerApellido", e.target.value)}
+                      className={
+                        fieldErrors.primerApellido ? "input-error" : ""
+                      }
                     />
+                    {fieldErrors.primerApellido && (
+                      <span className="field-error-msg">
+                        {fieldErrors.primerApellido}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Segundo apellido</label>
@@ -745,7 +794,15 @@ export default function Mecanicos() {
                       placeholder="Ej: López"
                       value={form.segundoApellido}
                       onChange={(e) => f("segundoApellido", e.target.value)}
+                      className={
+                        fieldErrors.segundoApellido ? "input-error" : ""
+                      }
                     />
+                    {fieldErrors.segundoApellido && (
+                      <span className="field-error-msg">
+                        {fieldErrors.segundoApellido}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -763,17 +820,13 @@ export default function Mecanicos() {
                       placeholder="Ej: 1001234567"
                       value={form.documento}
                       onChange={(e) => f("documento", e.target.value)}
+                      className={fieldErrors.documento ? "input-error" : ""}
                     />
-                  </div>
-                  <div className="form-group">
-                    <label>Username *</label>
-                    <input
-                      type="text"
-                      placeholder="Ej: jgarcia"
-                      autoComplete="one-time-code"
-                      value={form.username}
-                      onChange={(e) => f("username", e.target.value)}
-                    />
+                    {fieldErrors.documento && (
+                      <span className="field-error-msg">
+                        {fieldErrors.documento}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>
@@ -789,7 +842,13 @@ export default function Mecanicos() {
                       }
                       value={form.password}
                       onChange={(e) => f("password", e.target.value)}
+                      className={fieldErrors.password ? "input-error" : ""}
                     />
+                    {fieldErrors.password && (
+                      <span className="field-error-msg">
+                        {fieldErrors.password}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -807,7 +866,13 @@ export default function Mecanicos() {
                       placeholder="Ej: juan@autotech.com"
                       value={form.email}
                       onChange={(e) => f("email", e.target.value)}
+                      className={fieldErrors.email ? "input-error" : ""}
                     />
+                    {fieldErrors.email && (
+                      <span className="field-error-msg">
+                        {fieldErrors.email}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Teléfono</label>
@@ -816,7 +881,13 @@ export default function Mecanicos() {
                       placeholder="Ej: 3001234567"
                       value={form.telefono}
                       onChange={(e) => f("telefono", e.target.value)}
+                      className={fieldErrors.telefono ? "input-error" : ""}
                     />
+                    {fieldErrors.telefono && (
+                      <span className="field-error-msg">
+                        {fieldErrors.telefono}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group form-span-2">
                     <label>Dirección</label>
@@ -842,6 +913,9 @@ export default function Mecanicos() {
                       <select
                         value={form.idEspecialidad}
                         onChange={(e) => f("idEspecialidad", e.target.value)}
+                        className={
+                          fieldErrors.idEspecialidad ? "input-error" : ""
+                        }
                       >
                         <option value="">— Selecciona especialidad —</option>
                         {especialidades.map((e) => (
@@ -862,6 +936,11 @@ export default function Mecanicos() {
                         <i className="bi bi-plus-lg" />
                       </button>
                     </div>
+                    {fieldErrors.idEspecialidad && (
+                      <span className="field-error-msg">
+                        {fieldErrors.idEspecialidad}
+                      </span>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>Salario base</label>
@@ -871,41 +950,55 @@ export default function Mecanicos() {
                       placeholder="Ej: 1500000"
                       value={form.salarioBase}
                       onChange={(e) => f("salarioBase", e.target.value)}
+                      className={fieldErrors.salarioBase ? "input-error" : ""}
                     />
+                    {fieldErrors.salarioBase && (
+                      <span className="field-error-msg">
+                        {fieldErrors.salarioBase}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="modal-footer">
-              <button
-                className="btn-secondary"
-                onClick={cerrarModal}
-                disabled={saving}
+              {/* Footer dentro del drawer */}
+              <div
+                style={{
+                  marginTop: "2rem",
+                  padding: "1rem 0 0",
+                  borderTop: "1px solid var(--border)",
+                  display: "flex",
+                  gap: "0.75rem",
+                  justifyContent: "flex-end",
+                }}
               >
-                Cancelar
-              </button>
-              <button
-                className="btn-primary"
-                onClick={guardar}
-                disabled={saving}
-              >
-                {saving ? (
-                  <>
-                    <i className="bi bi-arrow-repeat spin me-1" />
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <i
-                      className={`bi ${
-                        editingId ? "bi-check-lg" : "bi-person-plus"
-                      } me-1`}
-                    />
-                    {editingId ? "Guardar cambios" : "Registrar mecánico"}
-                  </>
-                )}
-              </button>
+                <button
+                  className="btn-secondary"
+                  onClick={cerrarModal}
+                  disabled={saving}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={guardar}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <i className="bi bi-arrow-repeat spin me-1" />
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <i
+                        className={`bi ${editingId ? "bi-check-lg" : "bi-person-plus"} me-1`}
+                      />
+                      {editingId ? "Guardar cambios" : "Registrar mecánico"}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -913,18 +1006,21 @@ export default function Mecanicos() {
 
       {/* ══ MINI-MODAL ESPECIALIDAD ══ */}
       {showEsp && (
-        <div className="modal-overlay" onClick={() => setShowEsp(false)}>
-          <div
-            className="modal-card modal-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <h2>Nueva Especialidad</h2>
-              <button className="modal-close" onClick={() => setShowEsp(false)}>
+        <div className="mec-esp-overlay" onClick={() => setShowEsp(false)}>
+          <div className="mec-esp-card" onClick={(e) => e.stopPropagation()}>
+            <div className="mec-modal-header">
+              <h2 className="mec-modal-title">
+                <i className="bi bi-wrench me-2" />
+                Nueva Especialidad
+              </h2>
+              <button
+                className="mec-modal-close"
+                onClick={() => setShowEsp(false)}
+              >
                 <i className="bi bi-x-lg" />
               </button>
             </div>
-            <div className="modal-body">
+            <div className="mec-modal-body">
               <div className="form-group" style={{ marginBottom: ".75rem" }}>
                 <label>Nombre *</label>
                 <input
@@ -945,24 +1041,28 @@ export default function Mecanicos() {
                   placeholder="Descripción breve..."
                   value={nuevaEsp.descripcion}
                   onChange={(e) =>
-                    setNuevaEsp((p) => ({
-                      ...p,
-                      descripcion: e.target.value,
-                    }))
+                    setNuevaEsp((p) => ({ ...p, descripcion: e.target.value }))
                   }
                 />
               </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                className="btn-secondary"
-                onClick={() => setShowEsp(false)}
+              <div
+                style={{
+                  marginTop: "1.5rem",
+                  display: "flex",
+                  gap: "0.75rem",
+                  justifyContent: "flex-end",
+                }}
               >
-                Cancelar
-              </button>
-              <button className="btn-primary" onClick={guardarEspRapida}>
-                <i className="bi bi-check-lg me-1" /> Crear
-              </button>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setShowEsp(false)}
+                >
+                  Cancelar
+                </button>
+                <button className="btn-primary" onClick={guardarEspRapida}>
+                  <i className="bi bi-check-lg me-1" /> Crear
+                </button>
+              </div>
             </div>
           </div>
         </div>

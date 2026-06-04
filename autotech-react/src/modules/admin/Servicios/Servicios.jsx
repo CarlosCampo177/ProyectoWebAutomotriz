@@ -3,16 +3,8 @@ import './Servicios.css';
 import { servicioService } from '../../../services/adminService';
 
 const CATEGORIAS = [
-  'General',
-  'Mantenimiento',
-  'Diagnóstico',
-  'Reparación',
-  'Eléctrico',
-  'Carrocería',
-  'Frenos',
-  'Suspensión',
-  'Motor',
-  'Transmisión',
+  'General', 'Mantenimiento', 'Diagnóstico', 'Reparación',
+  'Eléctrico', 'Carrocería', 'Frenos', 'Suspensión', 'Motor', 'Transmisión',
 ];
 
 const CATEGORIA_COLOR = {
@@ -29,8 +21,7 @@ const CATEGORIA_COLOR = {
 };
 
 const EMPTY_FORM = {
-  nombre: '', descripcion: '',
-  precioBase: '', categoria: 'General',
+  nombre: '', descripcion: '', precioBase: '', categoria: 'General',
 };
 
 export default function Servicios() {
@@ -42,6 +33,7 @@ export default function Servicios() {
   const [loading,      setLoading]      = useState(true);
   const [saving,       setSaving]       = useState(false);
   const [error,        setError]        = useState('');
+  const [fieldErrors,  setFieldErrors]  = useState({});
   const [busqueda,     setBusqueda]     = useState('');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroCat,    setFiltroCat]    = useState('todas');
@@ -62,6 +54,7 @@ export default function Servicios() {
     setForm(EMPTY_FORM);
     setEditingId(null);
     setError('');
+    setFieldErrors({});
     setShowModal(true);
   };
 
@@ -74,23 +67,47 @@ export default function Servicios() {
     });
     setEditingId(s.id);
     setError('');
+    setFieldErrors({});
     setShowModal(true);
   };
 
-  const cerrarModal = () => { setShowModal(false); setError(''); };
+  const cerrarModal = () => {
+    setShowModal(false);
+    setError('');
+    setFieldErrors({});
+  };
+
+  /* ── Validación ── */
+  const validar = () => {
+    const errs = {};
+
+    if (!form.nombre.trim())
+      errs.nombre = 'El nombre es requerido.';
+    else if (form.nombre.trim().length < 3)
+      errs.nombre = 'El nombre debe tener al menos 3 caracteres.';
+
+    if (form.precioBase === '' || form.precioBase === null)
+      errs.precioBase = 'El precio base es requerido.';
+    else if (isNaN(Number(form.precioBase)) || Number(form.precioBase) < 0)
+      errs.precioBase = 'El precio debe ser un número mayor o igual a 0.';
+
+    if (!form.categoria)
+      errs.categoria = 'La categoría es requerida.';
+
+    return errs;
+  };
 
   const guardar = async () => {
-    if (!form.nombre.trim()) {
-      setError('El nombre es requerido.');
-      return;
-    }
-    if (!form.precioBase || Number(form.precioBase) < 0) {
-      setError('El precio base debe ser un número válido.');
+    const errs = validar();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError('Corrige los errores para guardar el servicio.');
       return;
     }
     try {
       setSaving(true);
       setError('');
+      setFieldErrors({});
       const payload = {
         nombre:      form.nombre.trim(),
         descripcion: form.descripcion.trim(),
@@ -125,12 +142,13 @@ export default function Servicios() {
     } catch { alert('No se pudo cambiar el estado.'); }
   };
 
-  const f = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  const f = (key, val) => {
+    setForm(p => ({ ...p, [key]: val }));
+    setFieldErrors(p => ({ ...p, [key]: '' }));
+  };
 
-  const catColor = (cat) =>
-    CATEGORIA_COLOR[cat] || CATEGORIA_COLOR['General'];
+  const catColor = (cat) => CATEGORIA_COLOR[cat] || CATEGORIA_COLOR['General'];
 
-  /* ── Categorías únicas para el filtro ── */
   const categoriasUsadas = ['todas',
     ...new Set(servicios.map(s => s.categoria).filter(Boolean))];
 
@@ -157,12 +175,8 @@ export default function Servicios() {
         {/* HEADER */}
         <div className="page-header">
           <div>
-            <h1 className="page-title">
-              <i className="bi bi-tools" /> Servicios
-            </h1>
-            <p className="page-subtitle">
-              Gestiona el catálogo de servicios del taller
-            </p>
+            <h1 className="page-title"><i className="bi bi-tools" /> Servicios</h1>
+            <p className="page-subtitle">Gestiona el catálogo de servicios del taller</p>
           </div>
           <button className="btn-primary" onClick={abrirCrear}>
             <i className="bi bi-plus-lg" /> Nuevo Servicio
@@ -223,12 +237,8 @@ export default function Servicios() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Servicio</th>
-                  <th>Categoría</th>
-                  <th>Precio base</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
+                  <th>#</th><th>Servicio</th><th>Categoría</th>
+                  <th>Precio base</th><th>Estado</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,16 +257,12 @@ export default function Servicios() {
                     <td className="srv-td-num">{i + 1}</td>
                     <td>
                       <div className="srv-nombre">{s.nombre}</div>
-                      <div className="srv-desc">
-                        {s.descripcion || '—'}
-                      </div>
+                      <div className="srv-desc">{s.descripcion || '—'}</div>
                     </td>
                     <td>
                       <span className="srv-badge-cat"
-                        style={{
-                          background: catColor(s.categoria).bg,
-                          color:      catColor(s.categoria).color
-                        }}>
+                        style={{ background: catColor(s.categoria).bg,
+                                 color: catColor(s.categoria).color }}>
                         {s.categoria}
                       </span>
                     </td>
@@ -264,11 +270,9 @@ export default function Servicios() {
                       ${Number(s.precioBase).toLocaleString('es-CO')}
                     </td>
                     <td onClick={e => e.stopPropagation()}>
-                      <button
-                        className={`srv-estado-btn ${s.estado}`}
+                      <button className={`srv-estado-btn ${s.estado}`}
                         onClick={e => cambiarEstado(s, e)}>
-                        <i className={`bi ${s.estado === 'activo'
-                          ? 'bi-toggle-on' : 'bi-toggle-off'}`} />
+                        <i className={`bi ${s.estado === 'activo' ? 'bi-toggle-on' : 'bi-toggle-off'}`} />
                         {s.estado === 'activo' ? 'Activo' : 'Inactivo'}
                       </button>
                     </td>
@@ -286,7 +290,7 @@ export default function Servicios() {
         )}
       </div>
 
-      {/* ── PANEL LATERAL ── */}
+      {/* ── PANEL LATERAL DETALLE ── */}
       {detalle && (
         <aside className="srv-detalle">
           <div className="srv-detalle-header">
@@ -302,13 +306,11 @@ export default function Servicios() {
 
           <div className="srv-detalle-body">
             <h3 className="srv-detalle-nombre">{detalle.nombre}</h3>
-
             <span className="srv-badge-cat"
               style={{ background: catColor(detalle.categoria).bg,
                        color: catColor(detalle.categoria).color }}>
               {detalle.categoria}
             </span>
-
             <div style={{ marginTop: '.6rem' }}>
               <span className={`srv-estado-btn ${detalle.estado}`}
                 style={{ fontSize: '.75rem' }}>
@@ -317,14 +319,12 @@ export default function Servicios() {
                 {detalle.estado}
               </span>
             </div>
-
             <div className="srv-detalle-precio">
               <span className="srv-precio-label">Precio base</span>
               <span className="srv-precio-val">
                 ${Number(detalle.precioBase).toLocaleString('es-CO')}
               </span>
             </div>
-
             <div className="srv-detalle-section">
               <p className="srv-section-title">Descripción</p>
               <p className="srv-desc-full">
@@ -338,8 +338,7 @@ export default function Servicios() {
               onClick={() => abrirEditar(detalle)}>
               <i className="bi bi-pencil me-1" /> Editar servicio
             </button>
-            <button
-              className={`srv-w-full srv-toggle-btn ${detalle.estado}`}
+            <button className={`srv-w-full srv-toggle-btn ${detalle.estado}`}
               onClick={e => cambiarEstado(detalle, e)}>
               <i className={`bi ${detalle.estado === 'activo'
                 ? 'bi-toggle-off' : 'bi-toggle-on'} me-1`} />
@@ -349,93 +348,127 @@ export default function Servicios() {
         </aside>
       )}
 
-      {/* ══ MODAL SERVICIO ══ */}
+      {/* ══ DRAWER LATERAL — NUEVO / EDITAR SERVICIO ══ */}
       {showModal && (
-        <div className="modal-overlay" onClick={cerrarModal}>
-          <div className="modal-card modal-md" onClick={e => e.stopPropagation()}>
+        <div className="srv-modal-overlay" onClick={cerrarModal}>
+          <div className="srv-modal-lateral" onClick={e => e.stopPropagation()}>
 
-            <div className="modal-header">
-              <h2>
-                <i className={`bi ${editingId
-                  ? 'bi-pencil' : 'bi-plus-circle'} me-2`} />
+            {/* Encabezado */}
+            <div className="srv-modal-header">
+              <h2 className="srv-modal-title">
+                <i className={`bi ${editingId ? 'bi-pencil' : 'bi-plus-circle'} me-2`} />
                 {editingId ? 'Editar Servicio' : 'Nuevo Servicio'}
               </h2>
-              <button className="modal-close" onClick={cerrarModal}>
+              <button className="srv-modal-close" onClick={cerrarModal}>
                 <i className="bi bi-x-lg" />
               </button>
             </div>
 
-            <div className="modal-body">
+            {/* Cuerpo */}
+            <div className="srv-modal-body">
               {error && (
-                <div className="alert-error">
+                <div className="alert-error" style={{ marginBottom: '1.25rem' }}>
                   <i className="bi bi-exclamation-triangle me-1" />{error}
                 </div>
               )}
 
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label>Nombre *</label>
-                <input type="text" placeholder="Ej: Cambio de aceite"
-                  value={form.nombre}
-                  onChange={e => f('nombre', e.target.value)} />
-              </div>
+              {/* Sección: Información del servicio */}
+              <div className="srv-form-section">
+                <div className="srv-form-label">
+                  <i className="bi bi-tools" /> Información del servicio
+                </div>
 
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label>Descripción</label>
-                <textarea rows={3}
-                  placeholder="Describe brevemente el servicio..."
-                  value={form.descripcion}
-                  onChange={e => f('descripcion', e.target.value)}
-                  className="srv-textarea"
-                />
-              </div>
-
-              <div className="form-grid-2">
                 <div className="form-group">
-                  <label>Precio base *</label>
-                  <div className="srv-precio-input">
-                    <span>$</span>
-                    <input type="number" min="0" placeholder="0"
-                      value={form.precioBase}
-                      onChange={e => f('precioBase', e.target.value)} />
+                  <label>Nombre *</label>
+                  <input type="text" placeholder="Ej: Cambio de aceite"
+                    value={form.nombre}
+                    onChange={e => f('nombre', e.target.value)}
+                    className={fieldErrors.nombre ? 'input-error' : ''}
+                  />
+                  {fieldErrors.nombre && (
+                    <span className="field-error-msg">{fieldErrors.nombre}</span>
+                  )}
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label>Descripción</label>
+                  <textarea rows={3}
+                    placeholder="Describe brevemente el servicio..."
+                    value={form.descripcion}
+                    onChange={e => f('descripcion', e.target.value)}
+                    className="srv-textarea"
+                  />
+                </div>
+              </div>
+
+              {/* Sección: Precio y categoría */}
+              <div className="srv-form-section">
+                <div className="srv-form-label">
+                  <i className="bi bi-tag" /> Precio y categoría
+                </div>
+
+                <div className="form-grid-2">
+                  <div className="form-group">
+                    <label>Precio base *</label>
+                    <div className={`srv-precio-input ${fieldErrors.precioBase ? 'input-error-wrap' : ''}`}>
+                      <span>$</span>
+                      <input type="number" min="0" placeholder="0"
+                        value={form.precioBase}
+                        onChange={e => f('precioBase', e.target.value)}
+                        className={fieldErrors.precioBase ? 'input-error' : ''}
+                      />
+                    </div>
+                    {fieldErrors.precioBase && (
+                      <span className="field-error-msg">{fieldErrors.precioBase}</span>
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label>Categoría *</label>
+                    <select value={form.categoria}
+                      onChange={e => f('categoria', e.target.value)}
+                      className={fieldErrors.categoria ? 'input-error' : ''}>
+                      {CATEGORIAS.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    {fieldErrors.categoria && (
+                      <span className="field-error-msg">{fieldErrors.categoria}</span>
+                    )}
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>Categoría</label>
-                  <select value={form.categoria}
-                    onChange={e => f('categoria', e.target.value)}>
-                    {CATEGORIAS.map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                {/* Preview categoría */}
+                <div className="srv-cat-preview">
+                  <span className="srv-badge-cat"
+                    style={{ background: catColor(form.categoria).bg,
+                             color: catColor(form.categoria).color }}>
+                    {form.categoria}
+                  </span>
+                  <span className="srv-preview-label">Vista previa de categoría</span>
                 </div>
               </div>
 
-              {/* Preview categoría */}
-              <div className="srv-cat-preview">
-                <span className="srv-badge-cat"
-                  style={{ background: catColor(form.categoria).bg,
-                           color: catColor(form.categoria).color }}>
-                  {form.categoria}
-                </span>
-                <span className="srv-preview-label">
-                  Vista previa de categoría
-                </span>
+              {/* Footer del drawer */}
+              <div style={{
+                marginTop: '2rem',
+                padding: '1rem 0 0',
+                borderTop: '1px solid var(--border)',
+                display: 'flex',
+                gap: '0.75rem',
+                justifyContent: 'flex-end',
+              }}>
+                <button className="btn-secondary" onClick={cerrarModal} disabled={saving}>
+                  Cancelar
+                </button>
+                <button className="btn-primary" onClick={guardar} disabled={saving}>
+                  {saving
+                    ? <><i className="bi bi-arrow-repeat spin me-1" />Guardando...</>
+                    : <><i className={`bi ${editingId ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} />
+                        {editingId ? 'Guardar cambios' : 'Crear servicio'}</>
+                  }
+                </button>
               </div>
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={cerrarModal}
-                disabled={saving}>Cancelar</button>
-              <button className="btn-primary" onClick={guardar}
-                disabled={saving}>
-                {saving
-                  ? <><i className="bi bi-arrow-repeat spin me-1" />Guardando...</>
-                  : <><i className={`bi ${editingId
-                      ? 'bi-check-lg' : 'bi-plus-lg'} me-1`} />
-                      {editingId ? 'Guardar cambios' : 'Crear servicio'}</>
-                }
-              </button>
             </div>
           </div>
         </div>

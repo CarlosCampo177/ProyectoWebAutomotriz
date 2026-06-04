@@ -116,11 +116,6 @@
   color: var(--text-1);
   font-weight: 600;
 }
-.srv-usado {
-  font-size: 0.82rem;
-  color: var(--text-3);
-  font-family: var(--font-mono);
-}
 
 /* ── Badge categoría ── */
 .srv-badge-cat {
@@ -163,7 +158,7 @@
   color: #fff;
 }
 
-/* ── Panel lateral ── */
+/* ── Panel lateral detalle ── */
 .srv-detalle {
   width: 270px;
   flex-shrink: 0;
@@ -240,24 +235,6 @@
   color: var(--text-2);
   line-height: 1.5;
 }
-.srv-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0.65rem 0.9rem;
-}
-.srv-stat-num {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-.srv-stat-label {
-  font-size: 0.8rem;
-  color: var(--text-3);
-}
 .srv-detalle-footer {
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--border);
@@ -300,10 +277,7 @@
   color: #fff;
 }
 
-/* ── Modal ── */
-.modal-md {
-  max-width: 520px;
-}
+/* ── Inputs del formulario ── */
 .srv-textarea {
   font-family: var(--font-body);
   font-size: 0.9rem;
@@ -322,6 +296,7 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
 }
+
 .srv-precio-input {
   display: flex;
   align-items: center;
@@ -333,6 +308,10 @@
 .srv-precio-input:focus-within {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-light);
+}
+.srv-precio-input.input-error-wrap {
+  border-color: var(--danger) !important;
+  background: #fff5f5;
 }
 .srv-precio-input span {
   padding: 0 0.75rem;
@@ -351,6 +330,7 @@
   font-size: 0.9rem;
   background: transparent;
 }
+
 .srv-cat-preview {
   display: flex;
   align-items: center;
@@ -366,6 +346,120 @@
   color: var(--text-3);
 }
 
+/* ── Validación por campo ── */
+.input-error {
+  border-color: var(--danger) !important;
+  background: #fff5f5;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  outline: none;
+}
+.field-error-msg {
+  display: block;
+  color: var(--danger);
+  font-size: 0.75rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════════
+   DRAWER LATERAL — MODAL SERVICIO
+══════════════════════════════════════════ */
+.srv-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 42, 69, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  justify-content: flex-end;
+  animation: srvFadeIn 0.25s ease;
+}
+
+.srv-modal-lateral {
+  background: var(--surface);
+  width: 100%;
+  max-width: 440px;
+  height: 100vh;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: srvSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.srv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.srv-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0;
+}
+.srv-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.srv-modal-close:hover {
+  color: var(--danger);
+}
+.srv-modal-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* ── Secciones del formulario ── */
+.srv-form-section {
+  margin-bottom: 1.5rem;
+}
+.srv-form-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ── Animaciones ── */
+@keyframes srvFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes srvSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .srv-page {
@@ -379,5 +473,8 @@
   .srv-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+  .srv-modal-lateral {
+    max-width: 100%;
   }
 }

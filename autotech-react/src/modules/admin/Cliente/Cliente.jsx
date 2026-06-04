@@ -8,7 +8,6 @@ const EMPTY_FORM = {
   primerApellido: "",
   segundoApellido: "",
   documento: "",
-  username: "",
   email: "",
   telefono: "",
   direccion: "",
@@ -59,7 +58,6 @@ export default function Clientes() {
       primerApellido: c.primerApellido || "",
       segundoApellido: c.segundoApellido || "",
       documento: c.documento || "",
-      username: c.username || "",
       email: c.email || "",
       telefono: c.telefono || "",
       direccion: c.direccion || "",
@@ -81,7 +79,6 @@ export default function Clientes() {
     const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
     const soloNums = /^\d+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const userRegex = /^[a-zA-Z0-9_]+$/;
 
     if (!form.primerNombre.trim())
       errs.primerNombre = "El primer nombre es requerido.";
@@ -104,10 +101,6 @@ export default function Clientes() {
       errs.documento = "Solo se permiten números.";
     else if (form.documento.length < 8 || form.documento.length > 10)
       errs.documento = "El documento debe tener entre 8 y 10 dígitos.";
-
-    if (!form.username.trim()) errs.username = "El username es requerido.";
-    else if (!userRegex.test(form.username))
-      errs.username = "Solo letras, números y guion bajo (_). Sin espacios.";
 
     if (!editingId && !form.password.trim())
       errs.password = "La contraseña es requerida al crear un cliente.";
@@ -302,7 +295,6 @@ export default function Clientes() {
                           </div>
                           <div>
                             <div className="cli-nombre">{c.nombre}</div>
-                            <div className="cli-username">@{c.username}</div>
                           </div>
                         </div>
                       </td>
@@ -394,10 +386,6 @@ export default function Clientes() {
                 <div className="cli-info-row">
                   <i className="bi bi-person-badge" />
                   <span>{detalle.documento}</span>
-                </div>
-                <div className="cli-info-row">
-                  <i className="bi bi-at" />
-                  <span>@{detalle.username}</span>
                 </div>
                 <div className="cli-info-row">
                   <i className="bi bi-envelope" />
@@ -576,24 +564,6 @@ export default function Clientes() {
                     {fieldErrors.documento && (
                       <span className="field-error-msg">
                         {fieldErrors.documento}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Username */}
-                  <div className="form-group">
-                    <label>Username *</label>
-                    <input
-                      type="text"
-                      placeholder="Ej: cposada"
-                      autoComplete="one-time-code"
-                      value={form.username}
-                      onChange={(e) => f("username", e.target.value)}
-                      className={fieldErrors.username ? "input-error" : ""}
-                    />
-                    {fieldErrors.username && (
-                      <span className="field-error-msg">
-                        {fieldErrors.username}
                       </span>
                     )}
                   </div>

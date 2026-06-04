@@ -1,0 +1,232 @@
+/* ── Layout ── */
+.est-page {
+  padding: 2rem 2.25rem;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: var(--font-body);
+}
+
+/* ── KPIs ── */
+.est-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.est-kpi {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  box-shadow: var(--shadow-sm);
+}
+.est-kpi-accent {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  border-color: transparent;
+}
+.est-kpi-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+.est-kpi-num {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  line-height: 1.1;
+}
+.est-kpi-accent .est-kpi-num {
+  color: #fff;
+}
+.est-kpi-label {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* ── Grids ── */
+.est-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Cards ── */
+.est-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+.est-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.est-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-1);
+  display: flex;
+  align-items: center;
+}
+.est-card-title i {
+  color: var(--accent);
+}
+.est-card-sub {
+  font-size: 0.78rem;
+  color: var(--text-3);
+}
+.est-empty {
+  color: var(--text-3);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* ── Tooltip ── */
+.est-tooltip {
+  background: var(--text-1);
+  color: #fff;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+}
+.est-tt-label {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+/* ── Pie ── */
+.est-pie-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.est-pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+.est-pie-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.est-pie-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.est-pie-label {
+  flex: 1;
+  color: var(--text-2);
+}
+.est-pie-val {
+  font-weight: 700;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+
+/* ── Mecánicos ── */
+.est-mec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.est-mec-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.est-mec-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.est-mec-info {
+  flex: 1;
+  min-width: 0;
+}
+.est-mec-nombre {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.est-mec-bar-wrap {
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.est-mec-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+.est-mec-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+.est-mec-completadas {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #16a34a;
+  font-family: var(--font-mono);
+}
+.est-mec-activas {
+  font-size: 0.72rem;
+  color: #b45309;
+  font-family: var(--font-mono);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .est-kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .est-page {
+    padding: 1.25rem 1rem;
+  }
+  .est-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .est-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
