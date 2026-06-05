@@ -30,7 +30,10 @@ export const mecanicoAdminService = {
   crear:           (data)     => apiClient.post('MecanicoAdmin', data),
   actualizar:      (id, data) => apiClient.put(`MecanicoAdmin/${id}`, data),
   cambiarEstado:   (id)       => apiClient.patch(`MecanicoAdmin/${id}/estado`),
+  getNomina: (mes, anio)      => apiClient.get(`MecanicoAdmin/nomina?mes=${mes}&anio=${anio}`),
 }
+
+
 
 /* ══════════════════════════════════
    ESPECIALIDADES

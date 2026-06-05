@@ -34,7 +34,23 @@ const ESTADO_COLOR = {
   cancelada: "mec-est-cancelada",
 };
 
+const MESES_NOMBRE = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
+
 export default function Mecanicos() {
+  /* ── Estados existentes ── */
   const [mecanicos, setMecanicos] = useState([]);
   const [especialidades, setEspecialidades] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -53,6 +69,13 @@ export default function Mecanicos() {
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [fieldErrors, setFieldErrors] = useState({});
+
+  /* ── Estados nómina ── */
+  const [showNomina, setShowNomina] = useState(false);
+  const [nominaData, setNominaData] = useState(null);
+  const [nominaMes, setNominaMes] = useState(new Date().getMonth() + 1);
+  const [nominaAnio, setNominaAnio] = useState(new Date().getFullYear());
+  const [loadingNomina, setLoadingNomina] = useState(false);
 
   useEffect(() => {
     cargar();
@@ -120,7 +143,7 @@ export default function Mecanicos() {
     }
   };
 
-  /* ── Modal ── */
+  /* ── Modal mecánico ── */
   const abrirCrear = () => {
     setForm(EMPTY_FORM);
     setEditingId(null);
@@ -267,6 +290,132 @@ export default function Mecanicos() {
     }
   };
 
+  /* ── Nómina ── */
+  const cargarNomina = async () => {
+    try {
+      setLoadingNomina(true);
+      const data = await mecanicoAdminService.getNomina(nominaMes, nominaAnio);
+      setNominaData(data);
+    } catch {
+      setNominaData(null);
+    } finally {
+      setLoadingNomina(false);
+    }
+  };
+
+  const imprimirNomina = () => {
+    if (!nominaData) return;
+    const fmt = (n) => `$${Number(n).toLocaleString("es-CO")}`;
+    const w = window.open("", "_blank", "width=1000,height=750");
+    w.document.write(`
+<!DOCTYPE html><html lang="es">
+<head><meta charset="UTF-8">
+<title>Nómina ${MESES_NOMBRE[nominaData.mes - 1]} ${nominaData.anio}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;padding:40px;color:#111;font-size:13px}
+  h1{font-size:22px;font-weight:900;margin-bottom:4px}
+  h1 span{color:#dc2626}
+  .sub{color:#666;font-size:13px;margin-bottom:28px}
+  .resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+  .res-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px}
+  .res-num{font-size:18px;font-weight:800;color:#1d4ed8}
+  .res-num.verde{color:#16a34a}
+  .res-label{font-size:11px;color:#94a3b8;margin-top:3px}
+  table{width:100%;border-collapse:collapse}
+  th{background:#f1f5f9;padding:10px 12px;text-align:left;font-size:11px;
+     font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+     color:#64748b;border-bottom:2px solid #e2e8f0}
+  td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+  .right{text-align:right}
+  .mec-info strong{display:block;font-weight:600;color:#0f172a}
+  .mec-info small{color:#94a3b8;font-size:11px}
+  .bon{color:#16a34a;font-weight:600}
+  .ded{color:#dc2626;font-size:12px}
+  .total-val{font-weight:800;font-size:14px}
+  .tfoot-row td{background:#f8fafc;font-weight:700;font-size:13px;
+                border-top:2px solid #cbd5e1;padding:12px}
+  .nota{margin-top:24px;background:#f8fafc;border:1px solid #e2e8f0;
+        border-radius:8px;padding:12px 16px;font-size:11px;color:#64748b}
+  .footer{text-align:center;font-size:11px;color:#94a3b8;margin-top:28px;
+          border-top:1px solid #e2e8f0;padding-top:16px}
+  @media print{body{padding:20px}}
+</style></head>
+<body>
+<h1>AUTO<span>TECH</span></h1>
+<div class="sub">
+  Liquidación de Nómina — ${MESES_NOMBRE[nominaData.mes - 1]} ${nominaData.anio}
+</div>
+<div class="resumen">
+  <div class="res-card">
+    <div class="res-num">${nominaData.totalMecanicos}</div>
+    <div class="res-label">Mecánicos liquidados</div>
+  </div>
+  <div class="res-card">
+    <div class="res-num">${fmt(nominaData.totalBonificacion)}</div>
+    <div class="res-label">Total bonificaciones</div>
+  </div>
+  <div class="res-card">
+    <div class="res-num verde">${fmt(nominaData.totalNomina)}</div>
+    <div class="res-label">Total neto a pagar</div>
+  </div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Mecánico</th>
+      <th>Especialidad</th>
+      <th class="right">Salario base</th>
+      <th class="right">Órdenes</th>
+      <th class="right">Bonificación</th>
+      <th class="right">- Salud 4%</th>
+      <th class="right">- Pensión 4%</th>
+      <th class="right">Total a pagar</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${nominaData.nomina
+      .map(
+        (n) => `
+    <tr>
+      <td class="mec-info">
+        <strong>${n.nombre}</strong>
+        <small>${n.documento}</small>
+      </td>
+      <td>${n.especialidad}</td>
+      <td class="right">${fmt(n.salarioBase)}</td>
+      <td class="right">${n.ordenesCompletadas}</td>
+      <td class="right bon">+${fmt(n.bonificacion)}</td>
+      <td class="right ded">-${fmt(n.deduccionSalud)}</td>
+      <td class="right ded">-${fmt(n.deduccionPension)}</td>
+      <td class="right total-val">${fmt(n.totalPagar)}</td>
+    </tr>`,
+      )
+      .join("")}
+  </tbody>
+  <tfoot>
+    <tr class="tfoot-row">
+      <td colspan="4">TOTAL NÓMINA ${MESES_NOMBRE[nominaData.mes - 1].toUpperCase()} ${nominaData.anio}</td>
+      <td class="right bon">+${fmt(nominaData.totalBonificacion)}</td>
+      <td class="right" colspan="2"></td>
+      <td class="right total-val">${fmt(nominaData.totalNomina)}</td>
+    </tr>
+  </tfoot>
+</table>
+<div class="nota">
+  ℹ️ Deducciones aplicadas según normativa colombiana:
+  Salud empleado 4% + Pensión empleado 4% sobre (salario base + bonificación).
+  Bonificación: 2% del salario base por cada orden completada en el mes.
+</div>
+<div class="footer">
+  AutoTech — Documento generado el ${new Date().toLocaleDateString("es-CO")} · Solo para uso interno
+</div>
+</body></html>`);
+    w.document.close();
+    setTimeout(() => w.print(), 500);
+  };
+
+  /* ── Helpers ── */
   const f = (key, val) => {
     setForm((p) => ({ ...p, [key]: val }));
     setFieldErrors((p) => ({ ...p, [key]: "" }));
@@ -308,9 +457,21 @@ export default function Mecanicos() {
               Gestiona el equipo de mecánicos del taller
             </p>
           </div>
-          <button className="btn-primary" onClick={abrirCrear}>
-            <i className="bi bi-person-plus" /> Nuevo Mecánico
-          </button>
+          {/* ── Botones header ── */}
+          <div style={{ display: "flex", gap: ".75rem" }}>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                setShowNomina(true);
+                cargarNomina();
+              }}
+            >
+              <i className="bi bi-calculator me-1" /> Nómina
+            </button>
+            <button className="btn-primary" onClick={abrirCrear}>
+              <i className="bi bi-person-plus" /> Nuevo Mecánico
+            </button>
+          </div>
         </div>
 
         {/* TOOLBAR */}
@@ -523,6 +684,7 @@ export default function Mecanicos() {
           </div>
 
           <div className="mec-tab-content">
+            {/* TAB PERFIL */}
             {tabDetalle === "perfil" && (
               <div className="mec-perfil">
                 <div className="mec-stats-row">
@@ -573,6 +735,7 @@ export default function Mecanicos() {
               </div>
             )}
 
+            {/* TAB ÓRDENES */}
             {tabDetalle === "ordenes" && (
               <div className="mec-ordenes-list">
                 {loadingDetalle ? (
@@ -620,6 +783,7 @@ export default function Mecanicos() {
               </div>
             )}
 
+            {/* TAB ESTADÍSTICAS */}
             {tabDetalle === "estadisticas" && (
               <div className="mec-stats-panel">
                 {loadingDetalle ? (
@@ -709,7 +873,6 @@ export default function Mecanicos() {
             className="mec-modal-lateral"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Encabezado */}
             <div className="mec-modal-header">
               <h2 className="mec-modal-title">
                 <i
@@ -722,7 +885,6 @@ export default function Mecanicos() {
               </button>
             </div>
 
-            {/* Cuerpo */}
             <div className="mec-modal-body">
               {error && (
                 <div
@@ -961,7 +1123,7 @@ export default function Mecanicos() {
                 </div>
               </div>
 
-              {/* Footer dentro del drawer */}
+              {/* Footer del drawer */}
               <div
                 style={{
                   marginTop: "2rem",
@@ -1063,6 +1225,238 @@ export default function Mecanicos() {
                   <i className="bi bi-check-lg me-1" /> Crear
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL NÓMINA ══ */}
+      {showNomina && (
+        <div className="nom-overlay" onClick={() => setShowNomina(false)}>
+          <div className="nom-panel" onClick={(e) => e.stopPropagation()}>
+            {/* Header nómina */}
+            <div className="nom-header">
+              <div>
+                <h2 className="nom-title">
+                  <i className="bi bi-calculator me-2" />
+                  Nómina de Mecánicos
+                </h2>
+                <p className="nom-sub">
+                  Cálculo automático de salarios, bonificaciones y deducciones
+                </p>
+              </div>
+              <button
+                className="mec-modal-close"
+                onClick={() => setShowNomina(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Filtros mes/año */}
+            <div className="nom-filtros">
+              <div className="nom-filtro-group">
+                <label>Mes</label>
+                <select
+                  value={nominaMes}
+                  onChange={(e) => setNominaMes(Number(e.target.value))}
+                >
+                  {MESES_NOMBRE.map((m, i) => (
+                    <option key={i} value={i + 1}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="nom-filtro-group">
+                <label>Año</label>
+                <select
+                  value={nominaAnio}
+                  onChange={(e) => setNominaAnio(Number(e.target.value))}
+                >
+                  {[2024, 2025, 2026, 2027].map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button className="btn-primary nom-btn" onClick={cargarNomina}>
+                <i className="bi bi-arrow-repeat me-1" /> Calcular
+              </button>
+              {nominaData && (
+                <button
+                  className="btn-secondary nom-btn"
+                  onClick={imprimirNomina}
+                >
+                  <i className="bi bi-printer me-1" /> Imprimir
+                </button>
+              )}
+            </div>
+
+            {/* Cards resumen */}
+            {nominaData && (
+              <div className="nom-resumen">
+                {/* Mecánicos - Icono de tuerca/herramientas */}
+                <div className="nom-res-card">
+                  <span className="nom-res-icon">
+                    <i className="bi bi-tools"></i>
+                  </span>
+                  <div>
+                    <span className="nom-res-num">
+                      {nominaData.totalMecanicos}
+                    </span>
+                    <span className="nom-res-label">Mecánicos liquidados</span>
+                  </div>
+                </div>
+
+                {/* Bonificaciones - Icono de estrella */}
+                <div className="nom-res-card bon">
+                  <span className="nom-res-icon">
+                    <i className="bi bi-star-fill"></i>
+                  </span>
+                  <div>
+                    <span className="nom-res-num">
+                      $
+                      {Number(nominaData.totalBonificacion).toLocaleString(
+                        "es-CO",
+                      )}
+                    </span>
+                    <span className="nom-res-label">Total bonificaciones</span>
+                  </div>
+                </div>
+
+                {/* Total Neto - Icono de billetera o billete */}
+                <div className="nom-res-card total">
+                  <span className="nom-res-icon">
+                    <i className="bi bi-wallet2"></i>
+                  </span>
+                  <div>
+                    <span className="nom-res-num verde">
+                      ${Number(nominaData.totalNomina).toLocaleString("es-CO")}
+                    </span>
+                    <span className="nom-res-label">Total neto a pagar</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tabla nómina */}
+            <div className="nom-body">
+              {loadingNomina ? (
+                <div className="loading-state" style={{ padding: "3rem" }}>
+                  <i className="bi bi-arrow-repeat spin me-2" />
+                  Calculando nómina...
+                </div>
+              ) : !nominaData ? (
+                <div className="nom-empty">
+                  <i
+                    className="bi bi-calculator"
+                    style={{
+                      fontSize: "2rem",
+                      display: "block",
+                      marginBottom: ".75rem",
+                    }}
+                  />
+                  Selecciona el mes y año, luego haz clic en{" "}
+                  <strong>Calcular</strong>.
+                </div>
+              ) : nominaData.nomina.length === 0 ? (
+                <div className="nom-empty">
+                  No hay mecánicos activos para este período.
+                </div>
+              ) : (
+                <table className="nom-table">
+                  <thead>
+                    <tr>
+                      <th>Mecánico</th>
+                      <th>Especialidad</th>
+                      <th className="nom-right">Salario base</th>
+                      <th className="nom-right">Órdenes ✓</th>
+                      <th className="nom-right">Bonificación</th>
+                      <th className="nom-right">- Salud 4%</th>
+                      <th className="nom-right">- Pensión 4%</th>
+                      <th className="nom-right">Total neto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {nominaData.nomina.map((n) => (
+                      <tr key={n.id}>
+                        <td>
+                          <div className="nom-mec-cell">
+                            <div className="nom-avatar">
+                              {n.nombre
+                                .split(" ")
+                                .map((x) => x[0])
+                                .slice(0, 2)
+                                .join("")}
+                            </div>
+                            <div>
+                              <div className="nom-nombre">{n.nombre}</div>
+                              <div className="nom-doc">{n.documento}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="nom-esp">{n.especialidad}</td>
+                        <td className="nom-right nom-mono">
+                          ${Number(n.salarioBase).toLocaleString("es-CO")}
+                        </td>
+                        <td className="nom-right">
+                          <span className="nom-badge-ord">
+                            {n.ordenesCompletadas}
+                          </span>
+                        </td>
+                        <td className="nom-right nom-bon">
+                          +${Number(n.bonificacion).toLocaleString("es-CO")}
+                        </td>
+                        <td className="nom-right nom-ded">
+                          -${Number(n.deduccionSalud).toLocaleString("es-CO")}
+                        </td>
+                        <td className="nom-right nom-ded">
+                          -${Number(n.deduccionPension).toLocaleString("es-CO")}
+                        </td>
+                        <td className="nom-right">
+                          <span className="nom-total-val">
+                            ${Number(n.totalPagar).toLocaleString("es-CO")}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="nom-tfoot-row">
+                      <td colSpan={4}>
+                        TOTAL NÓMINA —{" "}
+                        {MESES_NOMBRE[nominaData.mes - 1].toUpperCase()}{" "}
+                        {nominaData.anio}
+                      </td>
+                      <td className="nom-right nom-bon">
+                        +$
+                        {Number(nominaData.totalBonificacion).toLocaleString(
+                          "es-CO",
+                        )}
+                      </td>
+                      <td colSpan={2} />
+                      <td className="nom-right">
+                        <span className="nom-total-val">
+                          $
+                          {Number(nominaData.totalNomina).toLocaleString(
+                            "es-CO",
+                          )}
+                        </span>
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              )}
+            </div>
+
+            {/* Nota legal */}
+            <div className="nom-footer-nota">
+              <i className="bi bi-info-circle me-1" />
+              Deducciones: Salud 4% + Pensión 4% sobre (salario base +
+              bonificación). Bonificación: 2% del salario base por cada orden
+              completada en el mes.
             </div>
           </div>
         </div>

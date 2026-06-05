@@ -18,7 +18,7 @@
 }
 
 .mec-main.con-panel {
-  margin-right: 320px;       /* con panel: cede espacio */
+  margin-right: 320px; /* con panel: cede espacio */
 }
 
 /* ── Toolbar ── */
@@ -521,7 +521,6 @@
   }
 }
 
-
 /* ══════════════════════════════════════════
    DRAWER LATERAL — MODAL MECÁNICO
 ══════════════════════════════════════════ */
@@ -611,13 +610,21 @@
 
 /* Animaciones */
 @keyframes mecFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes mecSlideInRight {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @media (max-width: 768px) {
@@ -632,7 +639,7 @@
   inset: 0;
   background: rgba(28, 42, 69, 0.5);
   backdrop-filter: blur(2px);
-  z-index: 10000;        /* encima del drawer (9999) */
+  z-index: 10000; /* encima del drawer (9999) */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -650,8 +657,14 @@
 }
 
 @keyframes mecScaleIn {
-  from { transform: scale(0.95); opacity: 0; }
-  to   { transform: scale(1);    opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── Contenedor de Grupo de Formulario ── */
@@ -673,15 +686,15 @@
 /* ── CONTENEDOR FLEX: Alinea select y botón en la misma fila ── */
 .input-with-btn {
   display: flex;
-  gap: 0.5rem;          /* Espacio horizontal exacto entre select y botón */
+  gap: 0.5rem; /* Espacio horizontal exacto entre select y botón */
   align-items: stretch; /* Hace que ambos midan lo mismo de alto automáticamente */
   width: 100%;
 }
 
 /* ── Estilizado moderno para el Select ── */
 .input-with-btn select {
-  flex: 1;              /* Ocupa todo el espacio sobrante a la izquierda */
-  height: 42px;         /* Ajusta esta altura para que iguale a tu input de Salario Base */
+  flex: 1; /* Ocupa todo el espacio sobrante a la izquierda */
+  height: 42px; /* Ajusta esta altura para que iguale a tu input de Salario Base */
   padding: 0 1rem;
   font-size: 0.9rem;
   color: var(--text-1, #1e293b);
@@ -713,14 +726,14 @@
 
 /* ── El botón de agregar (+) ── */
 .input-with-btn .btn-icon.edit {
-  height: 42px;         /* Misma altura que el select */
-  width: 42px;          /* Lo hace perfectamente cuadrado */
-  min-width: 42px;      /* Evita que se encoja si el contenedor es estrecho */
+  height: 42px; /* Misma altura que el select */
+  width: 42px; /* Lo hace perfectamente cuadrado */
+  min-width: 42px; /* Evita que se encoja si el contenedor es estrecho */
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eff6ff;  /* El fondo azul claro sutil que se aprecia en tu screenshot */
-  color: #2563eb;       /* El color azul corporativo */
+  background: #eff6ff; /* El fondo azul claro sutil que se aprecia en tu screenshot */
+  color: #2563eb; /* El color azul corporativo */
   border: 1px solid #bfdbfe;
   border-radius: var(--radius-md, 8px);
   font-size: 1.2rem;
@@ -733,4 +746,270 @@
   background: #2563eb;
   color: #ffffff;
   border-color: #2563eb;
+}
+
+/* ══════════════════════════════════
+   NÓMINA
+══════════════════════════════════ */
+.nom-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 21, 35, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: mecFadeIn 0.2s ease;
+}
+
+.nom-panel {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  animation: mecScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Header */
+.nom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+.nom-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin: 0 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+.nom-title i {
+  color: var(--accent);
+}
+.nom-sub {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* Filtros */
+.nom-filtros {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.nom-filtros .form-group label {
+  margin-bottom: 0.3rem;
+}
+.nom-filtros select {
+  height: 38px;
+  padding: 0 0.75rem;
+  font-size: 0.88rem;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-1);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.nom-filtros select:focus {
+  border-color: var(--accent);
+}
+.nom-calc-btn {
+  padding: 0.5rem 1.1rem;
+  font-size: 0.85rem;
+  align-self: flex-end;
+}
+
+/* Resumen cards */
+.nom-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.nom-res-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+.nom-res-card.bon {
+  border-color: #bbf7d0;
+}
+.nom-res-card.total {
+  border-color: #bfdbfe;
+}
+.nom-res-icon {
+  font-size: 1.4rem;
+}
+.nom-res-num {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-1);
+  font-family: var(--font-mono);
+}
+.nom-res-label {
+  font-size: 0.7rem;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* Body / tabla */
+.nom-body {
+  flex: 1;
+  overflow: auto;
+}
+.nom-empty {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-3);
+  font-size: 0.88rem;
+}
+
+.nom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+.nom-table thead tr {
+  background: var(--surface-2);
+  border-bottom: 2px solid var(--border);
+}
+.nom-table th {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.nom-table th.right,
+.nom-table td.right {
+  text-align: right;
+}
+.nom-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.nom-table tbody tr:hover {
+  background: var(--surface-2);
+}
+.nom-table td {
+  padding: 0.8rem 1rem;
+  vertical-align: middle;
+}
+
+/* Celdas especiales */
+.nom-mec-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.nom-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.nom-nombre {
+  font-weight: 600;
+  color: var(--text-1);
+}
+.nom-doc {
+  font-size: 0.72rem;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}
+.nom-esp {
+  color: var(--text-2);
+  font-size: 0.8rem;
+}
+.nom-mono {
+  font-family: var(--font-mono);
+  color: var(--text-1);
+}
+.nom-badge-ord {
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+.nom-bon {
+  color: #16a34a;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+.nom-ded {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  color: #dc2626;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.nom-total {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: var(--text-1);
+  font-size: 0.88rem;
+}
+
+/* Total row */
+.nom-total-row {
+  background: var(--surface-2) !important;
+}
+.nom-total-row td {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-1);
+  padding: 0.9rem 1rem;
+  border-top: 2px solid var(--border);
+}
+
+/* Footer */
+.nom-footer {
+  padding: 0.9rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  flex-shrink: 0;
 }
